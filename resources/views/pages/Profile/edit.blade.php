@@ -4,7 +4,6 @@
             <div>
                 @include('pages.Profile.partials.update-profile-information-form')
                 @include('pages.Profile.partials.update-password-form')
-                @include('pages.Profile.partials.delete-user-form')
             </div>
         </div>
     </x-Layouts.ContainerLayout>
