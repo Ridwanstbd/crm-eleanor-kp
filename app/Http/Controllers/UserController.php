@@ -10,11 +10,11 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $users = User::query();
-    
+
         if ($request->has('sort')) {
             $users->orderBy($request->get('sort'), $request->get('direction', 'asc'));
         }
-        
+
         $users = $users->paginate(10);
         return view('pages.User.index', compact('users'));
     }

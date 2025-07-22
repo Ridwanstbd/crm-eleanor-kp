@@ -1,0 +1,55 @@
+{{-- pages/Admin/Product/index.blade.php --}}
+<x-Layouts.AdminLayout title="Produk">
+    <div class="">
+        <header class="flex items-center justify-between py-4">
+            <h2 class="text-xl font-semibold">Produk</h2>
+            <a href="#" @click="$dispatch('open-modal', 'create-product')" class="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                Tambah Produk
+            </a>
+        </header>
+
+        <x-Layouts.Table>
+            <x-Fragments.Table.Header>
+                <x-Elements.Table.th>No</x-Elements.Table.th>
+                <x-Elements.Table.th>Nama</x-Elements.Table.th>
+                <x-Elements.Table.th>Estimasi Habis</x-Elements.Table.th>
+                <x-Elements.Table.th>Aksi</x-Elements.Table.th>
+            </x-Fragments.Table.Header>
+
+            <x-Fragments.Table.Body>
+                @forelse ($products as $product)
+                    <tr>
+                        <x-Elements.Table.td>{{ $loop->iteration }}</x-Elements.Table.td>
+                        <x-Elements.Table.td>{{ $product->name }}</x-Elements.Table.td>
+                        <x-Elements.Table.td>{{ $product->default_estimation_days_per_unit }} hari</x-Elements.Table.td>
+                        <x-Elements.Table.td>
+                            <div class="flex space-x-2">
+                                <button @click="$dispatch('open-modal', 'edit-product-{{ $product->id }}')" class="text-blue-600 hover:text-blue-800">
+                                    Ubah
+                                </button>
+                                <button @click="$dispatch('open-modal', 'delete-product-{{ $product->id }}')" class="text-red-600 hover:text-red-800">
+                                    Hapus
+                                </button>
+                            </div>
+                        </x-Elements.Table.td>
+                    </tr>
+
+                    {{-- Include modal edit & delete --}}
+                    @include('pages.Admin.Product._edit-modal', ['product' => $product])
+                    @include('pages.Admin.Product._delete-modal', ['product' => $product])
+                @empty
+                    <x-Elements.Table.empty colspan="4">
+                        <p class="mt-1">Belum ada produk yang tersedia.</p>
+                    </x-Elements.Table.empty>
+                @endforelse
+            </x-Fragments.Table.Body>
+
+            <x-slot name="pagination">
+                {{-- <x-Fragments.Table.Pagination :paginator="$products" /> --}}
+            </x-slot>
+        </x-Layouts.Table>
+    </div>
+
+    {{-- Modal Tambah Produk --}}
+    @include('pages.Admin.Product._create-modal')
+</x-Layouts.AdminLayout>

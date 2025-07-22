@@ -2,19 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
 use Illuminate\Http\Request;
 
+use App\Models\Product;
 class ProductController extends Controller
 {
-    public function index()
-    {
-        return view('pages.product', ['products' => Product::all()]);
-    }
 
-    public function create()
+    public function index(Request $request)
     {
-        return view('products.create');
+        $products = Product::all();
+
+        if ($products->has('sort')) {
+            $products->orderBy($request->get('sort'), $request->get('direction', 'asc'));
+        }
+        return view('pages.Admin.Product.index', compact('products'));
     }
 
     public function store(Request $request)
@@ -29,10 +30,6 @@ class ProductController extends Controller
         return redirect()->route('products.index')->with('success', 'Product created.');
     }
 
-    public function edit(Product $product)
-    {
-        return view('products.edit', compact('product'));
-    }
 
     public function update(Request $request, Product $product)
     {
