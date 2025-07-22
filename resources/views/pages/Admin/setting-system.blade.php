@@ -3,10 +3,7 @@
         <div x-data="{ 
             imagePreview: $store.system.favicon ? '{{ asset('storage/') }}' + $store.system.favicon : '',
             name: $store.system.name,
-            email: $store.system.email,
-            phone: $store.system.phone,
             description: $store.system.description,
-            address: $store.system.address,
             
             handleFileUpload(event) {
                 const file = event.target.files[0];
@@ -23,24 +20,12 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Left Column - Form Fields -->
                     <div>
-                        <x-Fragments.Form.FormGroup :message="$errors->first('name')" label="Company Name" for="name">
+                        <x-Fragments.Form.FormGroup :message="$errors->first('name')" label="Nama Sistem" for="name">
                             <x-Elements.Form.Input name="name" id="name" x-model="name" readonly/>
                         </x-Fragments.Form.FormGroup>
-
-                        <x-Fragments.Form.FormGroup :message="$errors->first('email')" label="Email" for="email">
-                            <x-Elements.Form.Input type="email" name="email" id="email" x-model="email" readonly/>
-                        </x-Fragments.Form.FormGroup>
         
-                        <x-Fragments.Form.FormGroup :message="$errors->first('phone')" label="Phone Number" for="phone">
-                            <x-Fragments.Form.PhoneInput name="phone" id="phone" x-model="phone" readonly/>
-                        </x-Fragments.Form.FormGroup>
-
                         <x-Fragments.Form.FormGroup :message="$errors->first('description')" label="Description" for="description">
                             <x-Elements.Form.Textarea name="description" id="description" x-model="description" readonly/>
-                        </x-Fragments.Form.FormGroup>
-        
-                        <x-Fragments.Form.FormGroup :message="$errors->first('address')" label="Address" for="address">
-                            <x-Elements.Form.Textarea name="address" id="address" x-model="address" readonly/>
                         </x-Fragments.Form.FormGroup>
                     </div>
         

@@ -1,13 +1,10 @@
 {
     "system": [
         {
-            "name": "Company Example",
-            "description": "Your Description Company",
-            "slogan": "Your Slogan Company",
-            "favicon": "assets/img/logo.png",
-            "email": "admin@example.com",
-            "phone": "62812399999",
-            "address": "Pahlawan Street Center, Kota Madiun"
+            "name": "Eleanor CRM",
+            "description": "Sistem Manajemen Pelangan Eleanor",
+            "slogan": "Kepuasan Anda tujuan Kami",
+            "favicon": "assets/img/logo.png"
         }
     ]
 }

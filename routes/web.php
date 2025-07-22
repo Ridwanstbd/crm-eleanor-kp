@@ -26,9 +26,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
 
-
-});
-Route::middleware(['auth', 'role:admin'])->group(function () {
+    
     Route::get('/admin/settings', [AdminController::class, 'settings'])->name('admin.settings');
     Route::put('/admin/settings/edit',[AdminController::class,'updateSystem'])->name('system.update');
 });
