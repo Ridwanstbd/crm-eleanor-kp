@@ -1,36 +1,37 @@
 <x-Layouts.AuthLayout>
-    <x-Layouts.FormAuthContainer title="Login to your Account">
-        <form method="POST" action="{{ route('login') }}" enctype="multipart/form-data" class="space-y-4">
+    <x-Layouts.FormAuthContainer title="Masuk">
+        <form method="POST" action="{{ route('login') }}" enctype="multipart/form-data" class="space-y-6">
             @csrf
             
             <x-Fragments.Form.EmailInput 
                 name="email"
                 id="email"
-                label="Email"
-                placeholder="example@example.com"
+                placeholder="boypamitdangdutan@gmail.com"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
                 required
             />
+
             <x-Fragments.Form.PasswordInput 
                 name="password"
                 id="password"
-                label="Password"
-                placeholder="input password here"
+                placeholder="Password"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors pr-12"
                 required
             />
 
             <div class="flex items-center justify-between">
-                <x-Elements.Checkbox id="remember_me"name="remember"label="Remember Me"/>
-                <div class="text-sm">
-                    <x-Elements.Link href="{{ route('password.request')}}" >
-                        Forgot your password?
-                    </x-Elements.Link>
-                </div>
+                <label class="flex items-center">
+                    <input type="checkbox" name="remember" id="remember_me" class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
+                    <span class="ml-2 text-sm text-gray-600">Ingat Saya</span>
+                </label>
+                <x-Elements.Link href="{{ route('password.request')}}" class="text-sm text-red-600 hover:text-red-700">
+                    Lupa Password
+                </x-Elements.Link>
             </div>
 
-            <x-Elements.Form.ButtonSubmit type="submit">
-                <h1>Login</h1>
-            </x-Elements.Form.ButtonSubmit>
+            <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                Masuk
+            </button>
         </form>
-        <x-Fragments.RegisterLink />
     </x-Layouts.FormAuthContainer>
 </x-Layouts.AuthLayout>
