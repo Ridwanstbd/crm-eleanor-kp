@@ -9,10 +9,18 @@ use Illuminate\Http\Request;
 
 class CustomerController extends Controller
 {
-    public function index()
+   public function index(Request $request)
     {
-        return view('customers.index', ['customers' => Customer::all()]);
+        $customers = Customer::query()
+            ->when($request->search, fn ($q) =>
+                $q->where('name', 'like', '%' . $request->search . '%')
+            )
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        return view('pages.Admin.Customer.index', compact('customers'));
     }
+
 
     public function create()
     {
@@ -31,10 +39,10 @@ class CustomerController extends Controller
         return redirect()->route('customers.index')->with('success', 'Customer created.');
     }
 
-    public function edit(Customer $customer)
-    {
-        return view('customers.edit', compact('customer'));
-    }
+    // public function edit(Customer $customer)
+    // {
+    //     return view('customers.edit', compact('customer'));
+    // }
 
     public function update(Request $request, Customer $customer)
     {

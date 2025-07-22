@@ -11,7 +11,7 @@
         <x-Layouts.Table>
             <x-Fragments.Table.Header>
                 <x-Elements.Table.th>No</x-Elements.Table.th>
-                <x-Elements.Table.th>Nama</x-Elements.Table.th>
+                <x-Elements.Table.th>Nama Produk</x-Elements.Table.th>
                 <x-Elements.Table.th>Estimasi Habis</x-Elements.Table.th>
                 <x-Elements.Table.th>Aksi</x-Elements.Table.th>
             </x-Fragments.Table.Header>
@@ -23,30 +23,34 @@
                         <x-Elements.Table.td>{{ $product->name }}</x-Elements.Table.td>
                         <x-Elements.Table.td>{{ $product->default_estimation_days_per_unit }} hari</x-Elements.Table.td>
                         <x-Elements.Table.td>
-                            <div class="flex space-x-2">
-                                <button @click="$dispatch('open-modal', 'edit-product-{{ $product->id }}')" class="text-blue-600 hover:text-blue-800">
+                            <div class="flex gap-2">
+                                {{-- Tombol Ubah --}}
+                                <button
+                                    @click="$dispatch('open-modal', 'edit-product-{{ $product->id }}')"
+                                    class="px-3 py-1 text-sm text-white bg-yellow-500 rounded hover:bg-yellow-600">
                                     Ubah
                                 </button>
-                                <button @click="$dispatch('open-modal', 'delete-product-{{ $product->id }}')" class="text-red-600 hover:text-red-800">
+
+                                {{-- Tombol Hapus --}}
+                                <button
+                                    @click="$dispatch('open-modal', 'delete-product-{{ $product->id }}')"
+                                    class="px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700">
                                     Hapus
                                 </button>
                             </div>
                         </x-Elements.Table.td>
+
                     </tr>
 
-                    {{-- Include modal edit & delete --}}
+                    {{-- Include modals --}}
                     @include('pages.Admin.Product._edit-modal', ['product' => $product])
                     @include('pages.Admin.Product._delete-modal', ['product' => $product])
                 @empty
                     <x-Elements.Table.empty colspan="4">
-                        <p class="mt-1">Belum ada produk yang tersedia.</p>
+                        <p class="mt-1">Belum ada produk.</p>
                     </x-Elements.Table.empty>
                 @endforelse
             </x-Fragments.Table.Body>
-
-            <x-slot name="pagination">
-                {{-- <x-Fragments.Table.Pagination :paginator="$products" /> --}}
-            </x-slot>
         </x-Layouts.Table>
     </div>
 
