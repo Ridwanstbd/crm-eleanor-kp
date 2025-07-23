@@ -3,22 +3,32 @@
         {
             "route": "products.index",
             "icon": "M3 3h18a1 1 0 0 1 1 1v2H2V4a1 1 0 0 1 1-1ZM4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8M10 12h4",
-            "text": "Produk"
-        },
-        {
-            "route": "customers.index",
-            "icon": "M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm-7.5 6a7.5 7.5 0 0 1 15 0v1.5h-15V18Z",
-            "text": "Pelanggan"
-        },
-        {
-            "route": "templates.index",
-            "icon": "M12 6v6m0 0v6m0-6h6m-6 0H6",
-            "text": "Template Pesan"
+            "text": "Produk",
+            "activeRoutes": ["products.index"]
         },
         {
             "route": "campaigns.index",
-            "icon": "M12 6v6m0 0v6m0-6h6m-6 0H6",
-            "text": "Kampanye"
+            "icon": "M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14 M8 6v8",
+            "text": "Kampanye",
+            "activeRoutes": ["campaigns.index"]
+        },
+        {
+            "route": "templates.index",
+            "icon": "M3 3h18a1 1 0 0 1 1 1v2H2V4a1 1 0 0 1 1-1ZM4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8M10 12h4",
+            "text": "Template",
+            "activeRoutes": ["templates.index"]
+        },
+        {
+            "route": "customers.index",
+            "icon": "M18 21a8 8 0 0 0-16 0 M15 8a5 5 0 1 0 -10 0a5 5 0 1 0 10 0 M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3",
+            "text": "Pelanggan",
+            "activeRoutes": ["customers.index"]
+        },
+        {
+            "route": "customers.index",
+            "icon": "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z M13 8H7 M17 12H7",
+            "text": "Log Pesan",
+            "activeRoutes": ["customers.index"]
         }
     ]
 }

@@ -12,11 +12,29 @@
                 }
             });
 
+            Alpine.store('navigation', {
+                currentRoute: '{{ Route::currentRouteName() }}',
+                currentUrl: '{{ url()->current() }}',
+                isActive(routeName, activeRoutes = []) {
+                    if (this.currentRoute === routeName) return true;
+                    
+                    if (this.currentRoute.startsWith(routeName + '.')) return true;
+                    
+                    if (activeRoutes.length > 0) {
+                        return activeRoutes.some(route => {
+                            return this.currentRoute === route || this.currentRoute.startsWith(route + '.');
+                        });
+                    }
+                    
+                    return false;
+                }
+            });
+
             window.addEventListener('resize', () => {
                 Alpine.store('sidebar').isOpen = window.innerWidth >= 768;
             });
 
-            Alpine.store('system', @json($system));
+            Alpine.store('system', @json($system ?? []));
         });
     </script>
 
@@ -40,11 +58,12 @@
             </div>
         </main>
     </div>
+    
     @if(session('success'))
     <div x-data="{ show: true }"
          x-show="show"
          x-init="setTimeout(() => show = false, 3000)"
-         class="fixed top-4 right-4 z-50 bg-green-100 border-l-4 border-green-500 text-green-700 p-4"
+         class="fixed top-4 right-4 z-50 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-lg"
          role="alert">
         <p>{{ session('success') }}</p>
     </div>
@@ -53,7 +72,7 @@
     @if(session('error'))
         <div x-data="{ show: true }"
             x-show="show"
-            class="fixed top-4 right-4 z-50 bg-red-100 border-l-4 border-red-500 text-red-700 p-4"
+            class="fixed top-4 right-4 z-50 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-lg"
             role="alert">
             <p>{{ session('error') }}</p>
             <button @click="show = false" class="mt-2 text-sm text-red-500 underline">

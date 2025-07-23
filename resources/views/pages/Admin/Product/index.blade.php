@@ -11,8 +11,8 @@
         <x-Layouts.Table>
             <x-Fragments.Table.Header>
                 <x-Elements.Table.th>No</x-Elements.Table.th>
-                <x-Elements.Table.th>Nama Produk</x-Elements.Table.th>
-                <x-Elements.Table.th>Estimasi Habis</x-Elements.Table.th>
+                <x-Elements.Table.th sortable>Nama Produk</x-Elements.Table.th>
+                <x-Elements.Table.th sortable>Estimasi Habis</x-Elements.Table.th>
                 <x-Elements.Table.th>Aksi</x-Elements.Table.th>
             </x-Fragments.Table.Header>
 
