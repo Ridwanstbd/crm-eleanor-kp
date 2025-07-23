@@ -9,12 +9,12 @@ class MessageTemplateController extends Controller
 {
     public function index()
     {
-        return view('message_templates.index', ['templates' => MessageTemplate::all()]);
+        return view('pages.Admin.MessageTemplate.index', ['templates' => MessageTemplate::all()]);
     }
 
     public function create()
     {
-        return view('message_templates.create');
+        return view('pages.Admin.MessageTemplate.create');
     }
 
     public function store(Request $request)
@@ -31,7 +31,7 @@ class MessageTemplateController extends Controller
 
     public function edit(MessageTemplate $messageTemplate)
     {
-        return view('message_templates.edit', compact('messageTemplate'));
+        return view('pages.Admin.MessageTemplate.edit', compact('messageTemplate'));
     }
 
     public function update(Request $request, MessageTemplate $messageTemplate)
@@ -51,4 +51,5 @@ class MessageTemplateController extends Controller
         $messageTemplate->delete();
         return redirect()->route('message-templates.index')->with('success', 'Template deleted.');
     }
+
 }

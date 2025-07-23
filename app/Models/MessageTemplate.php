@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;  // Tambahkan ini
 use Illuminate\Database\Eloquent\Model;
 
-// app/Models/MessageTemplate.php
 class MessageTemplate extends Model
 {
-    use HasFactory;
+    use HasFactory; // Pastikan trait HasFactory digunakan
 
     protected $fillable = ['name', 'content'];
 
@@ -16,4 +16,3 @@ class MessageTemplate extends Model
         return $this->hasMany(Campaign::class);
     }
 }
-
