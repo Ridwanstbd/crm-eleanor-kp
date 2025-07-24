@@ -13,7 +13,7 @@
             <button type="button" @click="$dispatch('close-modal', 'edit-customer-{{ $customer->id }}')" class="px-4 py-2 text-sm bg-gray-300 rounded hover:bg-gray-400">
                 Batal
             </button>
-            <button type="submit" class="px-4 py-2 text-sm text-white bg-blue-600 rounded hover:bg-blue-700">
+            <button type="submit" class="px-4 py-2 text-sm text-white bg-indigo-600 rounded hover:bg-indigo-700">
                 Simpan
             </button>
         </div>

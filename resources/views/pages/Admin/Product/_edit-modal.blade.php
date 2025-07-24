@@ -1,17 +1,32 @@
 <x-layouts.modal
     name="edit-product-{{ $product->id }}"
     title="Edit Produk"
-    mode="edit"
+    mode="default"
 >
-    <form action="{{ route('products.update', $product) }}" method="POST" class="space-y-4 p-6">
-        @csrf
-        @method('PUT')
+    <div class="p-6"> {{-- tambahkan wrapper padding manual di sini --}}
+        <form action="{{ route('products.update', $product) }}" method="POST" class="space-y-4">
+            @csrf
+            @method('PUT')
 
-        <x-elements.form.input name="name" :value="$product->name" class="p-2" />
-        <x-elements.form.input type="number" name="default_estimation_days_per_unit" :value="$product->default_estimation_days_per_unit" class="p-2" />
+            {{-- Nama Produk --}}
+            <x-Fragments.Form.FormGroup label="Nama Produk" for="name">
+                <x-elements.form.input name="name" :value="$product->name" placeholder="Nama Produk" />
+            </x-Fragments.Form.FormGroup>
 
-        <div class="text-right">
-            <x-elements.button type="submit" variant="primary" class="px-4 py-2">Simpan Perubahan</x-elements.button>
-        </div>
-    </form>
+            {{-- Jangka Waktu --}}
+            <x-Fragments.Form.FormGroup label="Jangka Waktu" for="default_estimation_days_per_unit">
+                <x-elements.form.input
+                    type="number"
+                    name="default_estimation_days_per_unit"
+                    :value="$product->default_estimation_days_per_unit"
+                    placeholder="Estimasi Habis (hari)"
+                />
+            </x-Fragments.Form.FormGroup>
+
+            {{-- Tombol --}}
+            <div class="text-right">
+                <x-elements.button type="submit" variant="primary">Simpan</x-elements.button>
+            </div>
+        </form>
+    </div>
 </x-layouts.modal>
