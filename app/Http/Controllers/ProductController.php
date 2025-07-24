@@ -10,13 +10,18 @@ class ProductController extends Controller
 
     public function index(Request $request)
     {
-        $products = Product::all();
+        // Menangkap parameter pencarian dari query string
+        $search = $request->input('search');
 
-        if ($products->has('sort')) {
-            $products->orderBy($request->get('sort'), $request->get('direction', 'asc'));
-        }
+        // Memfilter produk berdasarkan pencarian nama produk
+        $products = Product::when($search, function ($query) use ($search) {
+            return $query->where('name', 'like', '%' . $search . '%');
+        })->paginate(10);
+
+        // Mengirimkan data ke view
         return view('pages.Admin.Product.index', compact('products'));
     }
+
 
     public function store(Request $request)
     {

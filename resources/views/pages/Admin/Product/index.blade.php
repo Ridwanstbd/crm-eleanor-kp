@@ -8,9 +8,9 @@
             </a>
         </header>
 
-         {{-- Search --}}
+        {{-- Search --}}
         <div class="mb-4">
-            <form method="GET" class="flex gap-2">
+            <form method="GET" action="{{ route('products.index') }}" class="flex gap-2">
                 <x-Elements.Form.Input
                     name="search"
                     id="search"
@@ -22,6 +22,7 @@
                 </button>
             </form>
         </div>
+
 
         <x-Layouts.Table>
             <x-Fragments.Table.Header>
