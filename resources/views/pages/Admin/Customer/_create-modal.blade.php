@@ -2,8 +2,13 @@
     <form method="POST" action="{{ route('customers.store') }}" class="space-y-4 p-4">
         @csrf
 
-        <x-Elements.Form.Input name="name" id="name" placeholder="Nama Pelanggan" />
-        <x-Elements.Form.Input name="phone" id="phone" placeholder="Nomor Telepon" />
+        <x-Fragments.Form.FormGroup label="Nama Pelanggan" for="name">
+            <x-Elements.Form.Input name="name" id="name" placeholder="Nama Pelanggan" />
+        </x-Fragments.Form.FormGroup>
+        <x-Fragments.Form.FormGroup label="Nomor" for="name">
+            <x-Elements.Form.Input name="phone" id="phone" placeholder="Nomor Telepon" />
+        </x-Fragments.Form.FormGroup>
+
 
         <div class="flex justify-end gap-2 pt-4">
             <button type="button" @click="$dispatch('close-modal', 'create-customer')" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">

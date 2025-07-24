@@ -3,13 +3,16 @@
         @csrf
 
         <div class="p-4 space-y-4">
+            <x-Fragments.Form.FormGroup label="Nama Kampanye" for="name">
             <x-Elements.Form.Input
                 name="name"
                 id="name"
                 value="{{ old('name') }}"
                 placeholder="Nama Kampanye"
             />
+            </x-Fragments.Form.FormGroup>
 
+            <x-Fragments.Form.FormGroup label="Tanggal Terjual" for="name">
             <x-Elements.Form.Input
                 type="date"
                 name="schedule"
@@ -17,6 +20,7 @@
                 value="{{ old('schedule') }}"
                 placeholder="Tanggal Jadwal"
             />
+            </x-Fragments.Form.FormGroup>
         </div>
 
         <div class="flex justify-end gap-2 px-4 pb-4">

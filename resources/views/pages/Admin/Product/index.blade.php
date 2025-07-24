@@ -3,10 +3,25 @@
     <div class="">
         <header class="flex items-center justify-between py-4">
             <h2 class="text-xl font-semibold">Produk</h2>
-            <a href="#" @click="$dispatch('open-modal', 'create-product')" class="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700">
+            <a href="#" @click="$dispatch('open-modal', 'create-product')" class="px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
                 Tambah Produk
             </a>
         </header>
+
+         {{-- Search --}}
+        <div class="mb-4">
+            <form method="GET" class="flex gap-2">
+                <x-Elements.Form.Input
+                    name="search"
+                    id="search"
+                    value="{{ request('search') }}"
+                    placeholder="Cari nama produk..."
+                />
+                <button type="submit" class="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300">
+                    Cari
+                </button>
+            </form>
+        </div>
 
         <x-Layouts.Table>
             <x-Fragments.Table.Header>
