@@ -3,16 +3,47 @@
     title="Tambah Produk"
     mode="create"
 >
-    <form action="{{ route('products.store') }}" method="POST" class="space-y-4 p-4">
+    <form action="{{ route('products.store') }}" method="POST">
         @csrf
-        <x-Fragments.Form.FormGroup label="Nama Produk" for="name">
-            <x-elements.form.input name="name" placeholder="Nama Produk" />
-        </x-Fragments.Form.FormGroup>
-        <x-Fragments.Form.FormGroup label="Jangka Waktu" for="name">
-            <x-elements.form.input type="number" name="default_estimation_days_per_unit" placeholder="Estimasi Habis (hari)" />
-        </x-Fragments.Form.FormGroup>
-        <div class="text-right">
-            <x-elements.button type="submit" variant="primary">Simpan</x-elements.button>
+
+        <div class="p-6 space-y-4">
+            {{-- Nama Produk --}}
+            <div>
+                <label for="name" class="block text-sm font-semibold text-gray-900 mb-1">
+                    Nama Produk
+                </label>
+                <x-elements.form.input
+                    name="name"
+                    placeholder="Susu Pengganti"
+                    class="w-full"
+                />
+            </div>
+
+            {{-- Jangka Waktu --}}
+            <div>
+                <label for="default_estimation_days_per_unit" class="block text-sm font-semibold text-gray-900 mb-1">
+                    Jangka Waktu
+                </label>
+                <div class="flex items-center gap-2">
+                    <x-elements.form.input
+                        type="number"
+                        name="default_estimation_days_per_unit"
+                        placeholder="12"
+                        class="w-full"
+                    />
+                    <span class="text-sm text-gray-700">Hari</span>
+                </div>
+            </div>
+
+            {{-- Tombol --}}
+            <div>
+                <x-elements.button
+                    type="submit"
+                    class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded"
+                >
+                    Tambah
+                </x-elements.button>
+            </div>
         </div>
     </form>
 </x-layouts.modal>
