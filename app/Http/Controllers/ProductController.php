@@ -10,16 +10,27 @@ class ProductController extends Controller
 
     public function index(Request $request)
     {
-        // Menangkap parameter pencarian dari query string
         $search = $request->input('search');
 
-        // Memfilter produk berdasarkan pencarian nama produk
+        $sortField = $request->input('sort', 'name'); 
+        $sortDirection = $request->input('direction', 'asc');
+        
+        $allowedSortFields = ['name', 'default_estimation_days_per_unit'];
+        if (!in_array($sortField, $allowedSortFields)) {
+            $sortField = 'name';
+        }
+        
+        $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'asc';
+        
         $products = Product::when($search, function ($query) use ($search) {
-            return $query->where('name', 'like', '%' . $search . '%');
-        })->paginate(10);
-
-        // Mengirimkan data ke view
-        return view('pages.Admin.Product.index', compact('products'));
+                return $query->where('name', 'like', '%' . $search . '%');
+            })
+            ->orderBy($sortField, $sortDirection)
+            ->paginate(10);
+        
+        $products->appends(request()->query());
+        
+        return view('pages.Admin.Product.index', compact('products', 'search', 'sortField', 'sortDirection'));
     }
 
 

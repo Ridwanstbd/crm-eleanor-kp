@@ -2,13 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-// app/Models/CustomerProductPurchase.php
 class CustomerProductPurchase extends Pivot
 {
-    use HasFactory;
-
     protected $table = 'customer_product_purchases';
 
     protected $fillable = [

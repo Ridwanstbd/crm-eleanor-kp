@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\MessageLogsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProductController;
@@ -42,13 +43,14 @@ Route::middleware('auth')->group(function () {
     Route::put('/message-templates/{messageTemplate}', [MessageTemplateController::class, 'update'])->name('templates.update');
     Route::delete('/message-templates/{messageTemplate}', [MessageTemplateController::class, 'destroy'])->name('templates.destroy');
     // Campaign Routes
-    Route::get('/campaigns', [CampaignController::class, 'index'])->name('campaigns.index'); // Menampilkan daftar kampanye
-    Route::get('/campaigns/create', [CampaignController::class, 'create'])->name('campaigns.create'); // Menampilkan form tambah kampanye
-    Route::post('/campaigns', [CampaignController::class, 'store'])->name('campaigns.store'); // Menyimpan kampanye baru
-    Route::get('/campaigns/{campaign}/edit', [CampaignController::class, 'edit'])->name('campaigns.edit'); // Menampilkan form edit kampanye
-    Route::put('/campaigns/{campaign}', [CampaignController::class, 'update'])->name('campaigns.update'); // Memperbarui kampanye
-    Route::delete('/campaigns/{campaign}', [CampaignController::class, 'destroy'])->name('campaigns.destroy'); // Menghapus kampanye
+    Route::get('/campaigns', [CampaignController::class, 'index'])->name('campaigns.index'); 
+    Route::get('/campaigns/create', [CampaignController::class, 'create'])->name('campaigns.create'); 
+    Route::post('/campaigns', [CampaignController::class, 'store'])->name('campaigns.store');
+    Route::get('/campaigns/{campaign}/edit', [CampaignController::class, 'edit'])->name('campaigns.edit'); 
+    Route::put('/campaigns/{campaign}', [CampaignController::class, 'update'])->name('campaigns.update');
+    Route::delete('/campaigns/{campaign}', [CampaignController::class, 'destroy'])->name('campaigns.destroy');
 
+    Route::get('/logs',[MessageLogsController::class,'index'])->name('logs.index');
 
 
 

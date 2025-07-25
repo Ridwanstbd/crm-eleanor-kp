@@ -1,34 +1,34 @@
 {{-- pages/Admin/Product/index.blade.php --}}
 <x-Layouts.AdminLayout title="Produk">
     <div class="">
-        <header class="flex items-center justify-between py-4">
+        <header class="flex items-center justify-between py-3">
             <h2 class="text-xl font-semibold">Produk</h2>
-            <a href="#" @click="$dispatch('open-modal', 'create-product')" class="px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
-                Tambah Produk
-            </a>
-        </header>
-
-        {{-- Search --}}
-        <div class="mb-4">
-            <form method="GET" action="{{ route('products.index') }}" class="flex gap-2">
-                <x-Elements.Form.Input
+            <div class="flex gap-2">
+                <input type="hidden" name="sort" value="{{ $sortField }}">
+                <input type="hidden" name="direction" value="{{ $sortDirection }}">
+                    
+                <x-Elements.Form.SearchInput
                     name="search"
                     id="search"
                     value="{{ request('search') }}"
                     placeholder="Cari nama produk..."
+                    onchange="this.form.submit()"
                 />
-                <button type="submit" class="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300">
-                    Cari
-                </button>
-            </form>
-        </div>
-
+                <x-Elements.Button @click="$dispatch('open-modal', 'create-product')" >
+                    <x-Elements.Link href="#" >
+                        Tambah
+                    </x-Elements.Link>
+                </x-Elements.Button>
+            </div>
+        </header>
 
         <x-Layouts.Table>
             <x-Fragments.Table.Header>
                 <x-Elements.Table.th>No</x-Elements.Table.th>
-                <x-Elements.Table.th sortable>Nama Produk</x-Elements.Table.th>
-                <x-Elements.Table.th sortable>Estimasi Habis</x-Elements.Table.th>
+                <x-Elements.Table.th sortable :direction="$sortField === 'name' ? $sortDirection : null" onclick="window.location.href='{{ route('products.index', array_merge(request()->query(), ['sort' => 'name', 'direction' => ($sortField === 'name' && $sortDirection === 'asc') ? 'desc' : 'asc'])) }}'"
+                >Nama Produk</x-Elements.Table.th>
+                <x-Elements.Table.th sortable :direction="$sortField === 'default_estimation_days_per_unit' ? $sortDirection : null" onclick="window.location.href='{{ route('products.index', array_merge(request()->query(), ['sort' => 'default_estimation_days_per_unit', 'direction' => ($sortField === 'default_estimation_days_per_unit' && $sortDirection === 'asc') ? 'desc' : 'asc'])) }}'"
+                >Estimasi Habis</x-Elements.Table.th>
                 <x-Elements.Table.th>Aksi</x-Elements.Table.th>
             </x-Fragments.Table.Header>
 
@@ -67,6 +67,9 @@
                     </x-Elements.Table.empty>
                 @endforelse
             </x-Fragments.Table.Body>
+            <x-slot name="pagination">
+               <x-Fragments.Table.Pagination :paginator="$products" />
+           </x-slot>
         </x-Layouts.Table>
     </div>
 

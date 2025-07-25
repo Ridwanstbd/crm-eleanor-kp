@@ -10,7 +10,7 @@ class MessageLogsController extends Controller
     public function index()
     {
         $logs = MessageLogs::latest()->paginate(25);
-        return view('message_logs.index', compact('logs'));
+        return view('pages.Admin.LogMessage.index', compact('logs'));
     }
 
     public function show(MessageLogs $messageLog)
