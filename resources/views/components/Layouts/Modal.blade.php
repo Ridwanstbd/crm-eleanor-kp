@@ -100,7 +100,7 @@ $maxWidth = Str::startsWith($maxWidth, '[')
             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
         >
             @if($title)
-            <div class="flex items-center justify-between p-6 border-b">
+            <div class="flex items-center justify-between px-6 pt-6">
                 <h3 class="text-xl font-semibold text-gray-900 flex items-center">
                     {{-- @if($mode === 'create')
                         <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -1,21 +1,51 @@
-{{-- _edit-modal.blade.php --}}
-<x-Layouts.Modal name="edit-customer-{{ $customer->id }}" title="Ubah Pelanggan" mode="edit">
+<x-layouts.modal
+    name="edit-customer-{{ $customer->id }}"
+    title="Ubah Pelanggan"
+    mode="edit"
+    :showIcon="false"
+>
     <form method="POST" action="{{ route('customers.update', $customer) }}">
         @csrf
         @method('PUT')
 
-        <div class="p-4 space-y-4">
-            <x-Elements.Form.Input name="name" id="name-{{ $customer->id }}" value="{{ $customer->name }}" placeholder="Nama Pelanggan" />
-            <x-Elements.Form.Input name="phone" id="phone-{{ $customer->id }}" value="{{ $customer->phone }}" placeholder="Nomor Telepon" />
-        </div>
+        <div class="p-6 space-y-4">
+            {{-- Nama Pelanggan --}}
+            <div>
+                <label for="name-{{ $customer->id }}" class="block text-sm font-semibold text-gray-900 mb-1">
+                    Nama Pelanggan
+                </label>
+                <x-elements.form.input
+                    id="name-{{ $customer->id }}"
+                    name="name"
+                    value="{{ $customer->name }}"
+                    placeholder="Nama Pelanggan"
+                    class="w-full"
+                />
+            </div>
 
-        <div class="flex justify-end gap-2 px-4 pb-4">
-            <button type="button" @click="$dispatch('close-modal', 'edit-customer-{{ $customer->id }}')" class="px-4 py-2 text-sm bg-gray-300 rounded hover:bg-gray-400">
-                Batal
-            </button>
-            <button type="submit" class="px-4 py-2 text-sm text-white bg-indigo-600 rounded hover:bg-indigo-700">
-                Simpan
-            </button>
+            {{-- Nomor Telepon --}}
+            <div>
+                <label for="phone-{{ $customer->id }}" class="block text-sm font-semibold text-gray-900 mb-1">
+                    Nomor Telepon
+                </label>
+                <x-elements.form.input
+                    id="phone-{{ $customer->id }}"
+                    name="phone"
+                    value="{{ $customer->phone }}"
+                    placeholder="081234567899"
+                    class="w-full"
+                />
+            </div>
+
+            {{-- Tombol Simpan --}}
+            <div>
+                <x-elements.button
+                    type="submit"
+                    class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded"
+                >
+                    Simpan
+                </x-elements.button>
+            </div>
         </div>
     </form>
-</x-Layouts.Modal>
+</x-layouts.modal>

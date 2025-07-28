@@ -2,6 +2,7 @@
     name="create-product"
     title="Tambah Produk"
     mode="create"
+    :showIcon="false"
 >
     <form action="{{ route('products.store') }}" method="POST">
         @csrf

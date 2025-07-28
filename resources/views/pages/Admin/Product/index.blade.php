@@ -6,7 +6,7 @@
             <div class="flex gap-2">
                 <input type="hidden" name="sort" value="{{ $sortField }}">
                 <input type="hidden" name="direction" value="{{ $sortDirection }}">
-                    
+
                 <x-Elements.Form.SearchInput
                     name="search"
                     id="search"

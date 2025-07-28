@@ -1,22 +1,46 @@
-<x-Layouts.Modal name="create-customer" title="Tambah Pelanggan" mode="create">
-    <form method="POST" action="{{ route('customers.store') }}" class="space-y-4 p-4">
+<x-layouts.modal
+    name="create-customer"
+    title="Tambah Pelanggan"
+    mode="create"
+    :showIcon="false"
+>
+    <form method="POST" action="{{ route('customers.store') }}">
         @csrf
 
-        <x-Fragments.Form.FormGroup label="Nama Pelanggan" for="name">
-            <x-Elements.Form.Input name="name" id="name" placeholder="Nama Pelanggan" />
-        </x-Fragments.Form.FormGroup>
-        <x-Fragments.Form.FormGroup label="Nomor" for="name">
-            <x-Elements.Form.Input name="phone" id="phone" placeholder="Nomor Telepon" />
-        </x-Fragments.Form.FormGroup>
+        <div class="space-y-4 p-6">
+            {{-- Nama Pelanggan --}}
+            <div>
+                <label for="name" class="block text-sm font-semibold text-gray-900 mb-1">
+                    Nama Pelanggan
+                </label>
+                <x-elements.form.input
+                    name="name"
+                    placeholder="Nama Pelanggan"
+                    class="w-full"
+                />
+            </div>
 
+            {{-- Nomor Telepon --}}
+            <div>
+                <label for="phone" class="block text-sm font-semibold text-gray-900 mb-1">
+                    Nomor Telepon
+                </label>
+                <x-elements.form.input
+                    name="phone"
+                    placeholder="081234567899"
+                    class="w-full"
+                />
+            </div>
 
-        <div class="flex justify-end gap-2 pt-4">
-            <button type="button" @click="$dispatch('close-modal', 'create-customer')" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
-                Batal
-            </button>
-            <button type="submit" class="px-4 py-2 text-white bg-indigo-600 rounded hover:bg-indigo-700">
-                Simpan
-            </button>
+            {{-- Tombol --}}
+            <div>
+                <x-elements.button
+                    type="submit"
+                    class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded"
+                >
+                    Tambah
+                </x-elements.button>
+            </div>
         </div>
     </form>
-</x-Layouts.Modal>
+</x-layouts.modal>
