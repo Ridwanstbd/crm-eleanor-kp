@@ -1,15 +1,13 @@
 <x-Layouts.AdminLayout title="Kampanye">
-    <header class="flex items-center justify-between py-4">
-        <h2 class="text-xl font-semibold">Kampanye</h2>
-
-        {{-- Tombol Tambah (trigger modal) --}}
-        <button
-            @click="$dispatch('open-modal', 'create-campaign')"
-            class="px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
-        >
-            Tambah Kampanye
-        </button>
-    </header>
+    <x-Organisms.PageHeader title="Kampanye">
+        <x-slot name="actions">
+            <x-Elements.Button>
+                <x-Elements.Link :href="route('campaigns.create')">
+                    Tambah 
+                </x-Elements.Link>
+            </x-Elements.Button>
+        </x-slot>
+    </x-Organisms.PageHeader>
 
     {{-- Search --}}
     <div class="mb-4">
@@ -77,6 +75,4 @@
         </x-slot>
     </x-Layouts.Table>
 
-    {{-- Modal Tambah Kampanye --}}
-    @include('pages.Admin.Campaign._create-modal')
 </x-Layouts.AdminLayout>
