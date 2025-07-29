@@ -7,49 +7,58 @@ use Illuminate\Http\Request;
 
 class MessageTemplateController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return view('pages.Admin.MessageTemplate.index', ['templates' => MessageTemplate::all()]);
-    }
+        $search = $request->input('search');
+        $sortField = $request->input('sort', 'title');
+        $sortDirection = $request->input('direction', 'asc');
 
-    public function create()
-    {
-        return view('pages.Admin.MessageTemplate.create');
+        $allowedSortFields = ['title'];
+        if (!in_array($sortField, $allowedSortFields)) {
+            $sortField = 'title';
+        }
+
+        $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'asc';
+
+        $templates = MessageTemplate::when($search, function ($query) use ($search) {
+                return $query->where('title', 'like', '%' . $search . '%');
+            })
+            ->orderBy($sortField, $sortDirection)
+            ->paginate(10);
+
+        $templates->appends(request()->query());
+
+        return view('pages.Admin.MessageTemplate.index', compact('templates', 'search', 'sortField', 'sortDirection'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|unique:message_templates',
-            'content' => 'required',
+            'title' => 'required|unique:message_templates,title',
+            'body' => 'required',
         ]);
 
-        MessageTemplate::create($request->only('name', 'content'));
+        MessageTemplate::create($request->only('title', 'body'));
 
-        return redirect()->route('message-templates.index')->with('success', 'Template created.');
-    }
-
-    public function edit(MessageTemplate $messageTemplate)
-    {
-        return view('pages.Admin.MessageTemplate.edit', compact('messageTemplate'));
+        return redirect()->route('templates.index')->with('success', 'Template created.');
     }
 
     public function update(Request $request, MessageTemplate $messageTemplate)
     {
         $request->validate([
-            'name' => 'required|unique:message_templates,name,' . $messageTemplate->id,
-            'content' => 'required',
+            'title' => 'required|unique:message_templates,title,' . $messageTemplate->id,
+            'body' => 'required',
         ]);
 
-        $messageTemplate->update($request->only('name', 'content'));
+        $messageTemplate->update($request->only('title', 'body'));
 
-        return redirect()->route('message-templates.index')->with('success', 'Template updated.');
+        return redirect()->route('templates.index')->with('success', 'Template updated.');
     }
 
     public function destroy(MessageTemplate $messageTemplate)
     {
         $messageTemplate->delete();
-        return redirect()->route('message-templates.index')->with('success', 'Template deleted.');
-    }
 
+        return redirect()->route('templates.index')->with('success', 'Template deleted.');
+    }
 }
