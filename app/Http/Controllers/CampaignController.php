@@ -9,17 +9,17 @@ use App\Models\MessageTemplate;
 
 class CampaignController extends Controller
 {
-    // Menampilkan daftar kampanye
     public function index()
     {
         $campaigns = Campaign::all();
         return view('pages.Admin.Campaign.index', compact('campaigns'));
     }
 
-    // Menampilkan form untuk menambah kampanye
     public function create()
     {
-        return view('pages.Admin.Campaign.create');
+        $products = Product::all();
+        $templates = MessageTemplate::all();
+        return view('pages.Admin.Campaign.create', compact("products","templates"));
     }
 
     // Menyimpan kampanye baru
@@ -35,13 +35,11 @@ class CampaignController extends Controller
         return redirect()->route('campaigns.index')->with('success', 'Kampanye berhasil dibuat.');
     }
 
-    // Menampilkan form untuk mengedit kampanye
     public function edit(Campaign $campaign)
     {
-        return view('pages.Admin.Campaign.edit', compact('campaign'));
+        return view('pages.Admin.Campaign.show', compact('campaign'));
     }
 
-    // Memperbarui kampanye
     public function update(Request $request, Campaign $campaign)
     {
         $request->validate([
