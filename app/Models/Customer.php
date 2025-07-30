@@ -29,6 +29,6 @@ class Customer extends Model
     // Relasi satu-ke-banyak ke log pesan
     public function messageLogs()
     {
-        return $this->hasMany(MessageLog::class);
+        return $this->hasMany(MessageLogs::class);
     }
 }

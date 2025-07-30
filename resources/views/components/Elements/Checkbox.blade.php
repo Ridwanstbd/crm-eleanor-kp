@@ -1,4 +1,4 @@
-@props(['id','name','label'])
+@props(['id','name','label'=> null])
 
 <div class="flex items-center">
     <input id="{{$id}}" name="{{$name}}" type="checkbox"

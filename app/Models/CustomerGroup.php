@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 // app/Models/CustomerGroup.php
 class CustomerGroup extends Model
 {
-    use HasFactory;
 
     protected $fillable = ['name'];
 

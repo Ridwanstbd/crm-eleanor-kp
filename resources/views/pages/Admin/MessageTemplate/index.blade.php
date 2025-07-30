@@ -37,7 +37,7 @@
                 @forelse ($templates as $template)
                     <tr>
                         <x-Elements.Table.td>{{ $loop->iteration }}</x-Elements.Table.td>
-                        <x-Elements.Table.td>{{ $template->title }}</x-Elements.Table.td>
+                        <x-Elements.Table.td>{{ $template->name }}</x-Elements.Table.td>
                         <x-Elements.Table.td>
                             <div class="flex gap-2">
                                 <button

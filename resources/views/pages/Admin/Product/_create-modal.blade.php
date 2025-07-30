@@ -2,12 +2,13 @@
     name="create-product"
     title="Tambah Produk"
     mode="create"
+    maxWidth="md"
     :showIcon="false"
 >
     <form action="{{ route('products.store') }}" method="POST">
         @csrf
 
-        <div class="p-6 space-y-4">
+        <div class="space-y-4">
             {{-- Nama Produk --}}
             <div>
                 <label for="name" class="block text-sm font-semibold text-gray-900 mb-1">
