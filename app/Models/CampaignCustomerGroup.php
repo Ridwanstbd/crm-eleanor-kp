@@ -3,11 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
 // app/Models/CampaignCustomerGroup.php
 class CampaignCustomerGroup extends Pivot
 {
-    use HasFactory;
 
     protected $table = 'campaign_customer_group';
 

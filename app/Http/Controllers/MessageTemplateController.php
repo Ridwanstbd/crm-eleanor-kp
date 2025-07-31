@@ -10,18 +10,18 @@ class MessageTemplateController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
-        $sortField = $request->input('sort', 'title');
+        $sortField = $request->input('sort', 'name');
         $sortDirection = $request->input('direction', 'asc');
 
-        $allowedSortFields = ['title'];
+        $allowedSortFields = ['name'];
         if (!in_array($sortField, $allowedSortFields)) {
-            $sortField = 'title';
+            $sortField = 'name';
         }
 
         $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'asc';
 
         $templates = MessageTemplate::when($search, function ($query) use ($search) {
-                return $query->where('title', 'like', '%' . $search . '%');
+                return $query->where('name', 'like', '%' . $search . '%');
             })
             ->orderBy($sortField, $sortDirection)
             ->paginate(10);
@@ -34,11 +34,11 @@ class MessageTemplateController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|unique:message_templates,title',
-            'body' => 'required',
+            'name' => 'required|unique:message_templates,name',
+            'content' => 'required',
         ]);
 
-        MessageTemplate::create($request->only('title', 'body'));
+        MessageTemplate::create($request->only('name', 'content'));
 
         return redirect()->route('templates.index')->with('success', 'Template created.');
     }
@@ -46,11 +46,11 @@ class MessageTemplateController extends Controller
     public function update(Request $request, MessageTemplate $messageTemplate)
     {
         $request->validate([
-            'title' => 'required|unique:message_templates,title,' . $messageTemplate->id,
-            'body' => 'required',
+            'name' => 'required|unique:message_templates,name,' . $messageTemplate->id,
+            'content' => 'required',
         ]);
 
-        $messageTemplate->update($request->only('title', 'body'));
+        $messageTemplate->update($request->only('name', 'content'));
 
         return redirect()->route('templates.index')->with('success', 'Template updated.');
     }
