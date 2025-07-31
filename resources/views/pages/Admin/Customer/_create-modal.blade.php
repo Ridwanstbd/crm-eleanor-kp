@@ -7,7 +7,7 @@
     <form method="POST" action="{{ route('customers.store') }}">
         @csrf
 
-        <div class="space-y-4 p-6">
+        <div class="p-6 space-y-4">
             {{-- Nama Pelanggan --}}
             <div>
                 <label for="name" class="block text-sm font-semibold text-gray-900 mb-1">
