@@ -63,11 +63,6 @@ class FonnteController extends Controller
             $customer = $purchase->customer;
             $quantityPurchased = $purchase->quantity;
 
-            // --- Logika Penentuan Estimasi Habis (Perlu Disesuaikan) ---
-            // Ini adalah bagian KRITIS yang perlu Anda sesuaikan dengan bisnis Anda.
-            // Contoh sederhana: 1 unit produk = 1 hari estimasi habis.
-            // Anda bisa tambahkan kolom 'consumption_rate_per_unit' di tabel produk,
-            // atau 'average_daily_consumption' di tabel customer, dll.
             $estimationDays = $quantityPurchased; 
 
             // Jika produk memiliki estimasi hari default (misal: susu biasanya habis dalam 7 hari per unit)

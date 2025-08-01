@@ -33,6 +33,10 @@
             @endif
         </x-Fragments.Form.FormGroup>
 
+        <x-Fragments.Form.FormGroup :message="$errors->get('name')" :label="__('Fonnte Token')" for="name">
+            <x-Elements.Form.Input name="fonnte_token" id="fonnte_token" :value="old('fonnte_token', $user->fonnte_token)" required autofocus autocomplete="fonnte_token"/>
+        </x-Fragments.Form.FormGroup>
+
         <div class="flex items-center gap-4">
             <x-Elements.Button variant="primary" type="submit">
                 {{ __('Simpan') }}
