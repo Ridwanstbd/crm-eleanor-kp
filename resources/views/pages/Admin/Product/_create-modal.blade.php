@@ -30,7 +30,7 @@
                     <x-elements.form.input
                         type="number"
                         name="default_estimation_days_per_unit"
-                        placeholder="12"
+                        placeholder="0 untuk produk selain konsumsi"
                         class="w-full"
                     />
                     <span class="text-sm text-gray-700">Hari</span>

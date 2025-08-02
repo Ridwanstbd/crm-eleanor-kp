@@ -22,7 +22,7 @@
                 :selected="old('template')"
                 class="w-1/2"
             >
-            <x-Elements.Option value="{name}">Nama</x-Elements.Option>
+            <x-Elements.Option value="{name}">Nama Pembeli</x-Elements.Option>
             <x-Elements.Option value="{product_name}">Nama Produk</x-Elements.Option>
             <x-Elements.Option value="{quantity_purchased}">Jumlah dibeli</x-Elements.Option>
             <x-Elements.Option value="{estimated_finish_date}">Tanggal Estimasi</x-Elements.Option>

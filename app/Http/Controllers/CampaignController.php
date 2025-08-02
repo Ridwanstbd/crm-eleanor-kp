@@ -40,7 +40,7 @@ class CampaignController extends Controller
             'product' => 'nullable|exists:products,id',
             'template' => 'required|exists:message_templates,id',
             'tanggal_terjual' => 'nullable|date',
-            'campaign_type' => 'nullable|in:immediate,scheduled,reminder',
+            'time_send' => 'nullable|date_format:H:i',
         ];
 
         $validationMessages = [
@@ -49,7 +49,7 @@ class CampaignController extends Controller
             'template.exists' => 'Template pesan yang dipilih tidak valid.',
             'product.exists' => 'Produk yang dipilih tidak valid.',
             'tanggal_terjual.date' => 'Format tanggal tidak valid.',
-            'campaign_type.in' => 'Tipe kampanye tidak valid.',
+            'time_send.date_format' => 'Format waktu kirim tidak valid. Gunakan format HH:MM.',
         ];
 
         // Cek apakah ada target audiens yang dipilih
@@ -106,6 +106,7 @@ class CampaignController extends Controller
                 'product_id' => $request->product,
                 'message_template_id' => $request->template,
                 'schedule' => $request->tanggal_terjual,
+                'time_send' => $request->time_send,
             ]);
 
             $customerGroups = [];
@@ -118,8 +119,8 @@ class CampaignController extends Controller
                 $customerGroups[] = $this->handleExistingCustomers($request, $campaign);
             }
 
-            $this->scheduleReminderMessages($campaign, $customerGroups, $request->tanggal_terjual);
-
+            // Pass time_send ke method scheduleReminderMessages
+            $this->scheduleReminderMessages($campaign, $customerGroups, $request->tanggal_terjual, $request->time_send);
 
             DB::commit();
             
@@ -281,7 +282,7 @@ class CampaignController extends Controller
         }
     }
 
-    private function scheduleReminderMessages(Campaign $campaign, array $customerGroups, $tanggalTerjual = null)
+    private function scheduleReminderMessages(Campaign $campaign, array $customerGroups, $tanggalTerjual = null, $timeSend = null)
     {
         $fonnteToken = User::find(auth()->id())->fonnte_token;
         
@@ -293,7 +294,16 @@ class CampaignController extends Controller
             return;
         }
 
+        // Gabungkan tanggal_terjual dengan time_send
         $baseDate = $tanggalTerjual ? \Carbon\Carbon::parse($tanggalTerjual) : now();
+        
+        // Jika ada time_send, set waktu pada base date
+        if ($timeSend) {
+            $timeParts = explode(':', $timeSend);
+            $hour = intval($timeParts[0]);
+            $minute = intval($timeParts[1]);
+            $baseDate->setTime($hour, $minute, 0);
+        }
         
         $messagesToSend = [];
 
@@ -305,14 +315,44 @@ class CampaignController extends Controller
                 $purchaseQuantity = $purchaseData ? $purchaseData->pivot->last_purchase_quantity : 1;
 
                 $estimationDays = 0;
-                if (isset($targetProduct->default_estimation_days_per_unit) && $targetProduct->default_estimation_days_per_unit > 0) {
+                
+                // Cek apakah default_estimation_days_per_unit = 0 (kirim hari ini)
+                if (isset($targetProduct->default_estimation_days_per_unit) && $targetProduct->default_estimation_days_per_unit == 0) {
+                    // Kirim hari ini
+                    $estimationDays = 0;
+                    $scheduledDate = now(); // Gunakan waktu sekarang sebagai base
+                    
+                    // Set waktu sesuai time_send atau default jam 9 pagi
+                    if ($timeSend) {
+                        $timeParts = explode(':', $timeSend);
+                        $hour = intval($timeParts[0]);
+                        $minute = intval($timeParts[1]);
+                        $scheduledDate->setTime($hour, $minute, 0);
+                    } else {
+                        $scheduledDate->setTime(9, 0, 0);
+                    }
+                    if ($scheduledDate->isPast()) {
+                        $scheduledDate = now();
+                    }
+                } elseif (isset($targetProduct->default_estimation_days_per_unit) && $targetProduct->default_estimation_days_per_unit > 0) {
                     $estimationDays = $targetProduct->default_estimation_days_per_unit * $purchaseQuantity;
+                    $scheduledDate = $baseDate->copy()->addDays($estimationDays);
+                    
+                    if (!$timeSend) {
+                        $scheduledDate->setTime(9, 0, 0);
+                    }
                 } else {
                     $estimationDays = 7 * $purchaseQuantity;
+                    $scheduledDate = $baseDate->copy()->addDays($estimationDays);
+                    
+                    if (!$timeSend) {
+                        $scheduledDate->setTime(9, 0, 0);
+                    }
                 }
-                $scheduledDate = $baseDate->copy()->addDays($estimationDays);
+                
                 $scheduleTimestamp = $scheduledDate->timestamp;
                 $formattedEstimationDate = $scheduledDate->format('d M Y');
+                $formattedScheduleTime = $scheduledDate->format('H:i');
 
                 $personalizedMessage = str_replace(
                     [
@@ -320,16 +360,12 @@ class CampaignController extends Controller
                         '{product_name}',
                         '{quantity_purchased}',
                         '{estimated_finish_date}',
-                        '{purchase_date}',
-                        '{estimation_days}'
                     ], 
                     [
                         $customer->name, 
                         $targetProduct->name,            
                         $purchaseQuantity,            
                         $formattedEstimationDate,
-                        $baseDate->format('d M Y'),
-                        $estimationDays
                     ],
                     $messageTemplateContent
                 );
@@ -347,7 +383,6 @@ class CampaignController extends Controller
             $this->sendToFonnte($messagesToSend, $fonnteToken, $campaign);
         }
     }
-
 
     private function sendToFonnte(array $messages, string $fonnteToken, Campaign $campaign)
     {
@@ -454,12 +489,8 @@ class CampaignController extends Controller
         $phone = preg_replace('/[^0-9+]/', '', $phone);
         
         if (substr($phone, 0, 1) === '0') {
-            $phone = '+62' . substr($phone, 1);
-        } elseif (substr($phone, 0, 2) === '62') {
-            $phone = '+' . $phone;
-        } elseif (substr($phone, 0, 3) !== '+62') {
-            $phone = '+62' . $phone;
-        }
+            $phone = '62' . substr($phone, 1);
+        } 
         
         return $phone;
     }
@@ -487,105 +518,4 @@ class CampaignController extends Controller
         return redirect()->route('campaigns.index')->with('success', 'Kampanye berhasil dihapus.');
     }
 
-    // Method tambahan untuk penjadwalan manual reminder
-    public function scheduleProductReminderMessages(Campaign $campaign, string $productSlug, string $customerGroupName)
-    {
-        // Ambil fonnte_token dari user yang memiliki campaign ini
-        $fonnteToken = null;
-        if ($campaign->user && $campaign->user->shop) {
-            $fonnteToken = $campaign->user->shop->fonnte_token;
-        }
-        
-        $messageTemplateContent = $campaign->messageTemplate->content;
-
-        $targetProduct = Product::where('slug', $productSlug)
-                               ->orWhere('name', $productSlug)
-                               ->first();
-        if (!$targetProduct) {
-            return response()->json(['message' => "Produk '{$productSlug}' tidak ditemukan."], 404);
-        }
-
-        $targetCustomerGroup = CustomerGroup::where('name', $customerGroupName)->first();
-        if (!$targetCustomerGroup) {
-            return response()->json(['message' => "Kelompok konsumen '{$customerGroupName}' tidak ditemukan."], 404);
-        }
-
-        $targetCustomerIds = $targetCustomerGroup->customers->pluck('id')->toArray();
-
-        // Karena tidak ada model Order, kita akan menggunakan data dari pivot table purchases
-        // dan asumsi bahwa pembelian hari ini disimpan di campaign->schedule atau tanggal hari ini
-        $today = now()->toDateString();
-        
-        // Ambil customers yang membeli produk target hari ini dari customer group
-        $customersWithPurchases = $targetCustomerGroup->customers()
-            ->whereHas('purchases', function($query) use ($targetProduct) {
-                $query->where('product_id', $targetProduct->id);
-            })
-            ->with(['purchases' => function($query) use ($targetProduct) {
-                $query->where('product_id', $targetProduct->id);
-            }])
-            ->get();
-
-        if ($customersWithPurchases->isEmpty()) {
-            return response()->json(['message' => "Tidak ada pelanggan dengan pembelian '{$targetProduct->name}' dari konsumen '{$customerGroupName}'."], 200);
-        }
-
-        $messagesToSend = [];
-
-        foreach ($customersWithPurchases as $customer) {
-            // Ambil data pembelian dari pivot table
-            $purchaseData = $customer->purchases->where('id', $targetProduct->id)->first();
-            if (!$purchaseData) {
-                continue;
-            }
-            
-            $quantityPurchased = $purchaseData->pivot->last_purchase_quantity ?? 1;
-            $estimationDays = $quantityPurchased; 
-
-            $scheduledDate = now()->addDays($estimationDays);
-            $scheduleTimestamp = $scheduledDate->timestamp;
-            $formattedEstimationDate = $scheduledDate->format('d M Y');
-
-            $personalizedMessage = str_replace(
-                [
-                    '{name}', 
-                    '{product_name}',
-                    '{quantity_purchased}',
-                    '{estimated_finish_date}'
-                ], 
-                [
-                    $customer->name, 
-                    $targetProduct->name,            
-                    $quantityPurchased,            
-                    $formattedEstimationDate       
-                ],
-                $messageTemplateContent
-            );
-
-            $messagesToSend[] = [
-                "target" => $this->formatPhoneForFonnte($customer->phone),
-                "message" => $personalizedMessage,
-                "schedule" => $scheduleTimestamp, 
-                "delay" => "3", 
-            ];
-        }
-
-        $payload = [
-            "data" => json_encode($messagesToSend),
-        ];
-
-        try {
-            $response = Http::withHeaders([
-                'Authorization' => $fonnteToken,
-            ])->post('https://api.fonnte.com/send', $payload);
-
-            if ($response->successful()) {
-                return response()->json(['message' => "Pesan pengingat untuk '{$targetProduct->name}' berhasil dijadwalkan.", 'response' => $response->json()], 200);
-            } else {
-                return response()->json(['message' => "Gagal menjadwalkan pesan pengingat untuk '{$targetProduct->name}'.", 'error' => $response->json()], $response->status());
-            }
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Terjadi kesalahan saat menghubungi Fonnte API.', 'error' => $e->getMessage()], 500);
-        }
-    }
 }

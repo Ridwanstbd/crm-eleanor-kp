@@ -104,6 +104,17 @@
                     <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror
             </x-Fragments.Form.FormGroup>
+            <x-Fragments.Form.FormGroup label="Waktu Kirim Kampanye" for="time_send">
+                <x-Elements.InputTime
+                    name="time_send"
+                    id="time_send"
+                    value="{{ old('time_send') }}"
+                    min="{{ date('Y-m-d') }}"
+                />
+                @error('tanggal_terjual')
+                    <span class="text-red-500 text-sm">{{ $message }}</span>
+                @enderror
+            </x-Fragments.Form.FormGroup>
             
             <x-Fragments.Form.FormGroup label="Target Audiens" for="target">
                 <div class="flex gap-2 mt-2">
@@ -141,7 +152,7 @@
                             name="name_group_customer"
                             id="name_group_customer"
                             value="{{ old('name_group_customer') }}"
-                            placeholder="Pembeli di shopee"
+                            placeholder="Pembeli dari shopee"
                             class="w-full" 
                             />
                     @error('name_group_customer')

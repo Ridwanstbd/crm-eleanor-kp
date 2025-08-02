@@ -14,9 +14,8 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
-            $table->integer('default_estimation_days_per_unit')->default(1);
+            $table->integer('default_estimation_days_per_unit')->default(0);
             $table->timestamps();
-
         });
     }
 

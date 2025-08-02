@@ -38,7 +38,7 @@ class ProductController extends Controller
     {
         $request->validate([
             'name' => 'required|unique:products',
-            'default_estimation_days_per_unit' => 'required|integer|min:1',
+            'default_estimation_days_per_unit' => 'required|integer|min:0',
         ]);
 
         Product::create($request->only('name', 'default_estimation_days_per_unit'));
@@ -51,7 +51,7 @@ class ProductController extends Controller
     {
         $request->validate([
             'name' => 'required|unique:products,name,' . $product->id,
-            'default_estimation_days_per_unit' => 'required|integer|min:1',
+            'default_estimation_days_per_unit' => 'required|integer|min:0',
         ]);
 
         $product->update($request->only('name', 'default_estimation_days_per_unit'));

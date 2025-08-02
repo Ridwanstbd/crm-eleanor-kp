@@ -9,7 +9,7 @@ class Campaign extends Model
 {
 
 
-    protected $fillable = ['user_id', 'message_template_id', 'product_id', 'name', 'schedule'];
+    protected $fillable = ['user_id', 'message_template_id', 'product_id', 'name', 'schedule','time_send'];
 
     public function user()
     {

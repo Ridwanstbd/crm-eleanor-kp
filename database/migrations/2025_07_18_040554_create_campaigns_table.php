@@ -17,7 +17,8 @@ return new class extends Migration
             $table->foreignId('message_template_id')->constrained('message_templates');
             $table->foreignId('product_id')->constrained();
             $table->string('name');
-            $table->timestamp('schedule')->nullable();
+            $table->time('time_send');
+            $table->timestamp('schedule');
             $table->timestamps();
         });
     }
