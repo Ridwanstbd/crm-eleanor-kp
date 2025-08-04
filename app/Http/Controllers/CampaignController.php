@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CampaignCustomerGroup;
 use App\Models\Customer;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -20,7 +21,7 @@ class CampaignController extends Controller
 {
     public function index()
     {
-        $campaigns = Campaign::all();
+        $campaigns = Campaign::paginate(10);
         return view('pages.Admin.Campaign.index', compact('campaigns'));
     }
 
@@ -119,7 +120,6 @@ class CampaignController extends Controller
                 $customerGroups[] = $this->handleExistingCustomers($request, $campaign);
             }
 
-            // Pass time_send ke method scheduleReminderMessages
             $this->scheduleReminderMessages($campaign, $customerGroups, $request->tanggal_terjual, $request->time_send);
 
             DB::commit();
@@ -163,7 +163,10 @@ class CampaignController extends Controller
                 }
                 
                 $customer->purchases()->syncWithoutDetaching([
-                    $campaign->product_id => ['last_purchase_quantity' => $purchaseQuantity]
+                    $campaign->product_id => [
+                        'campaign_id' => $campaign->id,
+                        'last_purchase_quantity' => $purchaseQuantity
+                        ]
                 ]);
             }
         }
@@ -253,7 +256,10 @@ class CampaignController extends Controller
 
                         if ($campaign->product_id) {
                             $customer->purchases()->syncWithoutDetaching([
-                                $campaign->product_id => ['last_purchase_quantity' => $purchaseQuantity]
+                                $campaign->product_id => [
+                                    'campaign_id' => $campaign->id,
+                                    'last_purchase_quantity' => $purchaseQuantity
+                                    ]
                             ]);
                         }
                         
@@ -294,10 +300,8 @@ class CampaignController extends Controller
             return;
         }
 
-        // Gabungkan tanggal_terjual dengan time_send
         $baseDate = $tanggalTerjual ? \Carbon\Carbon::parse($tanggalTerjual) : now();
         
-        // Jika ada time_send, set waktu pada base date
         if ($timeSend) {
             $timeParts = explode(':', $timeSend);
             $hour = intval($timeParts[0]);
@@ -316,13 +320,10 @@ class CampaignController extends Controller
 
                 $estimationDays = 0;
                 
-                // Cek apakah default_estimation_days_per_unit = 0 (kirim hari ini)
                 if (isset($targetProduct->default_estimation_days_per_unit) && $targetProduct->default_estimation_days_per_unit == 0) {
-                    // Kirim hari ini
                     $estimationDays = 0;
-                    $scheduledDate = now(); // Gunakan waktu sekarang sebagai base
+                    $scheduledDate = now(); 
                     
-                    // Set waktu sesuai time_send atau default jam 9 pagi
                     if ($timeSend) {
                         $timeParts = explode(':', $timeSend);
                         $hour = intval($timeParts[0]);
@@ -395,24 +396,6 @@ class CampaignController extends Controller
                 'Authorization' => $fonnteToken,
             ])->post('https://api.fonnte.com/send', $payload);
 
-            if ($response->successful()) {
-                Log::info('Messages sent successfully for campaign: ' . $campaign->id, [
-                    'response' => $response->json(),
-                    'message_count' => count($messages)
-                ]);
-                
-                // Log status berhasil (karena tidak bisa update field yang tidak ada di model)
-                Log::info('Campaign messages processed successfully', [
-                    'campaign_id' => $campaign->id,
-                    'total_messages' => count($messages),
-                    'sent_at' => now()
-                ]);
-            } else {
-                Log::error('Failed to send messages for campaign: ' . $campaign->id, [
-                    'error' => $response->json(),
-                    'status' => $response->status()
-                ]);
-            }
         } catch (\Exception $e) {
             Log::error('Exception when sending messages for campaign: ' . $campaign->id, [
                 'error' => $e->getMessage()
@@ -422,7 +405,6 @@ class CampaignController extends Controller
 
     private function formatPhoneForFonnte($phone)
     {
-        // Remove +62 prefix and ensure it starts with 62
         $phone = preg_replace('/[^0-9]/', '', $phone);
         
         if (substr($phone, 0, 1) === '0') {
@@ -491,13 +473,42 @@ class CampaignController extends Controller
         if (substr($phone, 0, 1) === '0') {
             $phone = '62' . substr($phone, 1);
         } 
+        elseif (substr($phone, 0, 1) === '8') {
+            $phone = '62' . $phone;
+        }
+        elseif (substr($phone, 0, 3) === '+62') {
+            $phone = substr($phone, 1); 
+        }
         
         return $phone;
     }
 
     public function edit(Campaign $campaign)
     {
-        return view('pages.Admin.Campaign.show', compact('campaign'));
+        $customerGroups = $campaign->customerGroups;
+        $customerIds = collect();
+        foreach ($customerGroups as $customerGroup) {
+            $customerIds = $customerIds->merge($customerGroup->customers->pluck('id'));
+        }
+        
+        $customerIds = $customerIds->unique();
+        
+        $customers = Customer::whereIn('id', $customerIds)
+            ->with(['purchases' => function ($query) use ($campaign) {
+                $query->wherePivot('campaign_id', $campaign->id)
+                    ->wherePivot('product_id', $campaign->product_id);
+            }])
+            ->paginate(10);
+        
+        $customers->getCollection()->transform(function ($customer) use ($campaign) {
+            $purchaseData = $customer->purchases->first();
+            $customer->purchase_quantity = $purchaseData ? $purchaseData->pivot->last_purchase_quantity : 1;
+            return $customer;
+        });
+
+        $product = Product::find($campaign->product_id);         
+        $template = MessageTemplate::find($campaign->message_template_id); 
+        return view('pages.Admin.Campaign.show', compact('campaign','customers', 'customerGroups','product','template',));
     }
 
     public function update(Request $request, Campaign $campaign)

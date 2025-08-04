@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('customer_product_purchases', function (Blueprint $table) {
             $table->foreignId('customer_id')->constrained()->onDelete('cascade');
+            $table->foreignId('campaign_id')->constrained()->onDelete('cascade');
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
             $table->integer('last_purchase_quantity');
-            $table->primary(['customer_id', 'product_id']);
+            $table->primary(['customer_id','campaign_id', 'product_id']);
         });
     }
 

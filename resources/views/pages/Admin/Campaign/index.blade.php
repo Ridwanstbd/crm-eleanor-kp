@@ -42,10 +42,8 @@
                 <x-Elements.Table.td>
                     <div class="flex gap-2">
                         {{-- Tombol Ubah --}}
-                        <button
-                            @click="$dispatch('open-modal', 'edit-campaign-{{ $campaign->id }}')"
-                            class="px-3 py-1 text-sm text-white bg-yellow-500 rounded hover:bg-yellow-600">
-                            Ubah
+                        <button class="px-3 py-1 text-sm text-white bg-blue-500 rounded hover:bg-blue-600">
+                            <x-Elements.Link :href="route('campaigns.edit',$campaign->id)">Detail</x-Elements.Link>
                         </button>
 
                         {{-- Tombol Hapus --}}
@@ -57,10 +55,6 @@
                     </div>
                 </x-Elements.Table.td>
             </tr>
-
-            {{-- Modal Edit --}}
-            @include('pages.Admin.Campaign._edit-modal', ['campaign' => $campaign])
-
             {{-- Modal Hapus --}}
             @include('pages.Admin.Campaign._delete-modal', ['campaign' => $campaign])
             @empty
@@ -71,7 +65,7 @@
         </x-Fragments.Table.Body>
 
         <x-slot name="pagination">
-            {{-- <x-Fragments.Table.Pagination :paginator="$campaigns" /> --}}
+            <x-Fragments.Table.Pagination :paginator="$campaigns" />
         </x-slot>
     </x-Layouts.Table>
 
