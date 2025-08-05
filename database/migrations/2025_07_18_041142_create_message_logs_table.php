@@ -12,13 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('message_logs', function (Blueprint $table) {
-            $table->id();
+            $table->string('report_id')->primary();
             $table->string('device')->nullable();
             $table->string('target');
             $table->text('message');
             $table->string('state_id')->nullable();
             $table->string('status');
             $table->string('state')->nullable();
+            $table->foreignId('customer_id')->constrained()->onDelete('cascade');
+            $table->foreignId('campaign_id')
+                  ->nullable()
+                  ->constrained('campaigns')
+                  ->onDelete('set null');
+
+            $table->timestamps();
         });
     }
 

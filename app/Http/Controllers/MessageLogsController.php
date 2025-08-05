@@ -29,4 +29,10 @@ class MessageLogsController extends Controller
         $messageLog->delete();
         return back()->with('success', 'Message log deleted.');
     }
+
+    public function handleIncomingWebhook(Request $request){
+        header('Content-Type: application/json; charset=utf-8');
+
+        
+    }
 }

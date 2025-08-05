@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CampaignCustomerGroup;
 use App\Models\Customer;
+use App\Models\MessageLogs;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Campaign;
@@ -396,9 +397,44 @@ class CampaignController extends Controller
                 'Authorization' => $fonnteToken,
             ])->post('https://api.fonnte.com/send', $payload);
 
+            $res = $response->json();
+
+            if ($response->successful() && isset($res['id']) && is_array($res['id'])) {
+                $rawDevice = $res['quota'] ?? null;
+                $device = is_array($rawDevice) ? ($rawDevice[0] ?? null) : $rawDevice;
+
+                $processStatus = $res['process'] ?? 'pending';
+
+                foreach ($res['id'] as $k => $reportId) {
+                    $target = $res['target'][$k] ?? null;
+                    $messageContent = $messages[$k]['message'] ?? null;
+
+                    if ($target && $messageContent) {
+                        $customer = Customer::where('phone', $target)->first();
+                        $customerId = $customer->id ?? null;
+
+                        MessageLogs::create([
+                            'report_id' => $reportId,
+                            'target' => $target,
+                            'message' => $messageContent,
+                            'status' => $processStatus,
+                            'device' => $device, 
+                            'state_id' => null,
+                            'state' => null,
+                            'customer_id' => $customerId,
+                            'campaign_id' => $campaign->id,
+                        ]);
+                    }
+                }
+            } else {
+                Log::error('Fonnte API responded with an error or invalid data for campaign: ' . $campaign->id, [
+                    'response' => $res,
+                ]);
+            }
+
         } catch (\Exception $e) {
             Log::error('Exception when sending messages for campaign: ' . $campaign->id, [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage() . " (Connection: " . DB::connection()->getDatabaseName() . ")",
             ]);
         }
     }

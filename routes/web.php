@@ -51,7 +51,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/campaigns/{campaign}', [CampaignController::class, 'destroy'])->name('campaigns.destroy');
 
     Route::get('/logs',[MessageLogsController::class,'index'])->name('logs.index');
-
+    Route::get('/logs/{id}',[MessageLogsController::class,'show'])->name('logs.show');
+    
 
 
     Route::get('/admin/settings', [AdminController::class, 'settings'])->name('admin.settings');

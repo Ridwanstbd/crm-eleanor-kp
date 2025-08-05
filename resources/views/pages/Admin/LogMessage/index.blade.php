@@ -19,15 +19,15 @@
                 @forelse ($logs as $log)
                     <tr>
                         <x-Elements.Table.td>{{ $loop->iteration }}</x-Elements.Table.td>
-                        <x-Elements.Table.td>{{ $log->nomor }}</x-Elements.Table.td>
+                        <x-Elements.Table.td>{{ $log->target }}</x-Elements.Table.td>
                         <x-Elements.Table.td>{{ ucfirst($log->status) }}</x-Elements.Table.td>
                         <x-Elements.Table.td>{{ \Carbon\Carbon::parse($log->waktu_kirim)->format('d M Y, H:i') }}</x-Elements.Table.td>
                         <x-Elements.Table.td>
-                            <x-Elements.Button>
-                                <x-Elements.Link href="{{ route('message_logs.show', $log->id) }}" class="text-white">
+                            {{-- <x-Elements.Button>
+                                <x-Elements.Link href="{{ route('logs.show', $log->id) }}" class="text-white">
                                     Detail
                                 </x-Elements.Link>
-                            </x-Elements.Button>
+                            </x-Elements.Button> --}}
                         </x-Elements.Table.td>
                     </tr>
                 @empty
