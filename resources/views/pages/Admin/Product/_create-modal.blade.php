@@ -11,10 +11,11 @@
         <div class="space-y-4">
             {{-- Nama Produk --}}
             <div>
-                <label for="name" class="block text-sm font-semibold text-gray-900 mb-1">
+                <label for="create-name" class="block text-sm font-semibold text-gray-900 mb-1">
                     Nama Produk
                 </label>
                 <x-elements.form.input
+                    id="create-name"
                     name="name"
                     placeholder="Susu Pengganti"
                     class="w-full"
@@ -23,12 +24,13 @@
 
             {{-- Jangka Waktu --}}
             <div>
-                <label for="default_estimation_days_per_unit" class="block text-sm font-semibold text-gray-900 mb-1">
+                <label for="create-default_estimation_days_per_unit" class="block text-sm font-semibold text-gray-900 mb-1">
                     Jangka Waktu
                 </label>
                 <div class="flex items-center gap-2">
                     <x-elements.form.input
                         type="number"
+                        id="create-default_estimation_days_per_unit"
                         name="default_estimation_days_per_unit"
                         placeholder="0 untuk produk selain konsumsi"
                         class="w-full"

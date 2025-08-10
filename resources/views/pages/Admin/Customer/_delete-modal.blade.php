@@ -2,6 +2,7 @@
     name="delete-customer-{{ $customer->id }}"
     title=""
     mode="default"
+    maxWidth="md"
     :showIcon="false"
 >
     <form action="{{ route('customers.destroy', $customer) }}" method="POST">

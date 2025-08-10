@@ -2,6 +2,7 @@
     name="delete-product-{{ $product->id }}"
     title=""
     mode="default"
+    maxWidth="md"
     :showIcon="false"
 >
     <form action="{{ route('products.destroy', $product) }}" method="POST">

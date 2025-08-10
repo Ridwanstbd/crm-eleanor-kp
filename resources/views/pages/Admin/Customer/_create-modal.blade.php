@@ -2,18 +2,20 @@
     name="create-customer"
     title="Tambah Pelanggan"
     mode="create"
+    maxWidth="md"
     :showIcon="false"
 >
     <form method="POST" action="{{ route('customers.store') }}">
         @csrf
 
-        <div class="p-6 space-y-4">
+        <div class="space-y-4">
             {{-- Nama Pelanggan --}}
             <div>
-                <label for="name" class="block text-sm font-semibold text-gray-900 mb-1">
+                <label for="create-customer-name" class="block text-sm font-semibold text-gray-900 mb-1">
                     Nama Pelanggan
                 </label>
                 <x-elements.form.input
+                    id="create-customer-name"
                     name="name"
                     placeholder="Nama Pelanggan"
                     class="w-full"
@@ -22,10 +24,11 @@
 
             {{-- Nomor Telepon --}}
             <div>
-                <label for="phone" class="block text-sm font-semibold text-gray-900 mb-1">
+                <label for="create-customer-phone" class="block text-sm font-semibold text-gray-900 mb-1">
                     Nomor Telepon
                 </label>
                 <x-elements.form.input
+                    id="create-customer-phone"
                     name="phone"
                     placeholder="081234567899"
                     class="w-full"
