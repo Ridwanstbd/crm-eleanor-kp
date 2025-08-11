@@ -15,7 +15,7 @@
                 <label for="edit-name-{{ $product->id }}" class="block text-sm font-semibold text-gray-900 mb-1">
                     Nama Produk
                 </label>
-                <x-elements.form.input
+                <x-Atoms.form.input
                     id="edit-name-{{ $product->id }}"
                     name="name"
                     value="{{ $product->name }}"
@@ -30,7 +30,7 @@
                     Jangka Waktu
                 </label>
                 <div class="flex items-center gap-2">
-                    <x-elements.form.input
+                    <x-Atoms.form.input
                         type="number"
                         id="edit-default_estimation_days_per_unit-{{ $product->id }}"
                         name="default_estimation_days_per_unit"
@@ -44,12 +44,12 @@
 
             {{-- Tombol Simpan --}}
             <div>
-                <x-elements.button
+                <x-Atoms.button
                     type="submit"
                     class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded"
                 >
                     Simpan
-                </x-elements.button>
+                </x-Atoms.button>
             </div>
         </div>
     </form>

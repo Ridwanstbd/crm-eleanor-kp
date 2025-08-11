@@ -14,7 +14,7 @@
                 <label for="create-name" class="block text-sm font-semibold text-gray-900 mb-1">
                     Nama Produk
                 </label>
-                <x-elements.form.input
+                <x-Atoms.form.input
                     id="create-name"
                     name="name"
                     placeholder="Susu Pengganti"
@@ -28,7 +28,7 @@
                     Jangka Waktu
                 </label>
                 <div class="flex items-center gap-2">
-                    <x-elements.form.input
+                    <x-Atoms.form.input
                         type="number"
                         id="create-default_estimation_days_per_unit"
                         name="default_estimation_days_per_unit"
@@ -41,12 +41,12 @@
 
             {{-- Tombol --}}
             <div>
-                <x-elements.button
+                <x-Atoms.button
                     type="submit"
                     class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded"
                 >
                     Tambah
-                </x-elements.button>
+                </x-Atoms.button>
             </div>
         </div>
     </form>

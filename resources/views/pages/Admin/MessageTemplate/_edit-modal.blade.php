@@ -3,7 +3,7 @@
         @csrf
         @method('PUT')
         
-        <x-Elements.Form.Input name="name" id="name-{{ $template->id }}" value="{{ $template->name }}" class="mb-2" placeholder="Nama Template Pesan" />
+        <x-Atoms.Form.Input name="name" id="name-{{ $template->id }}" value="{{ $template->name }}" class="mb-2" placeholder="Nama Template Pesan" />
         
         <x-Atoms.TextArea 
             name="content" 
@@ -17,7 +17,7 @@
             >{{ $template->content }}</x-Atoms.TextArea>
 
         <div class="flex my-2">
-            <x-Elements.Select
+            <x-Atoms.Select
                 name="item" 
                 id="placeholderSelect-{{ $template->id }}" 
                 valueField="id"
@@ -25,14 +25,14 @@
                 :selected="old('template')"
                 class="w-1/2"
             >
-                <x-Elements.Option value="{name}">Nama</x-Elements.Option>
-                <x-Elements.Option value="{product_name}">Nama Produk</x-Elements.Option>
-                <x-Elements.Option value="{quantity_purchased}">Jumlah dibeli</x-Elements.Option>
-                <x-Elements.Option value="{estimated_finish_date}">Tanggal Estimasi</x-Elements.Option>
-            </x-Elements.Select>
-            <x-Elements.Button id="insertPlaceholderBtn-{{ $template->id }}" type="button">
+                <x-Atoms.Option value="{name}">Nama</x-Atoms.Option>
+                <x-Atoms.Option value="{product_name}">Nama Produk</x-Atoms.Option>
+                <x-Atoms.Option value="{quantity_purchased}">Jumlah dibeli</x-Atoms.Option>
+                <x-Atoms.Option value="{estimated_finish_date}">Tanggal Estimasi</x-Atoms.Option>
+            </x-Atoms.Select>
+            <x-Atoms.Button id="insertPlaceholderBtn-{{ $template->id }}" type="button">
                 Masukkan
-            </x-Elements.Button>
+            </x-Atoms.Button>
         </div>
 
         <div class="flex justify-end gap-2 px-4 pb-4">

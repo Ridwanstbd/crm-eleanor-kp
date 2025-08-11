@@ -24,9 +24,9 @@
                     <input type="checkbox" name="remember" id="remember_me" class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
                     <span class="ml-2 text-sm text-gray-600">Ingat Saya</span>
                 </label>
-                <x-Elements.Link href="{{ route('password.request')}}" class="text-sm text-red-600 hover:text-red-700">
+                <x-Atoms.Link href="{{ route('password.request')}}" class="text-sm text-red-600 hover:text-red-700">
                     Lupa Password
-                </x-Elements.Link>
+                </x-Atoms.Link>
             </div>
 
             <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">

@@ -21,11 +21,11 @@
                     <!-- Left Column - Form Fields -->
                     <div>
                         <x-Fragments.Form.FormGroup :message="$errors->first('name')" label="Nama Sistem" for="name">
-                            <x-Elements.Form.Input name="name" id="name" x-model="name" readonly/>
+                            <x-Atoms.Form.Input name="name" id="name" x-model="name" readonly/>
                         </x-Fragments.Form.FormGroup>
         
                         <x-Fragments.Form.FormGroup :message="$errors->first('description')" label="Description" for="description">
-                            <x-Elements.Form.Textarea name="description" id="description" x-model="description" readonly/>
+                            <x-Atoms.Form.Textarea name="description" id="description" x-model="description" readonly/>
                         </x-Fragments.Form.FormGroup>
                     </div>
         

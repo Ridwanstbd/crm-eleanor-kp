@@ -3,23 +3,23 @@
         <x-Organisms.PageHeader title="Log Pesan"></x-Organisms.PageHeader>
         <x-Layouts.Table>
             <x-Fragments.Table.Header>
-                <x-Elements.Table.th>No</x-Elements.Table.th>
-                <x-Elements.Table.th>Nama</x-Elements.Table.th>
-                <x-Elements.Table.th>Nomor</x-Elements.Table.th>
-                <x-Elements.Table.th>Status</x-Elements.Table.th>
-                <x-Elements.Table.th>Waktu Kirim</x-Elements.Table.th>
-                <x-Elements.Table.th>Aksi</x-Elements.Table.th>
+                <x-Atoms.Table.th>No</x-Atoms.Table.th>
+                <x-Atoms.Table.th>Nama</x-Atoms.Table.th>
+                <x-Atoms.Table.th>Nomor</x-Atoms.Table.th>
+                <x-Atoms.Table.th>Status</x-Atoms.Table.th>
+                <x-Atoms.Table.th>Waktu Kirim</x-Atoms.Table.th>
+                <x-Atoms.Table.th>Aksi</x-Atoms.Table.th>
             </x-Fragments.Table.Header>
 
             <x-Fragments.Table.Body>
                 @forelse ($logs as $log)
                     <tr>
-                        <x-Elements.Table.td>{{ $loop->iteration }}</x-Elements.Table.td>
-                        <x-Elements.Table.td>{{ $log->customer ? $log->customer->name : '-' }}</x-Elements.Table.td>
-                        <x-Elements.Table.td>{{ $log->target }}</x-Elements.Table.td>
-                        <x-Elements.Table.td>{{ ucfirst($log->status) }}</x-Elements.Table.td>
-                        <x-Elements.Table.td>{{ \Carbon\Carbon::parse($log->updated_at)->format('d M Y, H:i') }}</x-Elements.Table.td>
-                        <x-Elements.Table.td>
+                        <x-Atoms.Table.td>{{ $loop->iteration }}</x-Atoms.Table.td>
+                        <x-Atoms.Table.td>{{ $log->customer ? $log->customer->name : '-' }}</x-Atoms.Table.td>
+                        <x-Atoms.Table.td>{{ $log->target }}</x-Atoms.Table.td>
+                        <x-Atoms.Table.td>{{ ucfirst($log->status) }}</x-Atoms.Table.td>
+                        <x-Atoms.Table.td>{{ \Carbon\Carbon::parse($log->updated_at)->format('d M Y, H:i') }}</x-Atoms.Table.td>
+                        <x-Atoms.Table.td>
                             <button
                                 @click="showDetail({{ json_encode([
                                     'id' => $log->id,
@@ -32,12 +32,12 @@
                                 class="px-3 py-1 text-sm text-white bg-yellow-500 rounded hover:bg-yellow-600">
                                 detail
                             </button>
-                        </x-Elements.Table.td>
+                        </x-Atoms.Table.td>
                     </tr>
                 @empty
-                    <x-Elements.Table.empty colspan="5">
+                    <x-Atoms.Table.empty colspan="5">
                         <p class="mt-1">Belum ada log pesan.</p>
-                    </x-Elements.Table.empty>
+                    </x-Atoms.Table.empty>
                 @endforelse
             </x-Fragments.Table.Body>
 

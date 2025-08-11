@@ -52,7 +52,7 @@
         }">
         <div class="grid grid-cols-2 gap-2 w-full">
             <x-Fragments.Form.FormGroup label="Nama" for="name" >
-                <x-Elements.Input  
+                <x-Atoms.Input  
                         name="name"
                         id="name"
                         value="{{ old('name') }}"
@@ -94,7 +94,7 @@
             </x-Fragments.Form.FormGroup>
             
             <x-Fragments.Form.FormGroup label="Tanggal Terjual" for="tanggal_terjual">
-                <x-Elements.InputDate
+                <x-Atoms.InputDate
                     name="tanggal_terjual"
                     id="tanggal_terjual"
                     value="{{ old('tanggal_terjual') }}"
@@ -105,7 +105,7 @@
                 @enderror
             </x-Fragments.Form.FormGroup>
             <x-Fragments.Form.FormGroup label="Waktu Kirim Kampanye" for="time_send">
-                <x-Elements.InputTime
+                <x-Atoms.InputTime
                     name="time_send"
                     id="time_send"
                     value="{{ old('time_send') }}"
@@ -118,7 +118,7 @@
             
             <x-Fragments.Form.FormGroup label="Target Audiens" for="target">
                 <div class="flex gap-2 mt-2">
-                    <x-Elements.Checkbox 
+                    <x-Atoms.Checkbox 
                         id="new_audiens" 
                         name="new_audiens" 
                         value="1"
@@ -126,7 +126,7 @@
                         :checked="old('new_audiens')"
                         @change="checkNewAudiens()"
                     />
-                    <x-Elements.Checkbox 
+                    <x-Atoms.Checkbox 
                         id="customer" 
                         name="customer" 
                         value="1"
@@ -148,7 +148,7 @@
         <div x-show="newAudiens" x-transition class="w-full mt-4">
             <div class="grid grid-cols-2 gap-2 w-full">
                 <x-Fragments.Form.FormGroup label="Nama Grup Pembeli" for="name_group_customer" >
-                    <x-Elements.Input  
+                    <x-Atoms.Input  
                             name="name_group_customer"
                             id="name_group_customer"
                             value="{{ old('name_group_customer') }}"
@@ -161,7 +161,7 @@
                 </x-Fragments.Form.FormGroup>
                 
                 <x-Fragments.Form.FormGroup label="Upload CSV" for="csv_file" >
-                    <x-Elements.Input  
+                    <x-Atoms.Input  
                             type="file"
                             name="csv_file"
                             id="csv_file"
@@ -196,24 +196,24 @@
             
             <x-Layouts.Table>
                 <x-Fragments.Table.Header>
-                    <x-Elements.Table.th>
-                        <x-Elements.Checkbox 
+                    <x-Atoms.Table.th>
+                        <x-Atoms.Checkbox 
                             id="select-all" 
                             name="select-all" 
                             label="Pilih Semua"
                             x-model="allCustomersSelected"
                             @change="toggleAllCustomers($event.target.checked)"
                         />
-                    </x-Elements.Table.th>
-                    <x-Elements.Table.th>Nama</x-Elements.Table.th>
-                    <x-Elements.Table.th>Nomor Telepon</x-Elements.Table.th>
-                    <x-Elements.Table.th x-show="selectedProduct && customer">Jumlah Pembelian</x-Elements.Table.th>
+                    </x-Atoms.Table.th>
+                    <x-Atoms.Table.th>Nama</x-Atoms.Table.th>
+                    <x-Atoms.Table.th>Nomor Telepon</x-Atoms.Table.th>
+                    <x-Atoms.Table.th x-show="selectedProduct && customer">Jumlah Pembelian</x-Atoms.Table.th>
                 </x-Fragments.Table.Header>
                 <x-Fragments.Table.Body>
                     @forelse($customers as $customerItem)
                     <tr class="customer-row">
-                        <x-Elements.Table.td>
-                            <x-Elements.Checkbox 
+                        <x-Atoms.Table.td>
+                            <x-Atoms.Checkbox 
                                 id="customer_{{ $customerItem->id }}" 
                                 name="selected_customers[]" 
                                 value="{{ $customerItem->id }}"
@@ -222,11 +222,11 @@
                                 @change="updateSelectAllState()"
                                 x-init="initCustomerQuantity({{ $customerItem->id }})"
                             />
-                        </x-Elements.Table.td>
-                        <x-Elements.Table.td>{{ $customerItem->name }}</x-Elements.Table.td>
-                        <x-Elements.Table.td>{{ $customerItem->phone }}</x-Elements.Table.td>
-                        <x-Elements.Table.td x-show="selectedProduct && customer">
-                            <x-Elements.Input  
+                        </x-Atoms.Table.td>
+                        <x-Atoms.Table.td>{{ $customerItem->name }}</x-Atoms.Table.td>
+                        <x-Atoms.Table.td>{{ $customerItem->phone }}</x-Atoms.Table.td>
+                        <x-Atoms.Table.td x-show="selectedProduct && customer">
+                            <x-Atoms.Input  
                                 type="number"
                                 name="customer_quantities[{{ $customerItem->id }}]"
                                 value="{{ old('customer_quantities.' . $customerItem->id, 1) }}"
@@ -236,12 +236,12 @@
                                 class="w-20" 
                                 @input="updateCustomerQuantity({{ $customerItem->id }}, $event.target.value)"
                             />
-                        </x-Elements.Table.td>
+                        </x-Atoms.Table.td>
                     </tr>
                     @empty
-                    <x-Elements.Table.Empty colspan="4">
+                    <x-Atoms.Table.Empty colspan="4">
                         <p class="text-sm text-gray-500 mt-2">Belum ada data pelanggan</p>
-                    </x-Elements.Table.Empty>
+                    </x-Atoms.Table.Empty>
                     @endforelse
                     
                     <x-slot name="pagination">

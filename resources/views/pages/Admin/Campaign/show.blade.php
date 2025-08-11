@@ -3,7 +3,7 @@
         <x-Organisms.PageHeader title="Detail Kampanye {{$campaign->name}}" />
         <div class="grid grid-cols-2 gap-2">
             <x-Fragments.Form.FormGroup label="Nama Kampanye" for="name">
-                <x-Elements.Input name="name" value="{{$campaign->name}}" disabled readonly/>
+                <x-Atoms.Input name="name" value="{{$campaign->name}}" disabled readonly/>
             </x-Fragments.Form.FormGroup>
             <x-Fragments.Form.FormGroup label="Produk" for="product">
                 <x-Fragments.Select 
@@ -23,7 +23,7 @@
             </x-Fragments.Form.FormGroup>
 
             <x-Fragments.Form.FormGroup label="Tanggal Terjual" for="tanggal_terjual">
-                <x-Elements.InputDate
+                <x-Atoms.InputDate
                     name="tanggal_terjual"
                     id="tanggal_terjual"
                     value="{{ $campaign->schedule }}"
@@ -36,7 +36,7 @@
             </x-Fragments.Form.FormGroup>
             
             <x-Fragments.Form.FormGroup label="Waktu Kirim Kampanye" for="time_send">
-                <x-Elements.InputTime
+                <x-Atoms.InputTime
                     name="time_send"
                     id="time_send"
                     value="{{ $campaign->time_send }}"
@@ -63,27 +63,27 @@
         
         <x-Layouts.Table min-height="200px">
             <x-Fragments.Table.Header>
-                <x-Elements.Table.th>No</x-Elements.Table.th>
-                <x-Elements.Table.th>Nama Pelanggan</x-Elements.Table.th>
-                <x-Elements.Table.th>Nomor Telepon</x-Elements.Table.th>
-                <x-Elements.Table.th>Jumlah Beli</x-Elements.Table.th>
-                <x-Elements.Table.th>Status Pesan</x-Elements.Table.th>
-                <x-Elements.Table.th>Waktu Kirim</x-Elements.Table.th>
-                <x-Elements.Table.th>Aksi</x-Elements.Table.th>
+                <x-Atoms.Table.th>No</x-Atoms.Table.th>
+                <x-Atoms.Table.th>Nama Pelanggan</x-Atoms.Table.th>
+                <x-Atoms.Table.th>Nomor Telepon</x-Atoms.Table.th>
+                <x-Atoms.Table.th>Jumlah Beli</x-Atoms.Table.th>
+                <x-Atoms.Table.th>Status Pesan</x-Atoms.Table.th>
+                <x-Atoms.Table.th>Waktu Kirim</x-Atoms.Table.th>
+                <x-Atoms.Table.th>Aksi</x-Atoms.Table.th>
             </x-Fragments.Table.Header>
 
             <x-Fragments.Table.Body>
                 @forelse ($messageLogs as $messageLog)
                     <tr>
-                        <x-Elements.Table.td>{{ $loop->iteration + ($messageLogs->currentPage() - 1) * $messageLogs->perPage() }}</x-Elements.Table.td>
-                        <x-Elements.Table.td>
+                        <x-Atoms.Table.td>{{ $loop->iteration + ($messageLogs->currentPage() - 1) * $messageLogs->perPage() }}</x-Atoms.Table.td>
+                        <x-Atoms.Table.td>
                             {{ $messageLog->customer ? $messageLog->customer->name : '-' }}
-                        </x-Elements.Table.td>
-                        <x-Elements.Table.td>{{ $messageLog->target }}</x-Elements.Table.td>
-                        <x-Elements.Table.td>
+                        </x-Atoms.Table.td>
+                        <x-Atoms.Table.td>{{ $messageLog->target }}</x-Atoms.Table.td>
+                        <x-Atoms.Table.td>
                             {{ $messageLog->customer ? $messageLog->customer->purchase_quantity : '-' }}
-                        </x-Elements.Table.td>
-                        <x-Elements.Table.td>
+                        </x-Atoms.Table.td>
+                        <x-Atoms.Table.td>
                             @if($messageLog->status == 'success')
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                     <svg class="w-2 h-2 mr-1" fill="currentColor" viewBox="0 0 8 8">
@@ -113,8 +113,8 @@
                                     {{ ucfirst($messageLog->status ?? 'Unknown') }}
                                 </span>
                             @endif
-                        </x-Elements.Table.td>
-                        <x-Elements.Table.td>
+                        </x-Atoms.Table.td>
+                        <x-Atoms.Table.td>
                             @if($messageLog->sent_at)
                                 <div class="text-sm text-gray-900">
                                     {{ \Carbon\Carbon::parse($messageLog->sent_at)->format('d/m/Y H:i') }}
@@ -125,8 +125,8 @@
                             @else
                                 <span class="text-sm text-gray-500">Belum dikirim</span>
                             @endif
-                        </x-Elements.Table.td>
-                        <x-Elements.Table.td>
+                        </x-Atoms.Table.td>
+                        <x-Atoms.Table.td>
                             <div class="flex space-x-2">
                                 <button
                                     @click="showDetail({{ json_encode([
@@ -154,10 +154,10 @@
                                     </button>
                                 @endif
                             </div>
-                        </x-Elements.Table.td>
+                        </x-Atoms.Table.td>
                     </tr>
                 @empty
-                    <x-Elements.Table.empty colspan="7">
+                    <x-Atoms.Table.empty colspan="7">
                         <div class="text-center py-8">
                             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2 2v-5m16 0h-2M4 13h2m8-8v2m0 6V9.5"></path>
@@ -165,7 +165,7 @@
                             <p class="mt-2 text-sm font-medium text-gray-900">Belum ada log pesan</p>
                             <p class="mt-1 text-sm text-gray-500">Pesan untuk kampanye ini belum ada yang dikirim.</p>
                         </div>
-                    </x-Elements.Table.empty>
+                    </x-Atoms.Table.empty>
                 @endforelse
             </x-Fragments.Table.Body>
 

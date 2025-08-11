@@ -1,4 +1,3 @@
-{{-- components/Fragments/Select.blade.php --}}
 @props([
     'options' => [],
     'valueField' => 'id',
@@ -9,11 +8,11 @@
     'allowEmpty' => true
 ])
 
-<x-Elements.Select {{ $attributes }}>
+<x-Atoms.Select {{ $attributes }}>
     @if($allowEmpty)
-        <x-Elements.Option value="" :selected="empty($selected) && empty(old($name))">
+        <x-Atoms.Option value="" :selected="empty($selected) && empty(old($name))">
             {{ $placeholder }}
-        </x-Elements.Option>
+        </x-Atoms.Option>
     @endif
     
     @foreach($options as $option)
@@ -23,11 +22,11 @@
             $isSelected = $selected == $optionValue || old($name) == $optionValue;
         @endphp
         
-        <x-Elements.Option 
+        <x-Atoms.Option 
             :value="$optionValue" 
             :selected="$isSelected"
         >
             {{ $optionText }}
-        </x-Elements.Option>
+        </x-Atoms.Option>
     @endforeach
-</x-Elements.Select>
+</x-Atoms.Select>

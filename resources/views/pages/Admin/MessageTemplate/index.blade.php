@@ -3,7 +3,7 @@
         <x-slot name="filters">
             <input type="hidden" name="sort" value="{{ $sortField }}">
             <input type="hidden" name="direction" value="{{ $sortDirection }}">
-            <x-Elements.Form.SearchInput
+            <x-Atoms.Form.SearchInput
                 name="search"
                 id="search"
                 value="{{ request('search') }}"
@@ -12,27 +12,27 @@
             />
         </x-slot>
         <x-slot name="actions">
-            <x-Elements.Button @click="$dispatch('open-modal', 'create-message-template')">
-                <x-Elements.Link href="#">Tambah</x-Elements.Link>
-            </x-Elements.Button>
+            <x-Atoms.Button @click="$dispatch('open-modal', 'create-message-template')">
+                <x-Atoms.Link href="#">Tambah</x-Atoms.Link>
+            </x-Atoms.Button>
         </x-slot>
     </x-Organisms.PageHeader>
 
     <x-Layouts.Table>
         <x-Fragments.Table.Header>
-            <x-Elements.Table.th>No</x-Elements.Table.th>
-            <x-Elements.Table.th sortable :direction="$sortField === 'name' ? $sortDirection : null" onclick="window.location.href='{{ route('templates.index', array_merge(request()->query(), ['sort' => 'name', 'direction' => ($sortField === 'name' && $sortDirection === 'asc') ? 'desc' : 'asc'])) }}'" >
+            <x-Atoms.Table.th>No</x-Atoms.Table.th>
+            <x-Atoms.Table.th sortable :direction="$sortField === 'name' ? $sortDirection : null" onclick="window.location.href='{{ route('templates.index', array_merge(request()->query(), ['sort' => 'name', 'direction' => ($sortField === 'name' && $sortDirection === 'asc') ? 'desc' : 'asc'])) }}'" >
                 Nama
-            </x-Elements.Table.th>
-            <x-Elements.Table.th>Aksi</x-Elements.Table.th>
+            </x-Atoms.Table.th>
+            <x-Atoms.Table.th>Aksi</x-Atoms.Table.th>
         </x-Fragments.Table.Header>
 
         <x-Fragments.Table.Body>
             @forelse ($templates as $template)
                 <tr>
-                    <x-Elements.Table.td>{{ $loop->iteration }}</x-Elements.Table.td>
-                    <x-Elements.Table.td>{{ $template->name }}</x-Elements.Table.td>
-                    <x-Elements.Table.td>
+                    <x-Atoms.Table.td>{{ $loop->iteration }}</x-Atoms.Table.td>
+                    <x-Atoms.Table.td>{{ $template->name }}</x-Atoms.Table.td>
+                    <x-Atoms.Table.td>
                         <div class="flex gap-2">
                             <button
                                 @click="$dispatch('open-modal', 'edit-message-template-{{ $template->id }}')"
@@ -46,16 +46,16 @@
                                 Hapus
                             </button>
                         </div>
-                    </x-Elements.Table.td>
+                    </x-Atoms.Table.td>
                 </tr>
 
                 {{-- Modals --}}
                 @include('pages.Admin.MessageTemplate._edit-modal', ['template' => $template])
                 @include('pages.Admin.MessageTemplate._delete-modal', ['template' => $template])
             @empty
-                <x-Elements.Table.empty colspan="3">
+                <x-Atoms.Table.empty colspan="3">
                     <p class="mt-1 text-sm">Belum ada template pesan.</p>
-                </x-Elements.Table.empty>
+                </x-Atoms.Table.empty>
             @endforelse
         </x-Fragments.Table.Body>
 

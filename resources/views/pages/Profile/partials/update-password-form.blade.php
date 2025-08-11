@@ -12,19 +12,19 @@
         @csrf
         @method('put')
         <x-Fragments.Form.FormGroup :message="$errors->updatePassword->get('current_password')" :label="__('Kata Sandi Saat ini')" for="update_password_current_password">
-            <x-Elements.Form.Input id="update_password_current_password" name="current_password" type="password" autocomplete="current-password"/>
+            <x-Atoms.Form.Input id="update_password_current_password" name="current_password" type="password" autocomplete="current-password"/>
         </x-Fragments.Form.FormGroup>
         <x-Fragments.Form.FormGroup :message="$errors->updatePassword->get('password')" :label="__('Kata Sandi Baru')" for="update_password_password">
-            <x-Elements.Form.Input id="update_password_password" name="password" type="password" autocomplete="new-password"/>
+            <x-Atoms.Form.Input id="update_password_password" name="password" type="password" autocomplete="new-password"/>
         </x-Fragments.Form.FormGroup>
         <x-Fragments.Form.FormGroup :message="$errors->updatePassword->get('password_confirmation')" :label="__('Konfirmasi Kata Sandi')" for="update_password_password_confirmation">
-            <x-Elements.Form.Input id="update_password_password_confirmation" name="password_confirmation" type="password" autocomplete="new-password"/>
+            <x-Atoms.Form.Input id="update_password_password_confirmation" name="password_confirmation" type="password" autocomplete="new-password"/>
         </x-Fragments.Form.FormGroup>
 
         <div class="flex items-center gap-4">
-            <x-Elements.Button variant="primary" type="submit">
+            <x-Atoms.Button variant="primary" type="submit">
                 {{ __('Simpan') }}
-            </x-Elements.Button>
+            </x-Atoms.Button>
 
             @if (session('status') === 'password-updated')
                 <p

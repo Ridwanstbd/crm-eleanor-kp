@@ -6,12 +6,12 @@
 ])
 
 <div>
-    <x-Elements.Label for="{{$id}}">
+    <x-Atoms.Label for="{{$id}}">
         {{$label}}
-    </x-Elements.Label>
+    </x-Atoms.Label>
     
     <div class="relative">
-        <x-Elements.Form.Input 
+        <x-Atoms.Form.Input 
             type="password"
             :id="$id"
             :name="$name"
@@ -36,7 +36,7 @@
         </button>
     </div>
     
-    <x-Elements.Form.InputError :message="$errors->first($name)" />
+    <x-Atoms.Form.InputError :message="$errors->first($name)" />
 </div>
 
 <script>

@@ -8,11 +8,11 @@
         @method('patch')
 
         <x-Fragments.Form.FormGroup :message="$errors->get('name')" :label="__('Name')" for="name">
-            <x-Elements.Form.Input name="name" id="name" :value="old('name', $user->name)" required autofocus autocomplete="name"/>
+            <x-Atoms.Form.Input name="name" id="name" :value="old('name', $user->name)" required autofocus autocomplete="name"/>
         </x-Fragments.Form.FormGroup>
 
         <x-Fragments.Form.FormGroup :message="$errors->get('email')" :label="__('Email')" for="email">
-            <x-Elements.Form.Input id="email" type="email" name="email" :value="old('email', $user->email)" required autofocus autocomplete="username" />
+            <x-Atoms.Form.Input id="email" type="email" name="email" :value="old('email', $user->email)" required autofocus autocomplete="username" />
             
             @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
                 <div>
@@ -34,13 +34,13 @@
         </x-Fragments.Form.FormGroup>
 
         <x-Fragments.Form.FormGroup :message="$errors->get('name')" :label="__('Fonnte Token')" for="name">
-            <x-Elements.Form.Input name="fonnte_token" id="fonnte_token" :value="old('fonnte_token', $user->fonnte_token)" required autofocus autocomplete="fonnte_token"/>
+            <x-Atoms.Form.Input name="fonnte_token" id="fonnte_token" :value="old('fonnte_token', $user->fonnte_token)" required autofocus autocomplete="fonnte_token"/>
         </x-Fragments.Form.FormGroup>
 
         <div class="flex items-center gap-4">
-            <x-Elements.Button variant="primary" type="submit">
+            <x-Atoms.Button variant="primary" type="submit">
                 {{ __('Simpan') }}
-            </x-Elements.Button>
+            </x-Atoms.Button>
 
             @if (session('status') === 'profile-updated')
                 <p

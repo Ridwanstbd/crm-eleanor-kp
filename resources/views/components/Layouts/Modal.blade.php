@@ -1,4 +1,3 @@
-{{-- components/Layouts/Modal.blade.php --}}
 @props([
     'name',
     'show' => false,

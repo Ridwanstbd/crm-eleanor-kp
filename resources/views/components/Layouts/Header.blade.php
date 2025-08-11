@@ -1,4 +1,3 @@
-{{-- x-Layouts.Header.blade.php --}}
 <header 
     :class="$store.sidebar.isOpen ? 'ml-64' : 'ml-16'"
     class="fixed top-0 right-0 left-0 z-10 transition-all duration-300"
@@ -38,12 +37,12 @@
                     x-transition
                     class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2"
                 >
-                    <x-Elements.Link href="{{ route('profile.edit') }}" class="block px-4 py-2">
+                    <x-Atoms.Link href="{{ route('profile.edit') }}" class="block px-4 py-2">
                         Profile
-                    </x-Elements.Link>
-                    <x-Elements.Link href="{{ route('admin.settings') }}" class="block px-4 py-2">
+                    </x-Atoms.Link>
+                    <x-Atoms.Link href="{{ route('admin.settings') }}" class="block px-4 py-2">
                         Informasi Sistem
-                    </x-Elements.Link>
+                    </x-Atoms.Link>
                     <hr class="my-2">
                     <form action="{{ route('logout') }}" method="POST" class="block">
                         @csrf

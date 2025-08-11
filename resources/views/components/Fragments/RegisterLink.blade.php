@@ -1,8 +1,8 @@
 <div class="text-center mt-4">
     <p class="text-sm text-gray-600">
         Don't have an account?
-        <x-Elements.Link href="{{ route('register') }}">
+        <x-Atoms.Link href="{{ route('register') }}">
             Register here
-        </x-Elements.Link>
+        </x-Atoms.Link>
     </p>
 </div>

@@ -15,7 +15,7 @@
                 <label for="edit-customer-name-{{ $customer->id }}" class="block text-sm font-semibold text-gray-900 mb-1">
                     Nama Pelanggan
                 </label>
-                <x-elements.form.input
+                <x-Atoms.form.input
                     id="edit-customer-name-{{ $customer->id }}"
                     name="name"
                     value="{{ $customer->name }}"
@@ -29,7 +29,7 @@
                 <label for="edit-customer-phone-{{ $customer->id }}" class="block text-sm font-semibold text-gray-900 mb-1">
                     Nomor Telepon
                 </label>
-                <x-elements.form.input
+                <x-Atoms.form.input
                     id="edit-customer-phone-{{ $customer->id }}"
                     name="phone"
                     value="{{ $customer->phone }}"
@@ -40,12 +40,12 @@
 
             {{-- Tombol Simpan --}}
             <div>
-                <x-elements.button
+                <x-Atoms.button
                     type="submit"
                     class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded"
                 >
                     Simpan
-                </x-elements.button>
+                </x-Atoms.button>
             </div>
         </div>
     </form>

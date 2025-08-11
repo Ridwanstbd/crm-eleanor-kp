@@ -3,12 +3,12 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <!-- Left Column -->
             <div class="space-y-6">
-                <x-Elements.Link href="/">
+                <x-Atoms.Link href="/">
                 <div class="flex items-center">
                         <img src="{{ asset('assets/img/logo.png') }}" alt="{{ $system->name }}" class="h-12">
                         <span class="text-xl font-semibold ml-2">{{ $system->name }}</span>
                     </div>
-                </x-Elements.Link>
+                </x-Atoms.Link>
                 <p class="text-gray-600">
                     {{ $system->slogan }}
                 </p>

@@ -1,4 +1,3 @@
-{{-- components/Fragments/Sidebar.blade.php --}}
 @props(['menuItems'])
 
 <aside :class="$store.sidebar.isOpen ? 'w-64' : 'w-16'" class="fixed top-0 left-0 h-full bg-gray-500 shadow-lg transition-all duration-300">
@@ -15,7 +14,7 @@
                            (isset($item['activeRoutes']) && collect($item['activeRoutes'])->contains(fn($route) => request()->routeIs($route)));
             @endphp
             
-            <x-Elements.NavLink 
+            <x-Atoms.NavLink 
                 href="{{ route($item['route']) }}"
                 :active="$isActive" 
             >
@@ -35,7 +34,7 @@
                 <span x-show="$store.sidebar.isOpen" class="ml-3 text-white">
                     {{ $item['text'] }}
                 </span>
-            </x-Elements.NavLink>
+            </x-Atoms.NavLink>
         @endforeach
     </nav>
 </aside>

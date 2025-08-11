@@ -1,7 +1,7 @@
 <x-Layouts.Modal name="create-message-template" title="Tambah Template Pesan" mode="create">
     <form method="POST" action="{{ route('templates.store') }}">
         @csrf
-        <x-Elements.Form.Input name="name" id="name" class="mb-2" placeholder="Nama Template Pesan" />
+        <x-Atoms.Form.Input name="name" id="name" class="mb-2" placeholder="Nama Template Pesan" />
         <x-Atoms.TextArea 
             name="content" 
             id="messageTemplate"
@@ -14,7 +14,7 @@
             />
 
         <div class="flex my-2">
-            <x-Elements.Select
+            <x-Atoms.Select
                 name="item" 
                 id="placeholderSelect" 
                 valueField="id"
@@ -22,14 +22,14 @@
                 :selected="old('template')"
                 class="w-1/2"
             >
-            <x-Elements.Option value="{name}">Nama Pembeli</x-Elements.Option>
-            <x-Elements.Option value="{product_name}">Nama Produk</x-Elements.Option>
-            <x-Elements.Option value="{quantity_purchased}">Jumlah dibeli</x-Elements.Option>
-            <x-Elements.Option value="{estimated_finish_date}">Tanggal Estimasi</x-Elements.Option>
-            </x-Elements.Select>
-            <x-Elements.Button id="insertPlaceholderBtn" type="button">
+            <x-Atoms.Option value="{name}">Nama Pembeli</x-Atoms.Option>
+            <x-Atoms.Option value="{product_name}">Nama Produk</x-Atoms.Option>
+            <x-Atoms.Option value="{quantity_purchased}">Jumlah dibeli</x-Atoms.Option>
+            <x-Atoms.Option value="{estimated_finish_date}">Tanggal Estimasi</x-Atoms.Option>
+            </x-Atoms.Select>
+            <x-Atoms.Button id="insertPlaceholderBtn" type="button">
                 Masukkan
-            </x-Elements.Button>
+            </x-Atoms.Button>
         </div>
         <div class="flex justify-end gap-2 px-4 pb-4">
             <button type="button" @click="$dispatch('close-modal', 'create-message-template')" class="px-4 py-2 text-sm bg-gray-300 rounded hover:bg-gray-400">

@@ -6,15 +6,15 @@
 ])
 
 <div>
-    <x-Elements.Label for="{{$id}}">
+    <x-Atoms.Label for="{{$id}}">
         {{$label}}
-    </x-Elements.Label>
-    <x-Elements.Form.Input 
+    </x-Atoms.Label>
+    <x-Atoms.Form.Input 
         type="email"
         :id="$id"
         :name="$name"
         :placeholder="$placeholder"
         {{ $attributes }}
     />
-    <x-Elements.Form.InputError :message="$errors->first($name)"/>
+    <x-Atoms.Form.InputError :message="$errors->first($name)"/>
 </div>
