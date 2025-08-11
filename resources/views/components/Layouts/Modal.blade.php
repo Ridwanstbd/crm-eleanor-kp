@@ -5,13 +5,12 @@
     'maxWidth' => '2xl',
     'trigger' => null,
     'title' => null,
-    'mode' => 'default', // 'default', 'create', 'edit', 'destroy'
+    'mode' => 'default',
     'message' => null,
-    'loading' => false  // Added loading state
+    'loading' => false
 ])
 
 @php
-
 use Illuminate\Support\Str;
 $maxWidth = Str::startsWith($maxWidth, '[')
     ? "sm:max-w-$maxWidth"
@@ -21,7 +20,7 @@ $maxWidth = Str::startsWith($maxWidth, '[')
         'lg' => 'sm:max-w-lg',
         'xl' => 'sm:max-w-xl',
         '2xl' => 'sm:max-w-2xl',
-    ][$maxWidth] ?? 'sm:max-w-2xl'; // fallback
+    ][$maxWidth] ?? 'sm:max-w-2xl';
 @endphp
 
 <div
@@ -29,6 +28,7 @@ $maxWidth = Str::startsWith($maxWidth, '[')
         show: @js($show),
         mode: '{{ $mode }}',
         loading: @js($loading),
+        modalName: '{{ $name }}',
         focusables() {
             let selector = 'a, button, input:not([type=\'hidden\']), textarea, select, details, [tabindex]:not([tabindex=\'-1\'])'
             return [...$el.querySelectorAll(selector)]
@@ -45,6 +45,16 @@ $maxWidth = Str::startsWith($maxWidth, '[')
             if (this.hasForm()) {
                 this.$el.querySelector('form').reset()
             }
+        },
+        openModal(modalName) {
+            if (modalName === this.modalName) {
+                this.show = true;
+            }
+        },
+        closeModal(modalName) {
+            if (!modalName || modalName === this.modalName) {
+                this.show = false;
+            }
         }
     }"
     x-init="$watch('show', value => {
@@ -56,12 +66,12 @@ $maxWidth = Str::startsWith($maxWidth, '[')
             resetForm();
         }
     })"
-    x-on:open-modal.window="$event.detail == '{{ $name }}' ? show = true : null"
-    x-on:close-modal.window="$event.detail == '{{ $name }}' ? show = false : null"
-    x-on:close.stop="show = false"
-    x-on:keydown.escape.window="show = false"
-    x-on:keydown.tab.prevent="$event.shiftKey || nextFocusable().focus()"
-    x-on:keydown.shift.tab.prevent="prevFocusable().focus()"
+    x-on:open-modal.window="openModal($event.detail)"
+    x-on:close-modal.window="closeModal($event.detail)"
+    x-on:close.stop="closeModal()"
+    x-on:keydown.escape.window="show && closeModal()"
+    x-on:keydown.tab.prevent="show && ($event.shiftKey || nextFocusable().focus())"
+    x-on:keydown.shift.tab.prevent="show && prevFocusable().focus()"
 >
     @if($trigger)
     <div @click="show = true">
@@ -73,12 +83,12 @@ $maxWidth = Str::startsWith($maxWidth, '[')
         x-show="show"
         x-cloak
         class="fixed inset-0 overflow-y-auto px-4 py-6 sm:px-0 z-50"
-        style="display: {{ $show ? 'block' : 'none' }};"
+        style="display: none;"
     >
         <div
             x-show="show"
             class="fixed inset-0 transform transition-all"
-            x-on:click="show = false"
+            x-on:click="closeModal()"
             x-transition:enter="ease-out duration-300"
             x-transition:enter-start="opacity-0"
             x-transition:enter-end="opacity-100"
@@ -105,7 +115,8 @@ $maxWidth = Str::startsWith($maxWidth, '[')
                     {{ $title }}
                 </h3>
                 <button
-                    @click="show = false"
+                    @click="closeModal()"
+                    type="button"
                     class="text-gray-400 hover:text-gray-500">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -114,7 +125,6 @@ $maxWidth = Str::startsWith($maxWidth, '[')
             </div>
             @endif
 
-            <!-- Loading Overlay -->
             <div x-show="loading" class="absolute inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50">
                 <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
             </div>
@@ -143,7 +153,6 @@ $maxWidth = Str::startsWith($maxWidth, '[')
                 <div :class="{ 'pointer-events-none opacity-75': loading }">
                     {{ $slot }}
                 </div>
-
             @endif
         </div>
     </div>

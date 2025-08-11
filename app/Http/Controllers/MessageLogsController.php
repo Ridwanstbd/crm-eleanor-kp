@@ -10,9 +10,6 @@ class MessageLogsController extends Controller
     public function index(Request $request)
     {
         $logs = MessageLogs::query()
-            ->when($request->search, function ($query) use ($request) {
-                $query->where('nomor', 'like', '%' . $request->search . '%');
-            })
             ->latest()
             ->paginate(25);
 

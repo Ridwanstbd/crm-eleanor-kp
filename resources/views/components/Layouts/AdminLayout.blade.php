@@ -72,7 +72,7 @@
     @if(session('error'))
         <div x-data="{ show: true }"
             x-show="show"
-            class="fixed top-4 right-4 z-50 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-lg"
+            class="fixed top-4 right-2 z-50 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-lg"
             role="alert">
             <p>{{ session('error') }}</p>
             <button @click="show = false" class="mt-2 text-sm text-red-500 underline">

@@ -18,7 +18,7 @@
         },
         {
             "route": "templates.index",
-            "icon": "M3 3h18a1 1 0 0 1 1 1v2H2V4a1 1 0 0 1 1-1ZM4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8M10 12h4",
+            "icon": "M8 2v4 M12 2v4 M16 2v4 M16 4h2a2 2 0 0 1 2 2v2 M20 12v2 M20 18v2a2 2 0 0 1-2 2h-1 M13 22h-2 M7 22H6a2 2 0 0 1-2-2v-2 M4 14v-2 M4 8V6a2 2 0 0 1 2-2h2 M8 10h6 M8 14h8 M8 18h5",
             "text": "Template",
             "activeRoutes": ["templates.index"]
         },

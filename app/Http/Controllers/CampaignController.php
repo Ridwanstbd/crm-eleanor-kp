@@ -20,10 +20,28 @@ use Illuminate\Support\Facades\Http;
  
 class CampaignController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $campaigns = Campaign::paginate(10);
-        return view('pages.Admin.Campaign.index', compact('campaigns'));
+        $search = $request->input('search');
+
+        $sortField = $request->input('sort', 'name'); 
+        $sortDirection = $request->input('direction', 'desc');
+        
+        $allowedSortFields = ['name','schedule'];
+        if (!in_array($sortField, $allowedSortFields)) {
+            $sortField = 'name';
+        }
+        
+        $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'asc';
+        
+        $campaigns = Campaign::when($search, function ($query) use ($search) {
+                return $query->where('name', 'like', '%' . $search . '%');
+            })
+            ->orderBy($sortField, $sortDirection)
+            ->paginate(10);
+
+        $campaigns->appends(request()->query());
+        return view('pages.Admin.Campaign.index', compact('campaigns', 'search', 'sortField', 'sortDirection'));
     }
 
     public function create()
@@ -54,14 +72,12 @@ class CampaignController extends Controller
             'time_send.date_format' => 'Format waktu kirim tidak valid. Gunakan format HH:MM.',
         ];
 
-        // Cek apakah ada target audiens yang dipilih
         if (!$request->has('new_audiens') && !$request->has('customer')) {
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Pilih minimal satu target audiens (Audiens Baru atau Pelanggan).');
         }
 
-        // Validasi untuk new audiens
         if ($request->has('new_audiens') && $request->new_audiens == '1') {
             $validationRules['name_group_customer'] = 'required|string|max:255';
             $validationRules['csv_file'] = 'required|file|mimes:csv,txt|max:2048';
@@ -72,7 +88,6 @@ class CampaignController extends Controller
             $validationMessages['csv_file.max'] = 'Ukuran file maksimal 2MB.';
         }
 
-        // Validasi untuk existing customers
         if ($request->has('customer') && $request->customer == '1') {
             $validationRules['selected_customers'] = 'required|array|min:1';
             $validationRules['selected_customers.*'] = 'exists:customers,id';
@@ -81,7 +96,6 @@ class CampaignController extends Controller
             $validationMessages['selected_customers.min'] = 'Pilih minimal satu pelanggan.';
             $validationMessages['selected_customers.*.exists'] = 'Pelanggan yang dipilih tidak valid.';
             
-            // Jika ada produk, validasi customer quantities
             if ($request->filled('product')) {
                 $validationRules['customer_quantities'] = 'required|array';
                 $validationRules['customer_quantities.*'] = 'required|integer|min:1|max:999';
@@ -125,7 +139,7 @@ class CampaignController extends Controller
 
             DB::commit();
             
-            return redirect()->route('campaigns.index')
+            return redirect()->route('campaigns.edit',$campaign->id)
                 ->with('success', 'Kampanye berhasil dibuat dan pesan telah dijadwalkan.');
                 
         } catch (\Exception $e) {
@@ -534,17 +548,34 @@ class CampaignController extends Controller
                 $query->wherePivot('campaign_id', $campaign->id)
                     ->wherePivot('product_id', $campaign->product_id);
             }])
-            ->paginate(10);
+            ->get();
         
-        $customers->getCollection()->transform(function ($customer) use ($campaign) {
+        $customers->transform(function ($customer) use ($campaign) {
             $purchaseData = $customer->purchases->first();
             $customer->purchase_quantity = $purchaseData ? $purchaseData->pivot->last_purchase_quantity : 1;
             return $customer;
         });
 
         $product = Product::find($campaign->product_id);         
-        $template = MessageTemplate::find($campaign->message_template_id); 
-        return view('pages.Admin.Campaign.show', compact('campaign','customers', 'customerGroups','product','template',));
+        $template = MessageTemplate::find($campaign->message_template_id);
+        
+        $messageLogs = $campaign->messageLogs()
+            ->with(['customer' => function($query) use ($campaign) {
+                $query->with(['purchases' => function ($subQuery) use ($campaign) {
+                    $subQuery->wherePivot('campaign_id', $campaign->id)
+                        ->wherePivot('product_id', $campaign->product_id);
+                }]);
+            }])
+            ->paginate(10);
+        
+        foreach ($messageLogs as $messageLog) {
+            if ($messageLog->customer) {
+                $purchaseData = $messageLog->customer->purchases->first();
+                $messageLog->customer->purchase_quantity = $purchaseData ? $purchaseData->pivot->last_purchase_quantity : 1;
+            }
+        }
+        
+        return view('pages.Admin.Campaign.show', compact('campaign','customers', 'customerGroups','product','template','messageLogs'));
     }
 
     public function update(Request $request, Campaign $campaign)

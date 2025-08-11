@@ -11,6 +11,10 @@ class Campaign extends Model
 
     protected $fillable = ['user_id', 'message_template_id', 'product_id', 'name', 'schedule','time_send'];
 
+    public function messageLogs()
+    {
+        return $this->hasMany(MessageLogs::class);
+    }
     public function user()
     {
         return $this->belongsTo(User::class);

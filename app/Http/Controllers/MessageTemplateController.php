@@ -11,7 +11,7 @@ class MessageTemplateController extends Controller
     {
         $search = $request->input('search');
         $sortField = $request->input('sort', 'name');
-        $sortDirection = $request->input('direction', 'asc');
+        $sortDirection = $request->input('direction', 'desc');
 
         $allowedSortFields = ['name'];
         if (!in_array($sortField, $allowedSortFields)) {

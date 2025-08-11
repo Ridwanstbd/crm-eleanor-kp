@@ -1,13 +1,13 @@
 {{-- components/Fragments/Sidebar.blade.php --}}
 @props(['menuItems'])
 
-<aside :class="$store.sidebar.isOpen ? 'w-64' : 'w-16'" class="fixed top-0 left-0 h-full bg-white shadow-lg transition-all duration-300">
+<aside :class="$store.sidebar.isOpen ? 'w-64' : 'w-16'" class="fixed top-0 left-0 h-full bg-gray-500 shadow-lg transition-all duration-300">
     <div class="flex items-center gap-2 px-4 py-6">
         <img src="{{ asset('assets/img/logo.png') }}" width="120" alt="Logo">
-        <h1 x-show="$store.sidebar.isOpen" class="font-bold text-xl"> CRM</h1>
+        <h1 x-show="$store.sidebar.isOpen" class="font-bold text-xl text-white"> CRM</h1>
     </div>
 
-    <nav class="p-2 mt-5">
+    <nav class="pl-2 mt-3">
         @foreach ($menuItems as $item)
             @php
                 $isActive = request()->routeIs($item['route']) || 
@@ -17,10 +17,10 @@
             
             <x-Elements.NavLink 
                 href="{{ route($item['route']) }}"
-                :active="$isActive"
+                :active="$isActive" 
             >
                 <svg
-                    class="w-6 h-6 text-gray-600"
+                    class="w-6 h-6 text-white"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -32,7 +32,7 @@
                         d="{{ $item['icon'] }}"
                     />
                 </svg>
-                <span x-show="$store.sidebar.isOpen" class="ml-3 text-gray-700">
+                <span x-show="$store.sidebar.isOpen" class="ml-3 text-white">
                     {{ $item['text'] }}
                 </span>
             </x-Elements.NavLink>

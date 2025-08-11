@@ -1,5 +1,17 @@
 <x-Layouts.AdminLayout title="Kampanye">
     <x-Organisms.PageHeader title="Kampanye">
+        <x-slot name="filters">
+            <input type="hidden" name="sort" value="{{ $sortField }}">
+            <input type="hidden" name="direction" value="{{ $sortDirection }}">
+
+            <x-Elements.Form.SearchInput
+                    name="search"
+                    id="search"
+                    value="{{ request('search') }}"
+                    placeholder="Cari Kampanye..."
+                    onchange="this.form.submit()"
+                />
+        </x-slot>
         <x-slot name="actions">
             <x-Elements.Button>
                 <x-Elements.Link :href="route('campaigns.create')">
@@ -8,28 +20,11 @@
             </x-Elements.Button>
         </x-slot>
     </x-Organisms.PageHeader>
-
-    {{-- Search --}}
-    <div class="mb-4">
-        <form method="GET" class="flex gap-2">
-            <x-Elements.Form.Input
-                name="search"
-                id="search"
-                value="{{ request('search') }}"
-                placeholder="Cari nama kampanye..."
-            />
-            <button type="submit" class="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300">
-                Cari
-            </button>
-        </form>
-    </div>
-
-    {{-- Tabel --}}
     <x-Layouts.Table>
         <x-Fragments.Table.Header>
             <x-Elements.Table.th>No</x-Elements.Table.th>
-            <x-Elements.Table.th>Nama Kampanye</x-Elements.Table.th>
-            <x-Elements.Table.th>Jadwal</x-Elements.Table.th>
+            <x-Elements.Table.th sortable :direction="$sortField === 'name' ? $sortDirection : null" onclick="window.location.href='{{ route('campaigns.index', array_merge(request()->query(), ['sort' => 'name', 'direction' => ($sortField === 'name' && $sortDirection === 'asc') ? 'desc' : 'asc'])) }}'">Nama Kampanye</x-Elements.Table.th>
+            <x-Elements.Table.th sortable :direction="$sortField === 'schedule' ? $sortDirection : null" onclick="window.location.href='{{ route('campaigns.index', array_merge(request()->query(), ['sort' => 'schedule', 'direction' => ($sortField === 'schedule' && $sortDirection === 'asc') ? 'desc' : 'asc'])) }}'">Jadwal</x-Elements.Table.th>
             <x-Elements.Table.th>Aksi</x-Elements.Table.th>
         </x-Fragments.Table.Header>
 
