@@ -2,20 +2,21 @@
     name="edit-product-{{ $product->id }}"
     title="Ubah Produk"
     mode="edit"
+    maxWidth="md"
     :showIcon="false"
 >
     <form method="POST" action="{{ route('products.update', $product) }}">
         @csrf
         @method('PUT')
 
-        <div class="p-6 space-y-4">
+        <div class="space-y-4">
             {{-- Nama Produk --}}
             <div>
-                <label for="name-{{ $product->id }}" class="block text-sm font-semibold text-gray-900 mb-1">
+                <label for="edit-name-{{ $product->id }}" class="block text-sm font-semibold text-gray-900 mb-1">
                     Nama Produk
                 </label>
                 <x-elements.form.input
-                    id="name-{{ $product->id }}"
+                    id="edit-name-{{ $product->id }}"
                     name="name"
                     value="{{ $product->name }}"
                     placeholder="Susu Pengganti"
@@ -25,16 +26,16 @@
 
             {{-- Jangka Waktu --}}
             <div>
-                <label for="default_estimation_days_per_unit-{{ $product->id }}" class="block text-sm font-semibold text-gray-900 mb-1">
+                <label for="edit-default_estimation_days_per_unit-{{ $product->id }}" class="block text-sm font-semibold text-gray-900 mb-1">
                     Jangka Waktu
                 </label>
                 <div class="flex items-center gap-2">
                     <x-elements.form.input
                         type="number"
-                        id="default_estimation_days_per_unit-{{ $product->id }}"
+                        id="edit-default_estimation_days_per_unit-{{ $product->id }}"
                         name="default_estimation_days_per_unit"
                         value="{{ $product->default_estimation_days_per_unit }}"
-                        placeholder="12"
+                        placeholder="0 untuk produk selain konsumsi"
                         class="w-full"
                     />
                     <span class="text-sm text-gray-700">Hari</span>

@@ -100,7 +100,7 @@ $maxWidth = Str::startsWith($maxWidth, '[')
             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
         >
             @if($title)
-            <div class="flex items-center justify-between px-2 py-2">
+            <div class="flex items-center justify-between px-0 py-2">
                 <h3 class="text-xl font-semibold text-gray-900 flex items-center">
                     {{ $title }}
                 </h3>

@@ -1,44 +1,52 @@
 <x-layouts.modal
     name="edit-customer-{{ $customer->id }}"
     title="Ubah Pelanggan"
-    mode="default"
+    mode="edit"
+    maxWidth="md"
     :showIcon="false"
 >
-    <div class="p-6"> {{-- Tambahkan padding agar isi modal tidak rapat ke batas --}}
-        <form method="POST" action="{{ route('customers.update', $customer) }}" class="space-y-4">
-            @csrf
-            @method('PUT')
+    <form method="POST" action="{{ route('customers.update', $customer) }}">
+        @csrf
+        @method('PUT')
 
-            {{-- Nama --}}
-            <x-Fragments.Form.FormGroup label="Nama Pelanggan" for="name">
+        <div class="space-y-4">
+            {{-- Nama Pelanggan --}}
+            <div>
+                <label for="edit-customer-name-{{ $customer->id }}" class="block text-sm font-semibold text-gray-900 mb-1">
+                    Nama Pelanggan
+                </label>
                 <x-elements.form.input
+                    id="edit-customer-name-{{ $customer->id }}"
                     name="name"
-                    id="name-{{ $customer->id }}"
                     value="{{ $customer->name }}"
                     placeholder="Nama Pelanggan"
+                    class="w-full"
                 />
-            </x-Fragments.Form.FormGroup>
+            </div>
 
-            {{-- Nomor --}}
-            <x-Fragments.Form.FormGroup label="Nomor" for="phone">
+            {{-- Nomor Telepon --}}
+            <div>
+                <label for="edit-customer-phone-{{ $customer->id }}" class="block text-sm font-semibold text-gray-900 mb-1">
+                    Nomor Telepon
+                </label>
                 <x-elements.form.input
+                    id="edit-customer-phone-{{ $customer->id }}"
                     name="phone"
-                    id="phone-{{ $customer->id }}"
                     value="{{ $customer->phone }}"
                     placeholder="081234567899"
+                    class="w-full"
                 />
-            </x-Fragments.Form.FormGroup>
+            </div>
 
-            {{-- Tombol --}}
+            {{-- Tombol Simpan --}}
             <div>
                 <x-elements.button
                     type="submit"
-                    variant="danger"
-                    class="w-full justify-center text-base font-semibold rounded-md"
+                    class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded"
                 >
                     Simpan
                 </x-elements.button>
             </div>
-        </form>
-    </div>
+        </div>
+    </form>
 </x-layouts.modal>
