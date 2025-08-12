@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Models\Campaign; // Impor model Campaign
+use App\Models\Campaign; 
 
 class MessageLogs extends Model
 {
@@ -17,7 +17,7 @@ class MessageLogs extends Model
 
     protected $fillable = [
         'report_id', 'device', 'target', 'message', 'state_id', 'status', 'state',
-        'campaign_id', 'sent_at', 'customer_id' 
+        'campaign_id', 'customer_id' 
     ];
 
     public function campaign()

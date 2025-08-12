@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('state_id')->nullable();
             $table->string('status');
             $table->string('state')->nullable();
-            $table->foreignId('customer_id')->constrained()->onDelete('cascade');
+            $table->foreignId('customer_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('campaign_id')
                   ->nullable()
                   ->constrained('campaigns')
