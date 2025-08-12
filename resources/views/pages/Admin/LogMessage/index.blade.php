@@ -2,16 +2,16 @@
     <div x-data="logModal()">
         <x-Organisms.PageHeader title="Log Pesan"></x-Organisms.PageHeader>
         <x-Layouts.Table>
-            <x-Fragments.Table.Header>
+            <x-Molecules.Table.Header>
                 <x-Atoms.Table.th>No</x-Atoms.Table.th>
                 <x-Atoms.Table.th>Nama</x-Atoms.Table.th>
                 <x-Atoms.Table.th>Nomor</x-Atoms.Table.th>
                 <x-Atoms.Table.th>Status</x-Atoms.Table.th>
                 <x-Atoms.Table.th>Waktu Kirim</x-Atoms.Table.th>
                 <x-Atoms.Table.th>Aksi</x-Atoms.Table.th>
-            </x-Fragments.Table.Header>
+            </x-Molecules.Table.Header>
 
-            <x-Fragments.Table.Body>
+            <x-Molecules.Table.Body>
                 @forelse ($logs as $log)
                     <tr>
                         <x-Atoms.Table.td>{{ $loop->iteration }}</x-Atoms.Table.td>
@@ -39,10 +39,10 @@
                         <p class="mt-1">Belum ada log pesan.</p>
                     </x-Atoms.Table.empty>
                 @endforelse
-            </x-Fragments.Table.Body>
+            </x-Molecules.Table.Body>
 
             <x-slot name="pagination">
-                <x-Fragments.Table.Pagination :paginator="$logs" />
+                <x-Molecules.Table.Pagination :paginator="$logs" />
             </x-slot>
         </x-Layouts.Table>
         <x-Layouts.Modal name="log-detail-modal" title="Detail Log Pesan">

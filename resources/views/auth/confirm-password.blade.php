@@ -6,9 +6,9 @@
         <form method="POST" action="{{ route('password.confirm') }}">
             @csrf    
             <!-- Password -->
-            <x-Fragments.Form.FormGroup label="Password" for="password">
-                <x-Fragments.Form.Input id="password" type="password" name="password" required autocomplete="current-password" />
-            </x-Fragments.Form.FormGroup>
+            <x-Molecules.Form.FormGroup label="Password" for="password">
+                <x-Molecules.Form.Input id="password" type="password" name="password" required autocomplete="current-password" />
+            </x-Molecules.Form.FormGroup>
             <x-Elements.Form.FormSubmit>
                 {{ __('Confirm') }}
             </x-Elements.Form.FormSubmit>

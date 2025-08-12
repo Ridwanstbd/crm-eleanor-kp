@@ -3,7 +3,7 @@
         <form method="POST" action="{{ route('login') }}" enctype="multipart/form-data" class="space-y-6">
             @csrf
 
-            <x-Fragments.Form.EmailInput
+            <x-Molecules.Form.EmailInput
                 name="email"
                 id="email"
                 placeholder="boypamitdangdutan@gmail.com"
@@ -11,7 +11,7 @@
                 required
             />
 
-            <x-Fragments.Form.PasswordInput
+            <x-Molecules.Form.PasswordInput
                 name="password"
                 id="password"
                 placeholder="Password"

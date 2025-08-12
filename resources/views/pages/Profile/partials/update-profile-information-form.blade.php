@@ -7,11 +7,11 @@
         @csrf
         @method('patch')
 
-        <x-Fragments.Form.FormGroup :message="$errors->get('name')" :label="__('Name')" for="name">
+        <x-Molecules.Form.FormGroup :message="$errors->get('name')" :label="__('Name')" for="name">
             <x-Atoms.Form.Input name="name" id="name" :value="old('name', $user->name)" required autofocus autocomplete="name"/>
-        </x-Fragments.Form.FormGroup>
+        </x-Molecules.Form.FormGroup>
 
-        <x-Fragments.Form.FormGroup :message="$errors->get('email')" :label="__('Email')" for="email">
+        <x-Molecules.Form.FormGroup :message="$errors->get('email')" :label="__('Email')" for="email">
             <x-Atoms.Form.Input id="email" type="email" name="email" :value="old('email', $user->email)" required autofocus autocomplete="username" />
             
             @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
@@ -31,11 +31,11 @@
                     @endif
                 </div>
             @endif
-        </x-Fragments.Form.FormGroup>
+        </x-Molecules.Form.FormGroup>
 
-        <x-Fragments.Form.FormGroup :message="$errors->get('name')" :label="__('Fonnte Token')" for="name">
+        <x-Molecules.Form.FormGroup :message="$errors->get('name')" :label="__('Fonnte Token')" for="name">
             <x-Atoms.Form.Input name="fonnte_token" id="fonnte_token" :value="old('fonnte_token', $user->fonnte_token)" required autofocus autocomplete="fonnte_token"/>
-        </x-Fragments.Form.FormGroup>
+        </x-Molecules.Form.FormGroup>
 
         <div class="flex items-center gap-4">
             <x-Atoms.Button variant="primary" type="submit">

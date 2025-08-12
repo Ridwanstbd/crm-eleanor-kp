@@ -19,15 +19,15 @@
     </x-Organisms.PageHeader>
 
     <x-Layouts.Table>
-        <x-Fragments.Table.Header>
+        <x-Molecules.Table.Header>
             <x-Atoms.Table.th>No</x-Atoms.Table.th>
             <x-Atoms.Table.th sortable :direction="$sortField === 'name' ? $sortDirection : null" onclick="window.location.href='{{ route('templates.index', array_merge(request()->query(), ['sort' => 'name', 'direction' => ($sortField === 'name' && $sortDirection === 'asc') ? 'desc' : 'asc'])) }}'" >
                 Nama
             </x-Atoms.Table.th>
             <x-Atoms.Table.th>Aksi</x-Atoms.Table.th>
-        </x-Fragments.Table.Header>
+        </x-Molecules.Table.Header>
 
-        <x-Fragments.Table.Body>
+        <x-Molecules.Table.Body>
             @forelse ($templates as $template)
                 <tr>
                     <x-Atoms.Table.td>{{ $loop->iteration }}</x-Atoms.Table.td>
@@ -57,10 +57,10 @@
                     <p class="mt-1 text-sm">Belum ada template pesan.</p>
                 </x-Atoms.Table.empty>
             @endforelse
-        </x-Fragments.Table.Body>
+        </x-Molecules.Table.Body>
 
         <x-slot name="pagination">
-            <x-Fragments.Table.Pagination :paginator="$templates" />
+            <x-Molecules.Table.Pagination :paginator="$templates" />
         </x-slot>
     </x-Layouts.Table>
 

@@ -5,19 +5,19 @@
             <div class="space-y-6">
                 <x-Atoms.Link href="/">
                 <div class="flex items-center">
-                        <img src="{{ asset('assets/img/logo.png') }}" alt="{{ $system->name }}" class="h-12">
-                        <span class="text-xl font-semibold ml-2">{{ $system->name }}</span>
+                        {{-- <img src="{{ asset('assets/img/logo.png') }}" alt="{{ $system->name }}" class="h-12">
+                        <span class="text-xl font-semibold ml-2">{{ $system->name }}</span> --}}
                     </div>
                 </x-Atoms.Link>
                 <p class="text-gray-600">
-                    {{ $system->slogan }}
+                    {{-- {{ $system->slogan }} --}}
                 </p>
                 
                 <div class="space-y-2">
                     <p class="text-gray-600 font-medium">Email di</p>
-                    <a href="mailto:{{ $system->email }}" class="text-gray-700 hover:text-emerald-600">
+                    {{-- <a href="mailto:{{ $system->email }}" class="text-gray-700 hover:text-emerald-600">
                         {{ $system->email }}
-                    </a>
+                    </a> --}}
                 </div>
                 
                 <div class="space-y-2">
@@ -35,23 +35,23 @@
                 <div class="space-y-2">
                     <p class="text-gray-600 font-medium">Alamat</p>
                     <p class="text-gray-600">
-                        {{ $system->address }}
+                        {{-- {{ $system->address }} --}}
                     </p>
                 </div>
                 
                 <div class="space-y-2">
                     <p class="text-gray-600 font-medium">Kontak</p>
-                    <a href="https://wa.me/{{ $system->phone }}" class="flex items-center text-gray-600 hover:text-emerald-600">
+                    {{-- <a href="https://wa.me/{{ $system->phone }}" class="flex items-center text-gray-600 hover:text-emerald-600">
                         <img src="{{ asset('assets/img/whatsapp.png') }}" alt="{{ $system->name }}" class="w-10 h-10">
                         {{ $system->phone }}
-                    </a>
+                    </a> --}}
                 </div>
             </div>
         </div>
         
         <div class="border-t border-gray-200 mt-8 pt-6 text-center">
             <p class="text-gray-600">
-                2025 © Prompt. All rights reserved. Created By {{ $system->name }}
+                2025 © Prompt. All rights reserved. Created By 
             </p>
         </div>
     </div>

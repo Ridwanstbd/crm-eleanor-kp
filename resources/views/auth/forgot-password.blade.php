@@ -7,9 +7,9 @@
         <x-Elements.AuthSessionStatus class="mb-4" :status="session('status')" />
         <form method="POST" action="{{ route('password.email') }}">
             @csrf
-            <x-Fragments.Form.FormGroup :message="$errors->get('email')" label="Email" for="email">
+            <x-Molecules.Form.FormGroup :message="$errors->get('email')" label="Email" for="email">
                 <x-Elements.Form.Input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
-            </x-Fragments.Form.FormGroup>
+            </x-Molecules.Form.FormGroup>
                
         </form>
     </x-Layouts.FormAuthContainer>

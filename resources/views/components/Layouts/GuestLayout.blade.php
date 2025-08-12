@@ -6,6 +6,6 @@
             {{$slot}}
             <x-Layouts.Footer/> 
         </main>
-        <x-Fragments.CallCenter />
+        <x-Molecules.CallCenter />
     </body>
 </html>

@@ -51,7 +51,7 @@
             }
         }">
         <div class="grid grid-cols-2 gap-2 w-full">
-            <x-Fragments.Form.FormGroup label="Nama" for="name" >
+            <x-Molecules.Form.FormGroup label="Nama" for="name" >
                 <x-Atoms.Input  
                         name="name"
                         id="name"
@@ -63,37 +63,37 @@
                 @error('name')
                     <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror
-            </x-Fragments.Form.FormGroup>
+            </x-Molecules.Form.FormGroup>
             
-            <x-Fragments.Form.FormGroup label="Produk" for="product" >
-                <select name="product" id="product" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" @change="updateSelectedProduct($event)">
-                    <option value="">Pilih Produk</option>
+            <x-Molecules.Form.FormGroup label="Produk" for="product" >
+                <x-Atoms.Select name="product" id="product" class="w-full" @change="updateSelectedProduct($event)">
+                    <x-Atoms.Option value="">Pilih Produk</x-Atoms.Option>
                     @foreach($products as $product)
-                        <option value="{{ $product->id }}" {{ old('product') == $product->id ? 'selected' : '' }}>
+                        <x-Atoms.Option value="{{ $product->id }}" :selected="old('product') == $product->id">
                             {{ $product->name }}
-                        </option>
+                        </x-Atoms.Option>
                     @endforeach
-                </select>
+                </x-Atoms.Select>
                 @error('product')
                     <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror
-            </x-Fragments.Form.FormGroup>
+            </x-Molecules.Form.FormGroup>
             
-            <x-Fragments.Form.FormGroup label="Template Pesan" for="template" >
-                <select name="template" id="template" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                    <option value="">Pilih Template</option>
+            <x-Molecules.Form.FormGroup label="Template Pesan" for="template" >
+                <x-Atoms.Select name="template" id="template" class="w-full" required>
+                    <x-Atoms.Option value="">Pilih Template</x-Atoms.Option>
                     @foreach($templates as $template)
-                        <option value="{{ $template->id }}" {{ old('template') == $template->id ? 'selected' : '' }}>
+                        <x-Atoms.Option value="{{ $template->id }}" :selected="old('template') == $template->id">
                             {{ $template->name }}
-                        </option>
+                        </x-Atoms.Option>
                     @endforeach
-                </select>
+                </x-Atoms.Select>
                 @error('template')
                     <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror
-            </x-Fragments.Form.FormGroup>
+            </x-Molecules.Form.FormGroup>
             
-            <x-Fragments.Form.FormGroup label="Tanggal Terjual" for="tanggal_terjual">
+            <x-Molecules.Form.FormGroup label="Tanggal Terjual" for="tanggal_terjual">
                 <x-Atoms.InputDate
                     name="tanggal_terjual"
                     id="tanggal_terjual"
@@ -103,8 +103,8 @@
                 @error('tanggal_terjual')
                     <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror
-            </x-Fragments.Form.FormGroup>
-            <x-Fragments.Form.FormGroup label="Waktu Kirim Kampanye" for="time_send">
+            </x-Molecules.Form.FormGroup>
+            <x-Molecules.Form.FormGroup label="Waktu Kirim Kampanye" for="time_send">
                 <x-Atoms.InputTime
                     name="time_send"
                     id="time_send"
@@ -114,9 +114,9 @@
                 @error('tanggal_terjual')
                     <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror
-            </x-Fragments.Form.FormGroup>
+            </x-Molecules.Form.FormGroup>
             
-            <x-Fragments.Form.FormGroup label="Target Audiens" for="target">
+            <x-Molecules.Form.FormGroup label="Target Audiens" for="target">
                 <div class="flex gap-2 mt-2">
                     <x-Atoms.Checkbox 
                         id="new_audiens" 
@@ -141,13 +141,13 @@
                 @error('customer')
                     <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror
-            </x-Fragments.Form.FormGroup>
+            </x-Molecules.Form.FormGroup>
         </div>
 
         {{-- Section untuk New Audiens --}}
         <div x-show="newAudiens" x-transition class="w-full mt-4">
             <div class="grid grid-cols-2 gap-2 w-full">
-                <x-Fragments.Form.FormGroup label="Nama Grup Pembeli" for="name_group_customer" >
+                <x-Molecules.Form.FormGroup label="Nama Grup Pembeli" for="name_group_customer" >
                     <x-Atoms.Input  
                             name="name_group_customer"
                             id="name_group_customer"
@@ -158,9 +158,9 @@
                     @error('name_group_customer')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
                     @enderror
-                </x-Fragments.Form.FormGroup>
+                </x-Molecules.Form.FormGroup>
                 
-                <x-Fragments.Form.FormGroup label="Upload CSV" for="csv_file" >
+                <x-Molecules.Form.FormGroup label="Upload CSV" for="csv_file" >
                     <x-Atoms.Input  
                             type="file"
                             name="csv_file"
@@ -171,7 +171,7 @@
                     @error('csv_file')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
                     @enderror
-                </x-Fragments.Form.FormGroup>
+                </x-Molecules.Form.FormGroup>
             </div>
             
             {{-- Info format CSV --}}
@@ -195,7 +195,7 @@
             @enderror
             
             <x-Layouts.Table>
-                <x-Fragments.Table.Header>
+                <x-Molecules.Table.Header>
                     <x-Atoms.Table.th>
                         <x-Atoms.Checkbox 
                             id="select-all" 
@@ -208,8 +208,8 @@
                     <x-Atoms.Table.th>Nama</x-Atoms.Table.th>
                     <x-Atoms.Table.th>Nomor Telepon</x-Atoms.Table.th>
                     <x-Atoms.Table.th x-show="selectedProduct && customer">Jumlah Pembelian</x-Atoms.Table.th>
-                </x-Fragments.Table.Header>
-                <x-Fragments.Table.Body>
+                </x-Molecules.Table.Header>
+                <x-Molecules.Table.Body>
                     @forelse($customers as $customerItem)
                     <tr class="customer-row">
                         <x-Atoms.Table.td>
@@ -245,9 +245,9 @@
                     @endforelse
                     
                     <x-slot name="pagination">
-                        <x-Fragments.Table.Pagination :paginator="$customers" />
+                        <x-Molecules.Table.Pagination :paginator="$customers" />
                     </x-slot>
-                </x-Fragments.Table.Body>
+                </x-Molecules.Table.Body>
             </x-Layouts.Table>
             
             {{-- Info untuk pelanggan --}}

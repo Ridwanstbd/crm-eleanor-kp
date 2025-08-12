@@ -20,13 +20,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Left Column - Form Fields -->
                     <div>
-                        <x-Fragments.Form.FormGroup :message="$errors->first('name')" label="Nama Sistem" for="name">
+                        <x-Molecules.Form.FormGroup :message="$errors->first('name')" label="Nama Sistem" for="name">
                             <x-Atoms.Form.Input name="name" id="name" x-model="name" readonly/>
-                        </x-Fragments.Form.FormGroup>
+                        </x-Molecules.Form.FormGroup>
         
-                        <x-Fragments.Form.FormGroup :message="$errors->first('description')" label="Description" for="description">
+                        <x-Molecules.Form.FormGroup :message="$errors->first('description')" label="Description" for="description">
                             <x-Atoms.Form.Textarea name="description" id="description" x-model="description" readonly/>
-                        </x-Fragments.Form.FormGroup>
+                        </x-Molecules.Form.FormGroup>
                     </div>
         
                     <!-- Right Column - Image Preview -->

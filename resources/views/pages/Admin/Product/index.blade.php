@@ -22,16 +22,16 @@
     </x-Organisms.PageHeader>
 
     <x-Layouts.Table>
-        <x-Fragments.Table.Header>
+        <x-Molecules.Table.Header>
             <x-Atoms.Table.th>No</x-Atoms.Table.th>
             <x-Atoms.Table.th sortable :direction="$sortField === 'name' ? $sortDirection : null" onclick="window.location.href='{{ route('products.index', array_merge(request()->query(), ['sort' => 'name', 'direction' => ($sortField === 'name' && $sortDirection === 'asc') ? 'desc' : 'asc'])) }}'"
             >Nama Produk</x-Atoms.Table.th>
             <x-Atoms.Table.th sortable :direction="$sortField === 'default_estimation_days_per_unit' ? $sortDirection : null" onclick="window.location.href='{{ route('products.index', array_merge(request()->query(), ['sort' => 'default_estimation_days_per_unit', 'direction' => ($sortField === 'default_estimation_days_per_unit' && $sortDirection === 'asc') ? 'desc' : 'asc'])) }}'"
             >Estimasi Habis</x-Atoms.Table.th>
             <x-Atoms.Table.th>Aksi</x-Atoms.Table.th>
-        </x-Fragments.Table.Header>
+        </x-Molecules.Table.Header>
 
-        <x-Fragments.Table.Body>
+        <x-Molecules.Table.Body>
             @forelse ($products as $product)
                 <tr>
                     <x-Atoms.Table.td>{{ $loop->iteration }}</x-Atoms.Table.td>
@@ -65,9 +65,9 @@
                     <p class="mt-1">Belum ada produk.</p>
                 </x-Atoms.Table.empty>
             @endforelse
-        </x-Fragments.Table.Body>
+        </x-Molecules.Table.Body>
         <x-slot name="pagination">
-           <x-Fragments.Table.Pagination :paginator="$products" />
+           <x-Molecules.Table.Pagination :paginator="$products" />
        </x-slot>
     </x-Layouts.Table>
     @include('pages.Admin.Product._create-modal')

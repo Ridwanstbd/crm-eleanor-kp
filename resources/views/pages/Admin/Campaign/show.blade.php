@@ -2,11 +2,11 @@
     <div x-data="messageLogModal()">
         <x-Organisms.PageHeader title="Detail Kampanye {{$campaign->name}}" />
         <div class="grid grid-cols-2 gap-2">
-            <x-Fragments.Form.FormGroup label="Nama Kampanye" for="name">
+            <x-Molecules.Form.FormGroup label="Nama Kampanye" for="name">
                 <x-Atoms.Input name="name" value="{{$campaign->name}}" disabled readonly/>
-            </x-Fragments.Form.FormGroup>
-            <x-Fragments.Form.FormGroup label="Produk" for="product">
-                <x-Fragments.Select 
+            </x-Molecules.Form.FormGroup>
+            <x-Molecules.Form.FormGroup label="Produk" for="product">
+                <x-Molecules.Select 
                     name="product" 
                     id="product"
                     :options="collect([$product])"
@@ -16,13 +16,13 @@
                     :allowEmpty="false"
                     disabled
                     readonly>
-                </x-Fragments.Select>
+                </x-Molecules.Select>
                 @error('product')
                 <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror
-            </x-Fragments.Form.FormGroup>
+            </x-Molecules.Form.FormGroup>
 
-            <x-Fragments.Form.FormGroup label="Tanggal Terjual" for="tanggal_terjual">
+            <x-Molecules.Form.FormGroup label="Tanggal Terjual" for="tanggal_terjual">
                 <x-Atoms.InputDate
                     name="tanggal_terjual"
                     id="tanggal_terjual"
@@ -33,9 +33,9 @@
                 @error('tanggal_terjual')
                     <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror
-            </x-Fragments.Form.FormGroup>
+            </x-Molecules.Form.FormGroup>
             
-            <x-Fragments.Form.FormGroup label="Waktu Kirim Kampanye" for="time_send">
+            <x-Molecules.Form.FormGroup label="Waktu Kirim Kampanye" for="time_send">
                 <x-Atoms.InputTime
                     name="time_send"
                     id="time_send"
@@ -46,9 +46,9 @@
                 @error('time_send')
                     <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror
-            </x-Fragments.Form.FormGroup>
+            </x-Molecules.Form.FormGroup>
         </div>
-        <x-Fragments.Form.FormGroup label="Template" for="template">
+        <x-Molecules.Form.FormGroup label="Template" for="template">
             <x-Atoms.TextArea 
                 name="content" 
                 id="messageTemplate-{{ $template->id }}"
@@ -59,10 +59,10 @@
                 class="mb-2"
                 :class="$errors->has('content') ? 'border-red-500 focus:ring-red-500' : ''"
                 disabled readonly>{{ $template->content }}</x-Atoms.TextArea>
-        </x-Fragments.Form.FormGroup>
+        </x-Molecules.Form.FormGroup>
         
         <x-Layouts.Table min-height="200px">
-            <x-Fragments.Table.Header>
+            <x-Molecules.Table.Header>
                 <x-Atoms.Table.th>No</x-Atoms.Table.th>
                 <x-Atoms.Table.th>Nama Pelanggan</x-Atoms.Table.th>
                 <x-Atoms.Table.th>Nomor Telepon</x-Atoms.Table.th>
@@ -70,9 +70,9 @@
                 <x-Atoms.Table.th>Status Pesan</x-Atoms.Table.th>
                 <x-Atoms.Table.th>Waktu Kirim</x-Atoms.Table.th>
                 <x-Atoms.Table.th>Aksi</x-Atoms.Table.th>
-            </x-Fragments.Table.Header>
+            </x-Molecules.Table.Header>
 
-            <x-Fragments.Table.Body>
+            <x-Molecules.Table.Body>
                 @forelse ($messageLogs as $messageLog)
                     <tr>
                         <x-Atoms.Table.td>{{ $loop->iteration + ($messageLogs->currentPage() - 1) * $messageLogs->perPage() }}</x-Atoms.Table.td>
@@ -167,10 +167,10 @@
                         </div>
                     </x-Atoms.Table.empty>
                 @endforelse
-            </x-Fragments.Table.Body>
+            </x-Molecules.Table.Body>
 
             <x-slot name="pagination">
-                <x-Fragments.Table.Pagination :paginator="$messageLogs" />
+                <x-Molecules.Table.Pagination :paginator="$messageLogs" />
             </x-slot>
         </x-Layouts.Table>
 
