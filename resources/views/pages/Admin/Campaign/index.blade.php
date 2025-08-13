@@ -1,5 +1,5 @@
 <x-Layouts.AdminLayout title="Kampanye">
-    <x-Organisms.PageHeader title="Kampanye">
+    <x-Layouts.PageHeader title="Kampanye">
         <x-slot name="filters">
             <input type="hidden" name="sort" value="{{ $sortField }}">
             <input type="hidden" name="direction" value="{{ $sortDirection }}">
@@ -19,7 +19,7 @@
                 </x-Atoms.Link>
             </x-Atoms.Button>
         </x-slot>
-    </x-Organisms.PageHeader>
+    </x-Layouts.PageHeader>
     <x-Layouts.Table>
         <x-Molecules.Table.Header>
             <x-Atoms.Table.th>No</x-Atoms.Table.th>
@@ -35,23 +35,26 @@
                 <x-Atoms.Table.td>{{ $campaign->name }}</x-Atoms.Table.td>
                 <x-Atoms.Table.td>{{ \Carbon\Carbon::parse($campaign->schedule)->translatedFormat('d F Y') }}</x-Atoms.Table.td>
                 <x-Atoms.Table.td>
-                    <div class="flex gap-2">
-                        {{-- Tombol Ubah --}}
-                        <button class="px-3 py-1 text-sm text-white bg-blue-500 rounded hover:bg-blue-600">
-                            <x-Atoms.Link :href="route('campaigns.edit',$campaign->id)">Detail</x-Atoms.Link>
-                        </button>
-
-                        {{-- Tombol Hapus --}}
-                        <button
-                            @click="$dispatch('open-modal', 'delete-campaign-{{ $campaign->id }}')"
-                            class="px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700">
-                            Hapus
-                        </button>
-                    </div>
+                    <x-Atoms.Button variant="info">
+                        <x-Atoms.Link :href="route('campaigns.edit',$campaign->id)">Detail</x-Atoms.Link>
+                    </x-Atoms.Button>
+                    <x-Atoms.Button @click="$dispatch('open-modal', 'delete-confirmation-{{ $campaign->id }}')" variant="danger">Hapus</x-Atoms.Button>
                 </x-Atoms.Table.td>
             </tr>
-            {{-- Modal Hapus --}}
-            @include('pages.Admin.Campaign._delete-modal', ['campaign' => $campaign])
+            <x-Layouts.Modal
+                    name="delete-confirmation-{{ $campaign->id }}"
+                    title=""
+                    maxWidth="sm"
+                    :showIcon="false"
+                >
+                    <form action="{{ route('campaigns.destroy', $campaign) }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <x-Molecules.ConfirmationContent :id="$campaign->id">
+                            Yakin, Hapus {{$campaign->name}}?
+                        </x-Molecules.ConfirmationContent>
+                    </form>
+                </x-Layouts.Modal>
             @empty
                 <x-Atoms.Table.empty colspan="4">
                     <p class="mt-1 text-sm">Belum ada kampanye.</p>

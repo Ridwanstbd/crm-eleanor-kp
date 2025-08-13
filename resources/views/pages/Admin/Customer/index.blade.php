@@ -1,5 +1,5 @@
 <x-Layouts.AdminLayout title="Pelanggan">
-    <x-Organisms.PageHeader title="Pelanggan">
+    <x-Layouts.PageHeader title="Pelanggan">
         <x-slot name="filters">
             <x-Atoms.Form.SearchInput
                 name="search"
@@ -16,7 +16,7 @@
                 </x-Atoms.Link>
             </x-Atoms.Button>
         </x-slot>
-    </x-Organisms.PageHeader>
+    </x-Layouts.PageHeader>
     <x-Layouts.Table>
         <x-Molecules.Table.Header>
             <x-Atoms.Table.th>No</x-Atoms.Table.th>
@@ -36,27 +36,25 @@
                     <x-Atoms.Table.td>{{ $customer->name }}</x-Atoms.Table.td>
                     <x-Atoms.Table.td>{{ $customer->phone }}</x-Atoms.Table.td>
                     <x-Atoms.Table.td>
-                        <div class="flex gap-2">
-                            {{-- Tombol Ubah --}}
-                            <button
-                                @click="$dispatch('open-modal', 'edit-customer-{{ $customer->id }}')"
-                                class="px-3 py-1 text-sm text-white bg-yellow-500 rounded hover:bg-yellow-600">
-                                Ubah
-                            </button>
-
-                            {{-- Tombol Hapus --}}
-                            <button
-                                @click="$dispatch('open-modal', 'delete-customer-{{ $customer->id }}')"
-                                class="px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700">
-                                Hapus
-                            </button>
-                        </div>
+                        <x-Atoms.Button @click="$dispatch('open-modal', 'edit-customer-{{ $customer->id }}')" variant="secondary">Ubah</x-Atoms.Button>
+                        <x-Atoms.Button @click="$dispatch('open-modal', 'delete-confirmation-{{ $customer->id }}')" variant="danger">Hapus</x-Atoms.Button>
                     </x-Atoms.Table.td>
                 </tr>
-
-                {{-- Include modals --}}
-                @include('pages.Admin.Customer._edit-modal', ['customer' => $customer])
-                @include('pages.Admin.Customer._delete-modal', ['customer' => $customer])
+                <x-Organisms.CustomerModal :customer="$customer" mode="edit" />
+                <x-Layouts.Modal
+                    name="delete-confirmation-{{ $customer->id }}"
+                    title=""
+                    maxWidth="sm"
+                    :showIcon="false"
+                >
+                    <form action="{{ route('customers.destroy', $customer) }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <x-Molecules.ConfirmationContent :id="$customer->id">
+                            Yakin, Hapus {{$customer->name}}?
+                        </x-Molecules.ConfirmationContent>
+                    </form>
+                </x-Layouts.Modal>
             @empty
                 <x-Atoms.Table.empty colspan="4">
                     <p class="mt-1">Belum ada pelanggan.</p>
@@ -68,7 +66,5 @@
             <x-Molecules.Table.Pagination :paginator="$customers" />
         </x-slot>
     </x-Layouts.Table>
-
-    {{-- Modal Tambah Pelanggan --}}
-    @include('pages.Admin.Customer._create-modal')
+    <x-Organisms.CustomerModal />
 </x-Layouts.AdminLayout>

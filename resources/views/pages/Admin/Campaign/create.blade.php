@@ -1,5 +1,5 @@
 <x-Layouts.AdminLayout>
-    <x-Organisms.PageHeader title="Buat Kampanye" />
+    <x-Layouts.PageHeader title="Buat Kampanye" />
     
     <form method="POST" action="{{ route('campaigns.store') }}" enctype="multipart/form-data">
         @csrf
@@ -60,9 +60,6 @@
                         class="w-full" 
                         required
                         />
-                @error('name')
-                    <span class="text-red-500 text-sm">{{ $message }}</span>
-                @enderror
             </x-Molecules.Form.FormGroup>
             
             <x-Molecules.Form.FormGroup label="Produk" for="product" >
@@ -74,9 +71,6 @@
                         </x-Atoms.Option>
                     @endforeach
                 </x-Atoms.Select>
-                @error('product')
-                    <span class="text-red-500 text-sm">{{ $message }}</span>
-                @enderror
             </x-Molecules.Form.FormGroup>
             
             <x-Molecules.Form.FormGroup label="Template Pesan" for="template" >
@@ -88,9 +82,6 @@
                         </x-Atoms.Option>
                     @endforeach
                 </x-Atoms.Select>
-                @error('template')
-                    <span class="text-red-500 text-sm">{{ $message }}</span>
-                @enderror
             </x-Molecules.Form.FormGroup>
             
             <x-Molecules.Form.FormGroup label="Tanggal Terjual" for="tanggal_terjual">
@@ -100,9 +91,6 @@
                     value="{{ old('tanggal_terjual') }}"
                     min="{{ date('Y-m-d') }}"
                 />
-                @error('tanggal_terjual')
-                    <span class="text-red-500 text-sm">{{ $message }}</span>
-                @enderror
             </x-Molecules.Form.FormGroup>
             <x-Molecules.Form.FormGroup label="Waktu Kirim Kampanye" for="time_send">
                 <x-Atoms.InputTime
@@ -111,9 +99,6 @@
                     value="{{ old('time_send') }}"
                     min="{{ date('Y-m-d') }}"
                 />
-                @error('tanggal_terjual')
-                    <span class="text-red-500 text-sm">{{ $message }}</span>
-                @enderror
             </x-Molecules.Form.FormGroup>
             
             <x-Molecules.Form.FormGroup label="Target Audiens" for="target">
@@ -135,19 +120,12 @@
                         @change="checkCustomer()"
                     />
                 </div>
-                @error('new_audiens')
-                    <span class="text-red-500 text-sm">{{ $message }}</span>
-                @enderror
-                @error('customer')
-                    <span class="text-red-500 text-sm">{{ $message }}</span>
-                @enderror
             </x-Molecules.Form.FormGroup>
         </div>
 
-        {{-- Section untuk New Audiens --}}
         <div x-show="newAudiens" x-transition class="w-full mt-4">
             <div class="grid grid-cols-2 gap-2 w-full">
-                <x-Molecules.Form.FormGroup label="Nama Grup Pembeli" for="name_group_customer" >
+                <x-Molecules.Form.FormGroup label="Nama Grup Pembeli" for="name_group_customer">
                     <x-Atoms.Input  
                             name="name_group_customer"
                             id="name_group_customer"
@@ -155,12 +133,9 @@
                             placeholder="Pembeli dari shopee"
                             class="w-full" 
                             />
-                    @error('name_group_customer')
-                        <span class="text-red-500 text-sm">{{ $message }}</span>
-                    @enderror
                 </x-Molecules.Form.FormGroup>
                 
-                <x-Molecules.Form.FormGroup label="Upload CSV" for="csv_file" >
+                <x-Molecules.Form.FormGroup label="Upload CSV" for="csv_file">
                     <x-Atoms.Input  
                             type="file"
                             name="csv_file"
@@ -168,27 +143,11 @@
                             accept=".csv"
                             class="w-full" 
                             />
-                    @error('csv_file')
-                        <span class="text-red-500 text-sm">{{ $message }}</span>
-                    @enderror
                 </x-Molecules.Form.FormGroup>
             </div>
-            
-            {{-- Info format CSV --}}
-            <div class="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <h4 class="text-sm font-medium text-blue-800 mb-2">Format CSV:</h4>
-                <p class="text-sm text-blue-700 mb-2">File CSV harus memiliki kolom berikut:</p>
-                <ul class="text-sm text-blue-600 list-disc list-inside space-y-1">
-                    <li><strong>phone</strong> (wajib): Nomor telepon pelanggan</li>
-                    <li><strong>name</strong> (opsional): Nama pelanggan</li>
-                    <li><strong>purchase_quantity</strong> (opsional): Jumlah pembelian (1-999)</li>
-                </ul>
-                <p class="text-xs text-blue-500 mt-2">Contoh: phone,name,purchase_quantity</p>
-                <p class="text-xs text-blue-500">081234567890,John Doe,5</p>
-            </div>
+            <x-Organisms.InformationCsvUpload />
         </div>
 
-        {{-- Section untuk Customer --}}
         <div x-show="customer" x-transition class="grid grid-cols-1 gap-2 w-full mt-4">
             @error('selected_customers')
                 <div class="text-red-500 text-sm mb-2">{{ $message }}</div>
@@ -250,7 +209,6 @@
                 </x-Molecules.Table.Body>
             </x-Layouts.Table>
             
-            {{-- Info untuk pelanggan --}}
             <div x-show="selectedProduct && customer" class="mt-3 p-4 bg-green-50 border border-green-200 rounded-lg">
                 <p class="text-sm text-green-700">
                     <strong>Catatan:</strong> Setiap pelanggan dapat memiliki jumlah pembelian yang berbeda. 
@@ -259,11 +217,8 @@
             </div>
         </div>
 
-        {{-- Submit Button --}}
         <div class="flex justify-end mt-6">
-            <button type="submit" class="px-4 py-2 text-sm text-white bg-blue-600 rounded hover:bg-blue-700">
-                Simpan
-            </button>
+            <x-Atoms.Button type="submit" variant="primary">Simpan</x-Atoms.Button>
         </div>
     </div>
     </form>

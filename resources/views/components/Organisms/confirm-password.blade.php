@@ -9,9 +9,9 @@
             <x-Molecules.Form.FormGroup label="Password" for="password">
                 <x-Molecules.Form.Input id="password" type="password" name="password" required autocomplete="current-password" />
             </x-Molecules.Form.FormGroup>
-            <x-Elements.Form.FormSubmit>
+            <x-Atoms.Form.FormSubmit>
                 {{ __('Confirm') }}
-            </x-Elements.Form.FormSubmit>
+            </x-Atoms.Form.FormSubmit>
         </form>
     </x-Layouts.FormAuthContainer>
 </x-Layouts.AuthLayout>

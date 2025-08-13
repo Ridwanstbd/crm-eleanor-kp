@@ -1,5 +1,5 @@
 <x-Layouts.AdminLayout title="Produk">
-    <x-Organisms.PageHeader title="Produk">
+    <x-Layouts.PageHeader title="Produk">
         <x-slot name="filters">
             <input type="hidden" name="sort" value="{{ $sortField }}">
             <input type="hidden" name="direction" value="{{ $sortDirection }}">
@@ -19,7 +19,7 @@
                 </x-Atoms.Link>
             </x-Atoms.Button>
         </x-slot>
-    </x-Organisms.PageHeader>
+    </x-Layouts.PageHeader>
 
     <x-Layouts.Table>
         <x-Molecules.Table.Header>
@@ -38,28 +38,25 @@
                     <x-Atoms.Table.td>{{ $product->name }}</x-Atoms.Table.td>
                     <x-Atoms.Table.td>{{ $product->default_estimation_days_per_unit }} hari</x-Atoms.Table.td>
                     <x-Atoms.Table.td>
-                        <div class="flex gap-2">
-                            {{-- Tombol Ubah --}}
-                            <button
-                                @click="$dispatch('open-modal', 'edit-product-{{ $product->id }}')"
-                                class="px-3 py-1 text-sm text-white bg-yellow-500 rounded hover:bg-yellow-600">
-                                Ubah
-                            </button>
-
-                            {{-- Tombol Hapus --}}
-                            <button
-                                @click="$dispatch('open-modal', 'delete-product-{{ $product->id }}')"
-                                class="px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700">
-                                Hapus
-                            </button>
-                        </div>
+                        <x-Atoms.Button @click="$dispatch('open-modal', 'edit-product-{{ $product->id }}')" variant="secondary">Ubah</x-Atoms.Button>
+                        <x-Atoms.Button @click="$dispatch('open-modal', 'delete-confirmation-{{ $product->id }}')" variant="danger">Hapus</x-Atoms.Button>
                     </x-Atoms.Table.td>
-
                 </tr>
-
-                {{-- Include modals --}}
-                @include('pages.Admin.Product._edit-modal', ['product' => $product])
-                @include('pages.Admin.Product._delete-modal', ['product' => $product])
+                <x-Organisms.ProductModal :product="$product" mode="edit" />
+                <x-Layouts.Modal
+                    name="delete-confirmation-{{ $product->id }}"
+                    title=""
+                    maxWidth="sm"
+                    :showIcon="false"
+                >
+                    <form action="{{ route('products.destroy', $product) }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <x-Molecules.ConfirmationContent :id="$product->id">
+                            Yakin, Hapus {{$product->name}}?
+                        </x-Molecules.ConfirmationContent>
+                    </form>
+                </x-Layouts.Modal>
             @empty
                 <x-Atoms.Table.empty colspan="4">
                     <p class="mt-1">Belum ada produk.</p>
@@ -70,5 +67,5 @@
            <x-Molecules.Table.Pagination :paginator="$products" />
        </x-slot>
     </x-Layouts.Table>
-    @include('pages.Admin.Product._create-modal')
+    <x-Organisms.ProductModal/>
 </x-Layouts.AdminLayout>

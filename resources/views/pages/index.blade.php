@@ -7,7 +7,6 @@
                 name="email"
                 id="email"
                 placeholder="boypamitdangdutan@gmail.com"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
                 required
             />
 
@@ -15,7 +14,6 @@
                 name="password"
                 id="password"
                 placeholder="Password"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors pr-12"
                 required
             />
 
@@ -29,9 +27,7 @@
                 </x-Atoms.Link>
             </div>
 
-            <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
-                Masuk
-            </button>
+            <x-Atoms.Button variant="submit" fullWidth>Masuk</x-Atoms.Button>
         </form>
     </x-Layouts.FormAuthContainer>
 </x-Layouts.AuthLayout>

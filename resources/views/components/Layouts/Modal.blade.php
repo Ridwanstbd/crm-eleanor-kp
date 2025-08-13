@@ -4,7 +4,6 @@
     'maxWidth' => '2xl',
     'trigger' => null,
     'title' => null,
-    'mode' => 'default',
     'message' => null,
     'loading' => false
 ])
@@ -25,7 +24,6 @@ $maxWidth = Str::startsWith($maxWidth, '[')
 <div
     x-data="{
         show: @js($show),
-        mode: '{{ $mode }}',
         loading: @js($loading),
         modalName: '{{ $name }}',
         focusables() {
@@ -81,26 +79,18 @@ $maxWidth = Str::startsWith($maxWidth, '[')
     <div
         x-show="show"
         x-cloak
-        class="fixed inset-0 overflow-y-auto px-4 py-6 sm:px-0 z-50"
+        class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4"
         style="display: none;"
     >
-        <div
-            x-show="show"
-            class="fixed inset-0 transform transition-all"
-            x-on:click="closeModal()"
-            x-transition:enter="ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-        >
-            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
-        </div>
+        <x-Atoms.ModalBackdrop
+            x-show="show" 
+            @click="closeModal()" 
+            ::open="show"
+        />
 
         <div
             x-show="show"
-            class="mb-6 bg-white p-4 rounded-lg overflow-hidden shadow-xl transform transition-all sm:w-full {{ $maxWidth }} sm:mx-auto"
+            class="relative bg-white rounded-lg overflow-hidden shadow-xl transform transition-all w-full {{ $maxWidth }} max-h-[90vh] overflow-y-auto"
             x-transition:enter="ease-out duration-300"
             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
@@ -109,14 +99,14 @@ $maxWidth = Str::startsWith($maxWidth, '[')
             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
         >
             @if($title)
-            <div class="flex items-center justify-between px-0 py-2">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
                 <h3 class="text-xl font-semibold text-gray-900 flex items-center">
                     {{ $title }}
                 </h3>
                 <button
                     @click="closeModal()"
                     type="button"
-                    class="text-gray-400 hover:text-gray-500">
+                    class="text-gray-400 hover:text-gray-500 p-1">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -127,32 +117,9 @@ $maxWidth = Str::startsWith($maxWidth, '[')
             <div x-show="loading" class="absolute inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50">
                 <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
             </div>
-
-            @if($mode === 'destroy')
-                <div class="p-6">
-                    <div class="flex items-center justify-center">
-                        <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                            <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                            </svg>
-                        </div>
-                        <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
-                            <div class="mt-2">
-                                <p class="text-sm text-gray-500">
-                                    {{ $message ?? 'Apakah Anda yakin ingin menghapus item ini? Tindakan ini tidak dapat dibatalkan.' }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                    {{ $slot }}
-                </div>
-            @else
-                <div :class="{ 'pointer-events-none opacity-75': loading }">
-                    {{ $slot }}
-                </div>
-            @endif
+            <div :class="{ 'pointer-events-none opacity-75': loading }" class="px-4 pt-2 pb-4">
+                {{ $slot }}
+            </div>
         </div>
     </div>
 </div>

@@ -1,6 +1,6 @@
 <x-Layouts.AdminLayout title="Log Pesan">
     <div x-data="logModal()">
-        <x-Organisms.PageHeader title="Log Pesan"></x-Organisms.PageHeader>
+        <x-Layouts.PageHeader title="Log Pesan"></x-Layouts.PageHeader>
         <x-Layouts.Table>
             <x-Molecules.Table.Header>
                 <x-Atoms.Table.th>No</x-Atoms.Table.th>
@@ -46,36 +46,32 @@
             </x-slot>
         </x-Layouts.Table>
         <x-Layouts.Modal name="log-detail-modal" title="Detail Log Pesan">
-            <div class="space-y-4" x-show="selectedLog">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama:</label>
+            <div class="space-y-4" x-show="selectedLog">                
+                <x-Molecules.Form.FormGroup label="Nama" for="log_name">
                     <p class="text-gray-900" x-text="selectedLog?.name || ''"></p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nomor Tujuan:</label>
+                </x-Molecules.Form.FormGroup>
+
+                <x-Molecules.Form.FormGroup label="Nomor Tujuan" for="log_target">
                     <p class="text-gray-900" x-text="selectedLog?.target || ''"></p>
-                </div>
+                </x-Molecules.Form.FormGroup>
                 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Status:</label>
+                <x-Molecules.Form.FormGroup label="Status" for="log_status">
                     <p class="text-gray-900" x-text="selectedLog?.status || ''"></p>
-                </div>
+                </x-Molecules.Form.FormGroup>
                 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Waktu Kirim:</label>
+                <x-Molecules.Form.FormGroup label="Waktu Kirim" for="log_updated_at">
                     <p class="text-gray-900" x-text="selectedLog?.updated_at || ''"></p>
-                </div>
+                </x-Molecules.Form.FormGroup>
                 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Isi Pesan:</label>
-                    <textarea 
-                        class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-500 cursor-not-allowed opacity-60 resize-y"
-                        rows="8"
-                        style="height: 200px;"
+                <x-Molecules.Form.FormGroup label="Isi Pesan" for="log_message">
+                    <x-Atoms.TextArea 
+                        rows="8" 
+                        height="200px"
+                        resize="vertical"
                         disabled
                         x-model="selectedLog?.message || ''"
-                    ></textarea>
-                </div>
+                    />
+                </x-Molecules.Form.FormGroup>
             </div>
         </x-Layouts.Modal>
     </div>

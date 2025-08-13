@@ -11,17 +11,17 @@
             <div class="mt-4 flex flex-row items-center justify-center">
                 <form method="POST" action="{{ route('verification.send') }}">
                     @csrf
-                    <x-Elements.ButtonSubmit>
+                    <x-Atoms.ButtonSubmit>
                         {{ __('Resend Verification Email') }}
-                    </x-Elements.ButtonSubmit>        
+                    </x-Atoms.ButtonSubmit>        
                     
                 </form>
         
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <x-Elements.ButtonSubmit>
+                    <x-Atoms.ButtonSubmit>
                         {{ __('Log Out') }}
-                    </x-Elements.ButtonSubmit>
+                    </x-Atoms.ButtonSubmit>
                 </form>
             </div>
     </x-Layouts.FormAuthContainer>

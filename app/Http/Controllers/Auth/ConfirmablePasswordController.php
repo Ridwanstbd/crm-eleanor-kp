@@ -16,7 +16,7 @@ class ConfirmablePasswordController extends Controller
      */
     public function show(): View
     {
-        return view('auth.confirm-password');
+        return view('components.Organisms.confirm-password');
     }
 
     /**
@@ -29,11 +29,11 @@ class ConfirmablePasswordController extends Controller
             'password' => $request->password,
         ])) {
             throw ValidationException::withMessages([
-                'password' => __('auth.password'),
+                'password' => __('components.Organisms.password'),
             ]);
         }
 
-        $request->session()->put('auth.password_confirmed_at', time());
+        $request->session()->put('components.Organisms.password_confirmed_at', time());
 
         return redirect()->intended(route('products.index', absolute: false));
     }
