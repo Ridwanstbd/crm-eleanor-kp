@@ -13,7 +13,7 @@ Route::get('/', function () {
     return view('pages.index');
 });
 
-Route::post('/webhook-status',[MessageLogsController::class,'handleIncomingWebhook']);
+Route::post('/webhook/incoming',[MessageLogsController::class,'handleIncomingWebhook']);
 
 Route::get('/dashboard', function () {
     return view('pages.dashboard');

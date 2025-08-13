@@ -1,5 +1,5 @@
 <div class="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-    <h4 class="text-sm font-medium text-blue-800 mb-2">Format CSV:</h4>
+    <x-Atoms.Typography.Heading  level="4" class="text-sm font-medium text-blue-800 mb-2">Format CSV:</x-Atoms.Typography.Heading>
     <p class="text-sm text-blue-700 mb-2">File CSV harus memiliki kolom berikut:</p>
     <ul class="text-sm text-blue-600 list-disc list-inside space-y-1">
         <li><strong>phone</strong> (wajib): Nomor telepon pelanggan</li>
