@@ -1,6 +1,6 @@
 <x-Layouts.AdminLayout>
     <div x-data="messageLogModal()">
-        <x-Organisms.PageHeader title="Detail Kampanye {{$campaign->name}}" />
+        <x-Layouts.PageHeader title="Detail Kampanye {{$campaign->name}}" />
         <div class="grid grid-cols-2 gap-2">
             <x-Molecules.Form.FormGroup label="Nama Kampanye" for="name">
                 <x-Atoms.Input name="name" value="{{$campaign->name}}" disabled readonly/>
@@ -61,7 +61,7 @@
                 disabled readonly>{{ $template->content }}</x-Atoms.TextArea>
         </x-Molecules.Form.FormGroup>
         
-        <x-Layouts.Table min-height="200px">
+        <x-Layouts.Table min-height="500px">
             <x-Molecules.Table.Header>
                 <x-Atoms.Table.th>No</x-Atoms.Table.th>
                 <x-Atoms.Table.th>Nama Pelanggan</x-Atoms.Table.th>

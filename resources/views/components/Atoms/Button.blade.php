@@ -1,9 +1,16 @@
-@props(['type' => 'button', 'variant' => 'primary', 'size' => 'md', 'fullWidth' => false])
+@props([
+    'href' => null, 
+    'type' => 'button',
+    'variant' => 'primary',
+    'size' => 'md',
+    'fullWidth' => false,
+    'target' => '_self'
+])
 
 @php
     if ($variant === 'submit') {
-        $type = 'submit';
-    }
+            $type = 'submit';
+        }
 
     $variants = [
         'primary' => 'bg-indigo-600 hover:bg-indigo-700 text-white',
@@ -11,7 +18,7 @@
         'danger' => 'text-sm text-white bg-red-600 rounded hover:bg-red-700',
         'submit' => 'bg-red-600 hover:bg-red-700 text-white font-semibold rounded',
         'muted' => 'bg-gray-400 text-white rounded hover:bg-gray-500',
-        'info' => 'text-white bg-blue-500 rounded hover:bg-blue-600'
+        'info' => 'text-sm text-white bg-blue-500 rounded hover:bg-blue-600'
     ];
 
     $sizes = [
@@ -23,10 +30,21 @@
     $widthClass = $fullWidth ? 'w-full' : 'inline-block';
 @endphp
 
-<button
-    {{ $attributes->merge([
-        'type' => $type,
-        'class' => "transition-colors duration-200 cursor-pointer rounded-lg $widthClass " . $variants[$variant] . ' ' . $sizes[$size]
-    ]) }}>
-    {{ $slot }}
-</button>
+@if ($href)
+    <a
+        {{ $attributes->merge([
+            'href' => $href,
+            'target' => $target,
+            'class' => "transition-colors duration-200 cursor-pointer text-center rounded-lg " . $widthClass . ' ' . $variants[$variant] . ' ' . $sizes[$size]
+        ]) }}>
+        {{ $slot }}
+    </a>
+@else
+    <button
+        {{ $attributes->merge([
+            'type' => $type,
+            'class' => "transition-colors duration-200 cursor-pointer rounded-lg " . $widthClass . ' ' . $variants[$variant] . ' ' . $sizes[$size]
+        ]) }}>
+        {{ $slot }}
+    </button>
+@endif

@@ -223,7 +223,7 @@ class CampaignController extends Controller
                     return trim(str_replace("\xEF\xBB\xBF", '', strtolower($header)));
                 }, $headers);
             } else {
-                $headers = ['phone', 'name', 'purchase_quantity'];
+                $headers = ['nomor', 'jumlah_beli', 'nama'];
                 while (count($headers) < count($firstRow)) {
                     $headers[] = 'extra_' . count($headers);
                 }
@@ -368,7 +368,6 @@ class CampaignController extends Controller
                 
                 $scheduleTimestamp = $scheduledDate->timestamp;
                 $formattedEstimationDate = $scheduledDate->format('d M Y');
-                $formattedScheduleTime = $scheduledDate->format('H:i');
 
                 $personalizedMessage = str_replace(
                     [
@@ -594,6 +593,37 @@ class CampaignController extends Controller
     {
         $campaign->delete();
         return redirect()->route('campaigns.index')->with('success', 'Kampanye berhasil dihapus.');
+    }
+
+    public function downloadCsvTemplate()
+    {
+        $sampleData = [
+            ['85704412510', '1', 'Ridwan Setio Budi'],
+            ['82337440435', '2', 'Davindra'],
+        ];
+        
+        $filename = 'customer_template.csv';
+        
+        $headers = [
+            'Content-Type' => 'text/csv; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+        
+        $callback = function() use ($sampleData) {
+            $file = fopen('php://output', 'w');
+            
+            fwrite($file, "\xEF\xBB\xBF");
+            
+            fputcsv($file, ['nomor', 'jumlah_beli', 'nama']);
+            
+            foreach ($sampleData as $row) {
+                fputcsv($file, $row);
+            }
+            
+            fclose($file);
+        };
+        
+        return response()->stream($callback, 200, $headers);
     }
 
 }

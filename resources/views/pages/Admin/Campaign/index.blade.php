@@ -13,10 +13,8 @@
                 />
         </x-slot>
         <x-slot name="actions">
-            <x-Atoms.Button>
-                <x-Atoms.Link :href="route('campaigns.create')">
-                    Tambah 
-                </x-Atoms.Link>
+            <x-Atoms.Button href="{{route('campaigns.create')}}">
+                Tambah 
             </x-Atoms.Button>
         </x-slot>
     </x-Layouts.PageHeader>
@@ -35,8 +33,8 @@
                 <x-Atoms.Table.td>{{ $campaign->name }}</x-Atoms.Table.td>
                 <x-Atoms.Table.td>{{ \Carbon\Carbon::parse($campaign->schedule)->translatedFormat('d F Y') }}</x-Atoms.Table.td>
                 <x-Atoms.Table.td>
-                    <x-Atoms.Button variant="info">
-                        <x-Atoms.Link :href="route('campaigns.edit',$campaign->id)">Detail</x-Atoms.Link>
+                    <x-Atoms.Button variant="info" href="{{route('campaigns.edit',$campaign->id)}}">
+                        Detail
                     </x-Atoms.Button>
                     <x-Atoms.Button @click="$dispatch('open-modal', 'delete-confirmation-{{ $campaign->id }}')" variant="danger">Hapus</x-Atoms.Button>
                 </x-Atoms.Table.td>

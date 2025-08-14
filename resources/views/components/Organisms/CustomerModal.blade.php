@@ -1,4 +1,5 @@
 @props(['customer' => null, 'mode'=>'create'])
+@if ($mode === 'edit' && $customer)
 <x-Layouts.Modal
     name="edit-customer-{{ $customer->id }}"
     title="Ubah Pelanggan"
@@ -33,7 +34,6 @@
         </x-Atoms.button>
     </form>
 </x-Layouts.Modal>
-@if ($mode === 'edit' && $customer)
 @elseif($mode === 'create')
 <x-Layouts.Modal
     name="create-customer"
