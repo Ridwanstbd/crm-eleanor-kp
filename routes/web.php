@@ -12,10 +12,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('pages.index');
 });
-
-Route::get( '/webhook/update-status', [MessageLogsController::class, 'handleUpdateStatusWebhook']);
-Route::post( '/webhook/update-status', [MessageLogsController::class, 'handleUpdateStatusWebhook']);
-
+Route::match(['get', 'post'], '/webhook/update-status', [MessageLogsController::class, 'handleUpdateStatusWebhook'])
+    ->name('webhook.update-status');
+    
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
