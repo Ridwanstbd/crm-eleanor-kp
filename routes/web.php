@@ -13,7 +13,7 @@ Route::get('/', function () {
     return view('pages.index');
 });
 
-Route::match(['GET', 'POST'], '/webhook/incoming', [MessageLogsController::class, 'handleIncomingWebhook']);
+Route::match(['GET', 'POST'], '/webhook/update-status', [MessageLogsController::class, 'handleUpdateStatusWebhook']);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

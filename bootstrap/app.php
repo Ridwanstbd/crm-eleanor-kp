@@ -13,7 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->validateCsrfTokens(except: [
             '/webhook/*',
-            '/webhook/incoming',
+            '/webhook/update-status',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

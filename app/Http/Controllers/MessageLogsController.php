@@ -22,7 +22,7 @@ class MessageLogsController extends Controller
         return view('pages.Admin.LogMessage.show', compact('messageLog'));
     }
 
-    public function handleIncomingWebhook(Request $request)
+    public function handleUpdateStatusWebhook(Request $request)
     {
         if ($request->isMethod('GET')) {
             $data = $request->all();

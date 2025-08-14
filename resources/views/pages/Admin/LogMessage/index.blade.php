@@ -29,7 +29,7 @@
                                     'updated_at' => \Carbon\Carbon::parse($log->updated_at)->format('d M Y, H:i'),
                                     'message' => $log->message
                                 ]) }})"
-                        variant="secondary">Ubah
+                        variant="secondary">Detail
                         </x-Atoms.Button>
                         </x-Atoms.Table.td>
                     </tr>
