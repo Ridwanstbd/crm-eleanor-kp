@@ -174,7 +174,7 @@
             </x-slot>
         </x-Layouts.Table>
 
-        @include('pages.admin.campaign.partials.show-detail')
+        @include('pages.Admin.Campaign.partials.show-detail')
     </div>
 
     <script>
