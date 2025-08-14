@@ -20,8 +20,8 @@
                         <x-Atoms.Table.td>{{ ucfirst($log->status) }}</x-Atoms.Table.td>
                         <x-Atoms.Table.td>{{ \Carbon\Carbon::parse($log->updated_at)->format('d M Y, H:i') }}</x-Atoms.Table.td>
                         <x-Atoms.Table.td>
-                            <button
-                                @click="showDetail({{ json_encode([
+                        <x-Atoms.Button 
+                        @click="showDetail({{ json_encode([
                                     'id' => $log->id,
                                     'name' => $log->customer ? $log->customer->name : '-',
                                     'target' => $log->target,
@@ -29,9 +29,8 @@
                                     'updated_at' => \Carbon\Carbon::parse($log->updated_at)->format('d M Y, H:i'),
                                     'message' => $log->message
                                 ]) }})"
-                                class="px-3 py-1 text-sm text-white bg-yellow-500 rounded hover:bg-yellow-600">
-                                detail
-                            </button>
+                        variant="secondary">Ubah
+                        </x-Atoms.Button>
                         </x-Atoms.Table.td>
                     </tr>
                 @empty

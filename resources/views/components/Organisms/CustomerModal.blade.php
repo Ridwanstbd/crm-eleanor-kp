@@ -12,7 +12,7 @@
         @method('PUT')
 
         <x-Molecules.Form.FormGroup for="edit-customer-name-{{ $customer->id }}" label="Nama Pelanggan">
-            <x-Atoms.form.input
+            <x-Atoms.Form.Input
                 id="edit-customer-name-{{ $customer->id }}"
                 name="name"
                 value="{{ $customer->name }}"
@@ -21,7 +21,7 @@
             />
         </x-Molecules.Form.FormGroup>
         <x-Molecules.Form.FormGroup for="edit-customer-phone-{{ $customer->id }}" label="Nomor Telepon" >
-            <x-Atoms.form.input
+            <x-Atoms.Form.Input
                 id="edit-customer-phone-{{ $customer->id }}"
                 name="phone"
                 value="{{ $customer->phone }}"
@@ -29,9 +29,9 @@
                 class="w-full"
             />
         </x-Molecules.Form.FormGroup>
-        <x-Atoms.button variant="submit" fullWidth>
+        <x-Atoms.Button variant="submit" fullWidth>
             Simpan
-        </x-Atoms.button>
+        </x-Atoms.Button>
     </form>
 </x-Layouts.Modal>
 @elseif($mode === 'create')
@@ -46,7 +46,7 @@
         @csrf
 
         <x-Molecules.Form.FormGroup for="create-customer-name" label="Nama Pelanggan">
-            <x-Atoms.form.input
+            <x-Atoms.Form.Input
                 id="create-customer-name"
                 name="name"
                 placeholder="Nama Pelanggan"
@@ -54,16 +54,16 @@
             />
         </x-Molecules.Form.FormGroup>
         <x-Molecules.Form.FormGroup for="create-customer-phone" label="Nomor Telepon">
-            <x-Atoms.form.input
+            <x-Atoms.Form.Input
                 id="create-customer-phone"
                 name="phone"
                 placeholder="6281234567899"
                 class="w-full"
             />
         </x-Molecules.Form.FormGroup>
-        <x-Atoms.button variant="submit" fullWidth>
+        <x-Atoms.Button variant="submit" fullWidth>
             Tambah
-        </x-Atoms.button>
+        </x-Atoms.Button>
     </form>
 </x-Layouts.Modal>
 @endif

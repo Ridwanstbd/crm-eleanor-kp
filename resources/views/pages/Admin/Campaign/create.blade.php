@@ -198,9 +198,9 @@
                         </x-Atoms.Table.td>
                     </tr>
                     @empty
-                    <x-Atoms.Table.Empty colspan="4">
+                    <x-Atoms.Table.empty colspan="4">
                         <p class="text-sm text-gray-500 mt-2">Belum ada data pelanggan</p>
-                    </x-Atoms.Table.Empty>
+                    </x-Atoms.Table.empty>
                     @endforelse
                     
                     <x-slot name="pagination">

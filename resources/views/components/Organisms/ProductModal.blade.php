@@ -13,7 +13,7 @@
             @method('PUT')
             
             <x-Molecules.Form.FormGroup for="edit-name-{{ $product->id }}" label="Nama Produk">
-                <x-Atoms.form.input
+                <x-Atoms.Form.Input
                     id="edit-name-{{ $product->id }}"
                     name="name"
                     value="{{ $product->name }}"
@@ -23,7 +23,7 @@
             </x-Molecules.Form.FormGroup>
             <x-Molecules.Form.FormGroup for="edit-default_estimation_days_per_unit-{{ $product->id }}" label="Jangka Waktu">
                 <div class="flex items-center gap-2">
-                    <x-Atoms.form.input
+                    <x-Atoms.Form.Input
                         type="number"
                         id="edit-default_estimation_days_per_unit-{{ $product->id }}"
                         name="default_estimation_days_per_unit"
@@ -51,7 +51,7 @@
         <form action="{{ route('products.store') }}" method="POST">
             @csrf
             <x-Molecules.Form.FormGroup label="Nama Produk" for="create-name">
-                <x-Atoms.form.input
+                <x-Atoms.Form.Input
                     id="create-name"
                     name="name"
                     placeholder="Susu Pengganti"
@@ -60,7 +60,7 @@
             </x-Molecules.Form.FormGroup>
             <x-Molecules.Form.FormGroup label="Jangka Waktu" for="create-default_estimation_days_per_unit">
                 <div class="flex items-center gap-2">
-                    <x-Atoms.form.input
+                    <x-Atoms.Form.Input
                         type="number"
                         id="create-default_estimation_days_per_unit"
                         name="default_estimation_days_per_unit"
@@ -70,9 +70,9 @@
                     <span class="text-sm text-gray-700">Hari</span>
                 </div>
             </x-Molecules.Form.FormGroup>
-            <x-Atoms.button variant="submit" fullWidth>
+            <x-Atoms.Button variant="submit" fullWidth>
                 Tambah
-            </x-Atoms.button>
+            </x-Atoms.Button>
         </form>
     </x-Layouts.Modal>
 @endif
