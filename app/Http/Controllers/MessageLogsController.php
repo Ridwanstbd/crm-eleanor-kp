@@ -25,28 +25,27 @@ class MessageLogsController extends Controller
     public function handleUpdateStatusWebhook(Request $request)
     {
         if ($request->isMethod('GET')) {
-            $data = $request->all();
-        } else {
-            $data = $request->json()->all();
+            return response()->json(['success' => true, 'message' => 'Webhook endpoint is active.'], 200);
         }
 
-        $id = $data['id'] ?? null;
-        $stateId = $data['stateid'] ?? null;
-        $status = $data['status'] ?? null;
-        $state = $data['state'] ?? null;
-        $device = $data['device'] ?? null;
-        $target = $data['target'] ?? null;
-        $message = $data['message'] ?? null;
-
         try {
+            $data = $request->json()->all();
+
+            $id = $data['id'] ?? null;
+            $stateId = $data['stateid'] ?? null;
+            $status = $data['status'] ?? null;
+            $state = $data['state'] ?? null;
+            $device = $data['device'] ?? null;
+            $target = $data['target'] ?? null;
+            $message = $data['message'] ?? null;
+
             $findAttributes = [
                 'report_id' => $id,
             ];
             
             $customerId = null;
             if (!empty($target)) {
-                $customer = Customer::where('phone', $target)->first();
-                $customerId = $customer->id ?? null;
+                $customerId = Customer::where('phone', $target)->first()?->id;
             }
             
             $createOrUpdateAttributes = [
@@ -69,7 +68,7 @@ class MessageLogsController extends Controller
             return response()->json(['success' => true, 'message' => "Message log {$action} successfully."], 200);
 
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'An error occurred while processing the request.'], 500);
         }
     }
 }
