@@ -46,22 +46,25 @@
             </x-slot>
         </x-Layouts.Table>
         <x-Layouts.Modal name="log-detail-modal" title="Detail Log Pesan">
-            <div class="space-y-4" x-show="selectedLog">                
-                <x-Molecules.Form.FormGroup label="Nama" for="log_name">
-                    <p class="text-gray-900" x-text="selectedLog?.name || ''"></p>
-                </x-Molecules.Form.FormGroup>
-
-                <x-Molecules.Form.FormGroup label="Nomor Tujuan" for="log_target">
-                    <p class="text-gray-900" x-text="selectedLog?.target || ''"></p>
-                </x-Molecules.Form.FormGroup>
-                
-                <x-Molecules.Form.FormGroup label="Status" for="log_status">
-                    <p class="text-gray-900" x-text="selectedLog?.status || ''"></p>
-                </x-Molecules.Form.FormGroup>
-                
-                <x-Molecules.Form.FormGroup label="Keadaan" for="log_state">
-                    <p class="text-gray-900" x-text="selectedLog?.state || 'Tidak Diketahui'"></p>
-                </x-Molecules.Form.FormGroup>
+            <div class="space-y-4" x-show="selectedLog">
+                <div class="grid grid-cols-2 gap-4">
+                    <x-Molecules.Form.FormGroup label="Nama" for="log_name">
+                        <p class="text-gray-900" x-text="selectedLog?.name || ''"></p>
+                    </x-Molecules.Form.FormGroup>
+    
+                    <x-Molecules.Form.FormGroup label="Nomor Tujuan" for="log_target">
+                        <p class="text-gray-900" x-text="selectedLog?.target || ''"></p>
+                    </x-Molecules.Form.FormGroup>
+                </div>                
+                <div class="grid grid-cols-2 gap-4">
+                    <x-Molecules.Form.FormGroup label="Status" for="log_status">
+                        <p class="text-gray-900" x-text="selectedLog?.status || ''"></p>
+                    </x-Molecules.Form.FormGroup>
+                    
+                    <x-Molecules.Form.FormGroup label="Keadaan" for="log_state">
+                        <p class="text-gray-900" x-text="selectedLog?.state || 'Tidak Diketahui'"></p>
+                    </x-Molecules.Form.FormGroup>
+                </div>
                 
                 <x-Molecules.Form.FormGroup label="Waktu Kirim" for="log_updated_at">
                     <p class="text-gray-900" x-text="selectedLog?.updated_at || ''"></p>
