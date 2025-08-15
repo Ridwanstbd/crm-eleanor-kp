@@ -26,6 +26,7 @@
                                     'name' => $log->customer ? $log->customer->name : '-',
                                     'target' => $log->target,
                                     'status' => ucfirst($log->status),
+                                    'state' => ucfirst($log->state),
                                     'updated_at' => \Carbon\Carbon::parse($log->updated_at)->format('d M Y, H:i'),
                                     'message' => $log->message
                                 ]) }})"
@@ -56,6 +57,10 @@
                 
                 <x-Molecules.Form.FormGroup label="Status" for="log_status">
                     <p class="text-gray-900" x-text="selectedLog?.status || ''"></p>
+                </x-Molecules.Form.FormGroup>
+                
+                <x-Molecules.Form.FormGroup label="Keadaan" for="log_state">
+                    <p class="text-gray-900" x-text="selectedLog?.state || 'Tidak Diketahui'"></p>
                 </x-Molecules.Form.FormGroup>
                 
                 <x-Molecules.Form.FormGroup label="Waktu Kirim" for="log_updated_at">

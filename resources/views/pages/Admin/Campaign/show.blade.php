@@ -110,17 +110,17 @@
                                     <svg class="w-2 h-2 mr-1" fill="currentColor" viewBox="0 0 8 8">
                                         <circle cx="4" cy="4" r="3" />
                                     </svg>
-                                    {{ ucfirst($messageLog->status ?? 'Unknown') }}
+                                    {{ ucfirst($messageLog->status ?? 'Tidak Diketahui') }}
                                 </span>
                             @endif
                         </x-Atoms.Table.td>
                         <x-Atoms.Table.td>
-                            @if($messageLog->sent_at)
+                            @if($messageLog->updated_at)
                                 <div class="text-sm text-gray-900">
-                                    {{ \Carbon\Carbon::parse($messageLog->sent_at)->format('d/m/Y H:i') }}
+                                    {{ \Carbon\Carbon::parse($messageLog->updated_at)->format('d/m/Y H:i') }}
                                 </div>
                                 <div class="text-sm text-gray-500">
-                                    {{ \Carbon\Carbon::parse($messageLog->sent_at)->diffForHumans() }}
+                                    {{ \Carbon\Carbon::parse($messageLog->updated_at)->diffForHumans() }}
                                 </div>
                             @else
                                 <span class="text-sm text-gray-500">Belum dikirim</span>
@@ -134,8 +134,9 @@
                                         'customer_name' => $messageLog->customer ? $messageLog->customer->name : 'Pelanggan Tidak Ditemukan',
                                         'target' => $messageLog->target,
                                         'purchase_quantity' => $messageLog->customer ? $messageLog->customer->purchase_quantity : '-',
-                                        'status' => ucfirst($messageLog->status ?? 'Unknown'),
-                                        'sent_at' => $messageLog->sent_at ? \Carbon\Carbon::parse($messageLog->sent_at)->format('d/m/Y H:i') : 'Belum dikirim',
+                                        'status' => ucfirst($messageLog->status ?? 'Tidak Diketahui'),
+                                        'state' => ucfirst($messageLog->state ?? 'Tidak Diketahui'),
+                                        'updated_at' => $messageLog->updated_at ? \Carbon\Carbon::parse($messageLog->updated_at)->format('d/m/Y H:i') : 'Belum dikirim',
                                         'message' => $messageLog->message
                                     ]) }})"
                                     class="px-3 py-1 text-sm text-white bg-yellow-500 rounded hover:bg-yellow-600">

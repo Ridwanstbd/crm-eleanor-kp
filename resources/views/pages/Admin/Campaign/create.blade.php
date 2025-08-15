@@ -3,53 +3,7 @@
     
     <form method="POST" action="{{ route('campaigns.store') }}" enctype="multipart/form-data">
         @csrf
-        <div x-data="{ 
-            newAudiens: false, 
-            customer: false,
-            selectedProduct: '{{ old('product') }}',
-            customerQuantities: {},
-            allCustomersSelected: false,
-            checkNewAudiens() {
-                this.newAudiens = document.getElementById('new_audiens').checked;
-                if (this.newAudiens) {
-                    this.customer = false;
-                    document.getElementById('customer').checked = false;
-                }
-            },
-            checkCustomer() {
-                this.customer = document.getElementById('customer').checked;
-                if (this.customer) {
-                    this.newAudiens = false;
-                    document.getElementById('new_audiens').checked = false;
-                }
-            },
-            updateSelectedProduct(event) {
-                this.selectedProduct = event.target.value;
-            },
-            initCustomerQuantity(customerId) {
-                if (!this.customerQuantities[customerId]) {
-                    this.customerQuantities[customerId] = 1;
-                }
-            },
-            updateCustomerQuantity(customerId, value) {
-                this.customerQuantities[customerId] = parseInt(value) || 1;
-            },
-            toggleAllCustomers(checked) {
-                this.allCustomersSelected = checked;
-                const checkboxes = document.querySelectorAll('.customer-checkbox');
-                checkboxes.forEach(checkbox => checkbox.checked = checked);
-            },
-            updateSelectAllState() {
-                const selectAll = document.getElementById('select-all');
-                const checkboxes = document.querySelectorAll('.customer-checkbox');
-                const checkedBoxes = document.querySelectorAll('.customer-checkbox:checked');
-                
-                this.allCustomersSelected = checkboxes.length === checkedBoxes.length && checkboxes.length > 0;
-                if (selectAll) {
-                    selectAll.checked = this.allCustomersSelected;
-                }
-            }
-        }">
+        <div x-data="campaignForm()">
         <div class="grid grid-cols-2 gap-2 w-full">
             <x-Molecules.Form.FormGroup label="Nama" for="name" >
                 <x-Atoms.Input  
@@ -153,6 +107,11 @@
                 <div class="text-red-500 text-sm mb-2">{{ $message }}</div>
             @enderror
             
+            <x-Organisms.SearchInputCustomers 
+                :totalCustomers="count($customers)"
+                placeholder="Cari nomor telepon (contoh: 628123)..."
+            />
+            
             <x-Layouts.Table>
                 <x-Molecules.Table.Header>
                     <x-Atoms.Table.th>
@@ -170,7 +129,14 @@
                 </x-Molecules.Table.Header>
                 <x-Molecules.Table.Body>
                     @forelse($customers as $customerItem)
-                    <tr class="customer-row">
+                    <tr class="customer-row" 
+                        x-show="searchQuery.length === 0 || filteredCustomers.some(c => c.id === {{ $customerItem->id }})"
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0"
+                        x-transition:enter-end="opacity-100"
+                        x-transition:leave="transition ease-in duration-150"
+                        x-transition:leave-start="opacity-100"
+                        x-transition:leave-end="opacity-0">
                         <x-Atoms.Table.td>
                             <x-Atoms.Checkbox 
                                 id="customer_{{ $customerItem->id }}" 
@@ -203,9 +169,12 @@
                     </x-Atoms.Table.empty>
                     @endforelse
                     
-                    <x-slot name="pagination">
-                        <x-Molecules.Table.Pagination :paginator="$customers" />
-                    </x-slot>
+                    <!-- No search results message -->
+                    <tr x-show="searchQuery.length > 0 && filteredCustomers.length === 0">
+                        <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">
+                            Tidak ada pelanggan yang ditemukan dengan kata kunci "<span x-text="searchQuery"></span>"
+                        </td>
+                    </tr>
                 </x-Molecules.Table.Body>
             </x-Layouts.Table>
             
@@ -222,4 +191,102 @@
         </div>
     </div>
     </form>
+
+    <script>
+        function campaignForm() {
+            return {
+                newAudiens: false, 
+                customer: false,
+                selectedProduct: '{{ old('product') }}',
+                customerQuantities: {},
+                allCustomersSelected: false,
+                searchQuery: '',
+                filteredCustomers: @json($customers),
+                allCustomers: @json($customers),
+                
+                checkNewAudiens() {
+                    this.newAudiens = document.getElementById('new_audiens').checked;
+                    if (this.newAudiens) {
+                        this.customer = false;
+                        document.getElementById('customer').checked = false;
+                    }
+                },
+                
+                checkCustomer() {
+                    this.customer = document.getElementById('customer').checked;
+                    if (this.customer) {
+                        this.newAudiens = false;
+                        document.getElementById('new_audiens').checked = false;
+                    }
+                },
+                
+                updateSelectedProduct(event) {
+                    this.selectedProduct = event.target.value;
+                },
+                
+                initCustomerQuantity(customerId) {
+                    if (!this.customerQuantities[customerId]) {
+                        this.customerQuantities[customerId] = 1;
+                    }
+                },
+                
+                updateCustomerQuantity(customerId, value) {
+                    this.customerQuantities[customerId] = parseInt(value) || 1;
+                },
+                
+                toggleAllCustomers(checked) {
+                    this.allCustomersSelected = checked;
+                    const checkboxes = document.querySelectorAll('.customer-checkbox');
+                    checkboxes.forEach(checkbox => checkbox.checked = checked);
+                },
+                
+                updateSelectAllState() {
+                    const selectAll = document.getElementById('select-all');
+                    const checkboxes = document.querySelectorAll('.customer-checkbox');
+                    const checkedBoxes = document.querySelectorAll('.customer-checkbox:checked');
+                    
+                    this.allCustomersSelected = checkboxes.length === checkedBoxes.length && checkboxes.length > 0;
+                    if (selectAll) {
+                        selectAll.checked = this.allCustomersSelected;
+                    }
+                },
+                
+                searchCustomers() {
+                    if (this.searchQuery.trim() === '') {
+                        this.filteredCustomers = this.allCustomers;
+                    } else {
+                        const query = this.searchQuery.trim();
+                        this.filteredCustomers = this.allCustomers.filter(customer => {
+                            const name = customer.name ? customer.name.toLowerCase() : '';
+                            const phone = customer.phone ? customer.phone.toString() : '';
+                            
+                            // Untuk pencarian nama (case insensitive)
+                            const nameMatch = name.includes(query.toLowerCase());
+                            
+                            // Untuk pencarian nomor telepon (exact match, bisa partial)
+                            // Menghapus semua karakter non-digit dari query dan phone untuk perbandingan
+                            const cleanQuery = query.replace(/\D/g, '');
+                            const cleanPhone = phone.replace(/\D/g, '');
+                            const phoneMatch = cleanPhone.includes(cleanQuery);
+                            
+                            // Juga cek format phone dengan karakter asli
+                            const phoneExactMatch = phone.includes(query);
+                            
+                            return nameMatch || phoneMatch || phoneExactMatch;
+                        });
+                    }
+                    // Reset select all state after search
+                    this.allCustomersSelected = false;
+                    this.$nextTick(() => {
+                        this.updateSelectAllState();
+                    });
+                },
+                
+                clearSearch() {
+                    this.searchQuery = '';
+                    this.searchCustomers();
+                }
+            }
+        }
+    </script>
 </x-Layouts.AdminLayout>

@@ -24,7 +24,7 @@ class CampaignController extends Controller
     {
         $search = $request->input('search');
 
-        $sortField = $request->input('sort', 'name'); 
+        $sortField = $request->input('sort', 'schedule'); 
         $sortDirection = $request->input('direction', 'desc');
         
         $allowedSortFields = ['name','schedule'];
@@ -32,7 +32,7 @@ class CampaignController extends Controller
             $sortField = 'name';
         }
         
-        $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'asc';
+        $sortDirection = in_array($sortDirection, ['asc', 'desc']) ? $sortDirection : 'desc';
         
         $campaigns = Campaign::when($search, function ($query) use ($search) {
                 return $query->where('name', 'like', '%' . $search . '%');
@@ -48,7 +48,7 @@ class CampaignController extends Controller
     {
         $products = Product::all();
         $templates = MessageTemplate::all();
-        $customers = Customer::paginate(10);
+        $customers = Customer::get();
                 
         return view('pages.Admin.Campaign.create', compact("products","templates","customers"));
     }

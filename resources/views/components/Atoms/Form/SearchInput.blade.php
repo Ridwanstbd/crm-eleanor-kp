@@ -1,9 +1,8 @@
-{{-- resources/views/components/elements/form/search-input.blade.php --}}
 @props([
     'name' => 'search',
     'id' => 'search',
     'value' => '',
-    'placeholder' => 'Cari nama produk...',
+    'placeholder' => 'Cari ...',
     'method' => 'GET'
 ])
 

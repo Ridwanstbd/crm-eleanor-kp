@@ -20,10 +20,14 @@
             </x-Molecules.Form.FormGroup>
         </div>
 
-        <x-Molecules.Form.FormGroup label="Waktu Kirim" for="message_log_sent_at">
-            <p class="text-gray-900" x-text="selectedMessageLog?.sent_at || ''"></p>
-        </x-Molecules.Form.FormGroup>
-        
+        <div class="grid grid-cols-2 gap-4">
+            <x-Molecules.Form.FormGroup label="Keadaan" for="message_log_state">
+                <p class="text-gray-900" x-text="selectedMessageLog?.state || ''"></p>
+            </x-Molecules.Form.FormGroup>
+            <x-Molecules.Form.FormGroup label="Waktu Kirim" for="message_log_updated_at">
+                <p class="text-gray-900" x-text="selectedMessageLog?.updated_at || ''"></p>
+            </x-Molecules.Form.FormGroup>
+        </div>
         <x-Molecules.Form.FormGroup label="Isi Pesan" for="message_log_message">
             <x-Atoms.TextArea 
                 rows="8" 

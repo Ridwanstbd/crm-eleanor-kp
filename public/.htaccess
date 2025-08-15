@@ -1,3 +1,9 @@
+<IfModule mod_security2.c>
+    <LocationMatch "/webhook/update-status">
+        SecRuleEngine Off
+    </LocationMatch>
+</IfModule>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes

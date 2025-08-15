@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Models\MessageLogs;
 
@@ -29,43 +28,56 @@ class MessageLogsController extends Controller
         }
 
         try {
-            $data = $request->json()->all();
-
-            $id = $data['id'] ?? null;
-            $stateId = $data['stateid'] ?? null;
-            $status = $data['status'] ?? null;
-            $state = $data['state'] ?? null;
-            $device = $data['device'] ?? null;
-            $target = $data['target'] ?? null;
-            $message = $data['message'] ?? null;
-
-            $findAttributes = [
-                'report_id' => $id,
-            ];
+            $payload = $request->json()->all();
             
-            $customerId = null;
-            if (!empty($target)) {
-                $customerId = Customer::where('phone', $target)->first()?->id;
+            if (empty($payload)) {
+                return response()->json(['success' => false, 'message' => 'Invalid payload.'], 400);
             }
             
-            $createOrUpdateAttributes = [
-                'device' => $device,
-                'target' => $target,
-                'message' => $message,
-                'status' => $status,
-                'state' => $state,
-                'state_id' => $stateId,
-                'customer_id' => $customerId,
-            ];
+
+            $reportId = $payload['id'] ?? null;
+            $stateId = $payload['stateid'] ?? null;
             
-            $messageLog = MessageLogs::updateOrCreate(
-                $findAttributes,
-                $createOrUpdateAttributes
-            );
+            if (!$reportId && !$stateId) {
+                return response()->json(['success' => false, 'message' => 'Payload must contain an "id" or "stateid".'], 400);
+            }
+
+            $messageLog = null;
+
+            if ($reportId) {
+                $messageLog = MessageLogs::where('report_id', $reportId)->first();
+                
+                if (!$messageLog && $stateId) {
+                    $messageLog = MessageLogs::where('state_id', $stateId)->first();
+                }
+            } else {
+                $messageLog = MessageLogs::where('state_id', $stateId)->first();
+                
+                if ($messageLog) {
+                    $reportId = $messageLog->report_id;
+                }
+            }
             
-            $action = $messageLog->wasRecentlyCreated ? 'created' : 'updated';
+            if (!$messageLog) {
+                return response()->json(['success' => false, 'message' => 'Message log not found.'], 404);
+            }
+
+            $attributes = [];
+            if (isset($payload['device'])) $attributes['device'] = $payload['device'];
+            if (isset($payload['status'])) $attributes['status'] = $payload['status'];
+            if (isset($payload['state'])) $attributes['state'] = $payload['state'];
             
-            return response()->json(['success' => true, 'message' => "Message log {$action} successfully."], 200);
+            if ($reportId && isset($payload['id'])) {
+                $attributes['report_id'] = $reportId;
+            }
+            
+            if ($stateId && isset($payload['stateid'])) {
+                $attributes['state_id'] = $stateId;
+            }
+            
+            $messageLog->update($attributes);
+            
+            return response()->json(['success' => true, 'message' => 'Message log updated successfully.'], 200);
 
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'An error occurred while processing the request.'], 500);
