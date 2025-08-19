@@ -187,7 +187,7 @@
         </div>
 
         <div class="flex justify-end mt-6">
-            <x-Atoms.Button type="submit" variant="primary">Simpan</x-Atoms.Button>
+            <x-Atoms.Button type="submit" variant="primary">Kirim Pesan Kampanye</x-Atoms.Button>
         </div>
     </div>
     </form>

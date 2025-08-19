@@ -10,10 +10,10 @@
     </div>
     <p class="text-sm text-blue-700 mb-2">File CSV harus memiliki kolom berikut:</p>
     <ul class="text-sm text-blue-600 list-disc list-inside space-y-1">
+        <li><strong>nama</strong> (opsional): Nama pelanggan</li>
         <li><strong>nomor</strong> (wajib): Nomor telepon pelanggan</li>
         <li><strong>jumlah_beli</strong> (opsional): Jumlah pembelian (1-999)</li>
-        <li><strong>nama</strong> (opsional): Nama pelanggan</li>
     </ul>
-    <p class="text-xs text-blue-500 mt-2">Contoh: nomor,jumlah_beli,nama</p>
-    <p class="text-xs text-blue-500">81234567890,5,boy</p>
+    <p class="text-xs text-blue-500 mt-2">Contoh: kolom A nama , kolom B nomor, kolom C Jumlah Beli</p>
+    <p class="text-xs text-blue-500">boy, 6281234567890, 5</p>
 </div>

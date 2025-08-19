@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CampaignCustomerGroup;
 use App\Models\Customer;
 use App\Models\MessageLogs;
 use App\Models\User;
@@ -180,8 +179,10 @@ class CampaignController extends Controller
                 $customer->purchases()->syncWithoutDetaching([
                     $campaign->product_id => [
                         'campaign_id' => $campaign->id,
-                        'last_purchase_quantity' => $purchaseQuantity
-                        ]
+                        'last_purchase_quantity' => $purchaseQuantity,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]
                 ]);
             }
         }
@@ -201,202 +202,327 @@ class CampaignController extends Controller
 
             $campaign->customerGroups()->attach($customerGroup->id);
 
-            $csvData = array_map('str_getcsv', file(storage_path('app/public/' . $csvPath)));
+            $csvContent = file_get_contents(storage_path('app/public/' . $csvPath));
+            $csvContent = str_replace("\xEF\xBB\xBF", '', $csvContent);
+            
+            $lines = explode("\n", $csvContent);
+            $csvData = [];
+            
+            foreach ($lines as $line) {
+                $line = trim((string) $line);
+                if (!empty($line)) {
+                    $row = str_getcsv($line, ',');
+                    if (count($row) == 1) {
+                        $row = str_getcsv($line, ';');
+                    }
+                    if (count($row) == 1) {
+                        $row = str_getcsv($line, "\t");
+                    }
+                    $row = array_map(function($item) {
+                        return (string) $item;
+                    }, $row);
+                    $csvData[] = $row;
+                }
+            }
+            
+            if (empty($csvData)) {
+                throw new \Exception('File CSV kosong atau tidak dapat dibaca');
+            }
             
             $firstRow = $csvData[0] ?? [];
             $hasHeaders = false;
             
             if (!empty($firstRow)) {
-                $firstRow[0] = trim(str_replace("\xEF\xBB\xBF", '', $firstRow[0]));
+                $firstRow = array_map(function($item) {
+                    return trim((string) $item);
+                }, $firstRow);
             }
             
-            if (!empty($firstRow) && count($firstRow) >= 1) {
+            if (!empty($firstRow) && count($firstRow) >= 2) {
                 $firstCol = strtolower(trim($firstRow[0]));
-                if (in_array($firstCol, ['phone', 'nama', 'name', 'telepon', 'hp', 'nomor'])) {
+                $secondCol = strtolower(trim($firstRow[1]));
+                $thirdCol = isset($firstRow[2]) ? strtolower(trim($firstRow[2])) : '';
+                
+                $phoneHeaders = ['nomor', 'phone', 'telepon', 'nomor telepon', 'no_hp', 'hp', 'whatsapp', 'wa'];
+                $nameHeaders = ['nama', 'name', 'customer', 'pelanggan', 'nama customer'];
+                $quantityHeaders = ['jumlah', 'quantity', 'qty', 'jumlah_beli', 'jumlah beli', 'amount'];
+                
+                if (in_array($firstCol, $phoneHeaders) || 
+                    in_array($secondCol, $nameHeaders) || 
+                    in_array($thirdCol, $quantityHeaders)) {
                     $hasHeaders = true;
                 }
             }
             
             if ($hasHeaders) {
-                $headers = array_shift($csvData);
-                $headers = array_map(function($header) {
-                    return trim(str_replace("\xEF\xBB\xBF", '', strtolower($header)));
-                }, $headers);
-            } else {
-                $headers = ['nomor', 'jumlah_beli', 'nama'];
-                while (count($headers) < count($firstRow)) {
-                    $headers[] = 'extra_' . count($headers);
-                }
+                array_shift($csvData);
             }
             
             $processedCustomers = [];
             $totalQuantity = 0;
             $errors = [];
+            $successCount = 0;
 
             foreach ($csvData as $rowIndex => $row) {
-                if (count($row) >= 1 && !empty(trim($row[0]))) {
-                    $row = array_pad($row, count($headers), '');
-                    $customerData = array_combine($headers, $row);
+                if (empty(array_filter($row, function($value) { return !empty(trim($value)); }))) {
+                    continue;
+                }
+                
+                if (count($row) < 2) {
+                    $errors[] = "Baris " . ($rowIndex + 1) . ": Data tidak lengkap (minimal nomor dan nama)";
+                    continue;
+                }
+                
+                $phone = isset($row[0]) ? trim((string) $row[0]) : '';
+                $name = isset($row[1]) ? trim((string) $row[1]) : '';
+                $purchaseQuantity = isset($row[2]) && !empty(trim((string) $row[2])) ? intval(trim((string) $row[2])) : 1;
+                
+                if (empty($phone) || empty($name)) {
+                    $errors[] = "Baris " . ($rowIndex + 1) . ": Nomor telepon atau nama kosong";
+                    continue;
+                }
+                
+                if ($purchaseQuantity < 1 || $purchaseQuantity > 999) {
+                    $purchaseQuantity = 1;
+                }
+                
+                try {
+                    $cleanPhone = $this->cleanPhoneNumber($phone);
                     
-                    $phone = $this->getPhoneFromData($customerData);
-                    $name = $this->getNameFromData($customerData, $rowIndex + 1);
-                    $purchaseQuantity = $this->getQuantityFromData($customerData);
-                    
-                    if (empty($phone)) {
-                        $errors[] = "Baris " . ($rowIndex + 1) . ": Nomor telepon kosong atau tidak valid";
+                    if (!$this->isValidPhoneNumber($cleanPhone)) {
+                        $errors[] = "Baris " . ($rowIndex + 1) . ": Format nomor telepon tidak valid ($phone)";
                         continue;
                     }
                     
-                    if ($purchaseQuantity < 1 || $purchaseQuantity > 999) {
-                        $purchaseQuantity = 1;
-                    }
+                    $customer = Customer::where('phone', $cleanPhone)->first();
                     
-                    try {
-                        $cleanPhone = $this->cleanPhoneNumber($phone);
-                        
-                        $customer = Customer::firstOrCreate([
-                            'phone' => $cleanPhone,
-                        ], [
-                            'name' => $name,
-                        ]);
-
-                        if (empty($customer->name) || $customer->name === 'Unknown') {
+                    if ($customer) {
+                        if (empty($customer->name) || $customer->name === 'Unknown' || strlen($name) > strlen($customer->name)) {
                             $customer->update(['name' => $name]);
                         }
-
-                        $customerGroup->customers()->syncWithoutDetaching([$customer->id]);
-                        
-                        $processedCustomers[] = $customer->id;
-                        $totalQuantity += $purchaseQuantity;
-
-                        if ($campaign->product_id) {
-                            $customer->purchases()->syncWithoutDetaching([
-                                $campaign->product_id => [
-                                    'campaign_id' => $campaign->id,
-                                    'last_purchase_quantity' => $purchaseQuantity
-                                    ]
-                            ]);
-                        }
-                        
-                    } catch (\Exception $e) {
-                        $errors[] = "Baris " . ($rowIndex + 1) . ": Error processing customer - " . $e->getMessage();
+                    } else {
+                        $customer = Customer::create([
+                            'phone' => $cleanPhone,
+                            'name' => $name,
+                        ]);
                     }
-                } else {
-                    Log::info("Row " . ($rowIndex + 1) . ": Empty row, skipping.");
+
+                    $customerGroup->customers()->syncWithoutDetaching([$customer->id]);
+                    
+                    $processedCustomers[] = $customer->id;
+                    $totalQuantity += $purchaseQuantity;
+                    $successCount++;
+
+                    if ($campaign->product_id) {
+                        $customer->purchases()->syncWithoutDetaching([
+                            $campaign->product_id => [
+                                'campaign_id' => $campaign->id,
+                                'last_purchase_quantity' => $purchaseQuantity,
+                                'created_at' => now(),
+                                'updated_at' => now()
+                            ]
+                        ]);
+                    }
+                    
+                } catch (\Exception $e) {
+                    $errors[] = "Baris " . ($rowIndex + 1) . ": Error - " . $e->getMessage();
+                    Log::error("Error processing customer row " . ($rowIndex + 1), [
+                        'phone' => $phone,
+                        'name' => $name,
+                        'error' => $e->getMessage()
+                    ]);
                 }
             }
 
-            if (!empty($errors) && count($processedCustomers) == 0) {
-                throw new \Exception("Tidak ada customer yang berhasil diproses. Errors: " . implode(', ', array_slice($errors, 0, 3)));
+            if ($successCount == 0) {
+                $errorMsg = "Tidak ada customer yang berhasil diproses.";
+                if (!empty($errors)) {
+                    $errorMsg .= " Errors: " . implode('; ', array_slice($errors, 0, 5));
+                }
+                throw new \Exception($errorMsg);
             }
 
             $customerGroup->update([
-                'total_customers' => count($processedCustomers),
-                'description' => $customerGroup->description . " | Total customers: " . count($processedCustomers) . " | Total quantity: " . $totalQuantity,
+                'total_customers' => $successCount,
+                'description' => "Imported from CSV | Total customers: $successCount | Total quantity: $totalQuantity" . 
+                            (!empty($errors) ? " | Errors: " . count($errors) : ""),
             ]);
+
+            if (isset($csvPath) && Storage::disk('public')->exists($csvPath)) {
+                Storage::disk('public')->delete($csvPath);
+            }
 
             return $customerGroup;
 
         } catch (\Exception $e) {
-            Storage::disk('public')->delete($csvPath);
+            if (isset($csvPath) && Storage::disk('public')->exists($csvPath)) {
+                Storage::disk('public')->delete($csvPath);
+            }
             throw new \Exception('Error processing CSV file: ' . $e->getMessage());
         }
     }
 
     private function scheduleReminderMessages(Campaign $campaign, array $customerGroups, $tanggalTerjual = null, $timeSend = null)
     {
-        $fonnteToken = User::find(auth()->id())->fonnte_token;
+        $user = User::find(auth()->id());
+        $fonnteToken = $user->fonnte_token ?? null;
         
-        $messageTemplateContent = $campaign->messageTemplate->content;
-        $targetProduct = Product::find($campaign->product_id);
-
-        if (!$fonnteToken || !$targetProduct) {
-            Log::warning('Missing Fonnte token or product for campaign: ' . $campaign->id);
-            return;
+        if (!$fonnteToken) {
+            throw new \Exception('Fonnte token tidak ditemukan. Silakan konfigurasi token Fonnte terlebih dahulu.');
+        }
+        
+        $messageTemplateContent = $campaign->messageTemplate->content ?? null;
+        if (!$messageTemplateContent) {
+            throw new \Exception('Template pesan tidak ditemukan.');
+        }
+        
+        $targetProduct = null;
+        if ($campaign->product_id) {
+            $targetProduct = Product::find($campaign->product_id);
+            if (!$targetProduct) {
+                Log::warning('Product not found for campaign: ' . $campaign->id);
+            }
         }
 
         $baseDate = $tanggalTerjual ? \Carbon\Carbon::parse($tanggalTerjual) : now();
         
         if ($timeSend) {
-            $timeParts = explode(':', $timeSend);
-            $hour = intval($timeParts[0]);
-            $minute = intval($timeParts[1]);
-            $baseDate->setTime($hour, $minute, 0);
+            try {
+                $timeParts = explode(':', $timeSend);
+                $hour = intval($timeParts[0]);
+                $minute = intval($timeParts[1]);
+                $baseDate->setTime($hour, $minute, 0);
+            } catch (\Exception $e) {
+                Log::warning('Invalid time format for campaign ' . $campaign->id . ': ' . $timeSend);
+                $baseDate->setTime(9, 0, 0);
+            }
         }
         
         $messagesToSend = [];
+        $totalCustomers = 0;
 
         foreach ($customerGroups as $customerGroup) {
-            $customers = $customerGroup->customers;
+            $customers = $customerGroup->customers()->get();
+            $totalCustomers += $customers->count();
 
             foreach ($customers as $customer) {
-                $purchaseData = $customer->purchases()->where('product_id', $targetProduct->id)->first();
-                $purchaseQuantity = $purchaseData ? $purchaseData->pivot->last_purchase_quantity : 1;
+                try {
+                    $purchaseQuantity = 1;
+                    
+                    if ($targetProduct) {
+                        $purchaseData = $customer->purchases()
+                            ->where('product_id', $targetProduct->id)
+                            ->wherePivot('campaign_id', $campaign->id)
+                            ->first();
+                        
+                        if ($purchaseData) {
+                            $purchaseQuantity = $purchaseData->pivot->last_purchase_quantity ?? 1;
+                        }
+                    }
 
-                $estimationDays = 0;
-                
-                if (isset($targetProduct->default_estimation_days_per_unit) && $targetProduct->default_estimation_days_per_unit == 0) {
-                    $estimationDays = 0;
-                    $scheduledDate = now(); 
+                    $scheduledDate = $this->calculateScheduleDate($baseDate, $targetProduct, $purchaseQuantity, $timeSend);
                     
-                    if ($timeSend) {
-                        $timeParts = explode(':', $timeSend);
-                        $hour = intval($timeParts[0]);
-                        $minute = intval($timeParts[1]);
-                        $scheduledDate->setTime($hour, $minute, 0);
-                    } else {
-                        $scheduledDate->setTime(9, 0, 0);
+                    $scheduleTimestamp = $scheduledDate->timestamp;
+                    $formattedEstimationDate = $scheduledDate->format('d M Y');
+
+                    $personalizedMessage = $this->personalizeMessage(
+                        $messageTemplateContent,
+                        $customer,
+                        $targetProduct,
+                        $purchaseQuantity,
+                        $formattedEstimationDate
+                    );
+
+                    $formattedPhone = $this->formatPhoneForFonnte($customer->phone);
+                    if (!$this->isValidPhoneNumber($formattedPhone)) {
+                        Log::warning("Invalid phone number for customer " . $customer->id . ": " . $customer->phone);
+                        continue;
                     }
-                    if ($scheduledDate->isPast()) {
-                        $scheduledDate = now();
-                    }
-                } elseif (isset($targetProduct->default_estimation_days_per_unit) && $targetProduct->default_estimation_days_per_unit > 0) {
-                    $estimationDays = $targetProduct->default_estimation_days_per_unit * $purchaseQuantity;
-                    $scheduledDate = $baseDate->copy()->addDays($estimationDays);
+
+                    $messagesToSend[] = [
+                        "target" => $formattedPhone,
+                        "message" => $personalizedMessage,
+                        "schedule" => $scheduleTimestamp,
+                        "delay" => "3",
+                    ];
                     
-                    if (!$timeSend) {
-                        $scheduledDate->setTime(9, 0, 0);
-                    }
-                } else {
-                    $estimationDays = 7 * $purchaseQuantity;
-                    $scheduledDate = $baseDate->copy()->addDays($estimationDays);
-                    
-                    if (!$timeSend) {
-                        $scheduledDate->setTime(9, 0, 0);
-                    }
+                } catch (\Exception $e) {
+                    Log::error("Error preparing message for customer " . $customer->id . ": " . $e->getMessage());
                 }
-                
-                $scheduleTimestamp = $scheduledDate->timestamp;
-                $formattedEstimationDate = $scheduledDate->format('d M Y');
-
-                $personalizedMessage = str_replace(
-                    [
-                        '{name}', 
-                        '{product_name}',
-                        '{quantity_purchased}',
-                        '{estimated_finish_date}',
-                    ], 
-                    [
-                        $customer->name, 
-                        $targetProduct->name,            
-                        $purchaseQuantity,            
-                        $formattedEstimationDate,
-                    ],
-                    $messageTemplateContent
-                );
-
-                $messagesToSend[] = [
-                    "target" => $this->formatPhoneForFonnte($customer->phone),
-                    "message" => $personalizedMessage,
-                    "schedule" => $scheduleTimestamp, 
-                    "delay" => "3", 
-                ];
             }
         }
 
-        if (!empty($messagesToSend)) {
-            $this->sendToFonnte($messagesToSend, $fonnteToken, $campaign);
+        if (empty($messagesToSend)) {
+            throw new \Exception('Tidak ada pesan yang dapat dikirim. Periksa data customer dan nomor telepon.');
         }
+
+        $this->sendToFonnte($messagesToSend, $fonnteToken, $campaign);
+    }
+
+    private function calculateScheduleDate($baseDate, $targetProduct, $purchaseQuantity, $timeSend)
+    {
+        $estimationDays = 0;
+        
+        if ($targetProduct && isset($targetProduct->default_estimation_days_per_unit)) {
+            if ($targetProduct->default_estimation_days_per_unit == 0) {
+                $scheduledDate = now();
+                
+                if ($timeSend) {
+                    $timeParts = explode(':', $timeSend);
+                    $hour = intval($timeParts[0]);
+                    $minute = intval($timeParts[1]);
+                    $scheduledDate->setTime($hour, $minute, 0);
+                } else {
+                    $scheduledDate->setTime(9, 0, 0);
+                }
+                
+                if ($scheduledDate->isPast()) {
+                    $scheduledDate = now();
+                }
+            } else {
+                $estimationDays = $targetProduct->default_estimation_days_per_unit * $purchaseQuantity;
+                $scheduledDate = $baseDate->copy()->addDays($estimationDays);
+                
+                if (!$timeSend) {
+                    $scheduledDate->setTime(9, 0, 0);
+                }
+            }
+        } else {
+            $estimationDays = 1 * $purchaseQuantity;
+            $scheduledDate = $baseDate->copy()->addDays($estimationDays);
+            
+            if (!$timeSend) {
+                $scheduledDate->setTime(9, 0, 0);
+            }
+        }
+        
+        return $scheduledDate;
+    }
+
+    private function personalizeMessage($messageTemplate, $customer, $product, $quantity, $estimationDate)
+    {
+        $customerName = (string) ($customer->name ?? 'Customer');
+        $productName = $product ? (string) ($product->name ?? 'Product') : 'Product';
+        $quantityStr = (string) $quantity;
+        $estimationDateStr = (string) $estimationDate;
+        
+        $replacements = [
+            '{name}' => $customerName,
+            '{customer_name}' => $customerName,
+            '{quantity_purchased}' => $quantityStr,
+            '{estimated_finish_date}' => $estimationDateStr,
+        ];
+        
+        if ($product) {
+            $replacements['{product_name}'] = $productName;
+            $replacements['{product}'] = $productName;
+        }
+        
+        return str_replace(
+            array_keys($replacements),
+            array_values($replacements),
+            (string) $messageTemplate
+        );
     }
 
     private function sendToFonnte(array $messages, string $fonnteToken, Campaign $campaign)
@@ -454,15 +580,20 @@ class CampaignController extends Controller
 
     private function formatPhoneForFonnte($phone)
     {
-        $phone = preg_replace('/[^0-9]/', '', $phone);
+        $phone = (string) $phone;
+        $cleanPhone = $this->cleanPhoneNumber($phone);
         
-        if (substr($phone, 0, 1) === '0') {
-            return '62' . substr($phone, 1);
-        } elseif (substr($phone, 0, 2) !== '62') {
-            return '62' . $phone;
+        if (substr($cleanPhone, 0, 2) !== '62') {
+            if (substr($cleanPhone, 0, 1) === '0') {
+                $cleanPhone = '62' . substr($cleanPhone, 1);
+            } elseif (substr($cleanPhone, 0, 1) === '8') {
+                $cleanPhone = '62' . $cleanPhone;
+            } else {
+                $cleanPhone = '62' . $cleanPhone;
+            }
         }
         
-        return $phone;
+        return $cleanPhone;
     }
     
     private function getPhoneFromData($data)
@@ -499,7 +630,7 @@ class CampaignController extends Controller
     
     private function getQuantityFromData($data)
     {
-        $quantityFields = ['purchase_quantity', 'quantity', 'qty', 'jumlah', 'jumlah_beli'];
+        $quantityFields = ['purchase_quantity', 'quantity', 'qty', 'jumlah', 'jumlah beli'];
         
         foreach ($quantityFields as $field) {
             if (isset($data[$field]) && !empty(trim($data[$field]))) {
@@ -517,6 +648,7 @@ class CampaignController extends Controller
 
     private function cleanPhoneNumber($phone)
     {
+        $phone = (string) $phone;
         $phone = preg_replace('/[^0-9+]/', '', $phone);
         
         if (substr($phone, 0, 1) === '0') {
@@ -530,6 +662,23 @@ class CampaignController extends Controller
         }
         
         return $phone;
+    }
+
+    private function isValidPhoneNumber($phone)
+    {
+        if (!preg_match('/^62[0-9]{8,13}$/', $phone)) {
+            return false;
+        }
+        
+        $validPrefixes = ['628', '629', '627', '626', '625', '624', '623', '622', '621'];
+        
+        foreach ($validPrefixes as $prefix) {
+            if (substr($phone, 0, strlen($prefix)) === $prefix) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     public function edit(Campaign $campaign)
@@ -598,29 +747,30 @@ class CampaignController extends Controller
     public function downloadCsvTemplate()
     {
         $sampleData = [
-            ['85704412510', '1', 'Ridwan Setio Budi'],
-            ['82337440435', '2', 'Davindra'],
+            [ 'nomor','nama', 'jumlah_beli'], 
+            ['6285704412510','Ridwan Setio Budi',  '1'],
+            ['6282337440435', 'Davindra', '2'],
         ];
         
-        $filename = 'customer_template.csv';
+        $filename = 'template_customer.csv';
         
         $headers = [
             'Content-Type' => 'text/csv; charset=utf-8',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Cache-Control' => 'no-cache, must-revalidate',
+            'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
         ];
         
         $callback = function() use ($sampleData) {
-            $file = fopen('php://output', 'w');
+            $output = fopen('php://output', 'w');
             
-            fwrite($file, "\xEF\xBB\xBF");
-            
-            fputcsv($file, ['nomor', 'jumlah_beli', 'nama']);
+            fwrite($output, "\xEF\xBB\xBF");
             
             foreach ($sampleData as $row) {
-                fputcsv($file, $row);
+                fputcsv($output, $row, ';');
             }
             
-            fclose($file);
+            fclose($output);
         };
         
         return response()->stream($callback, 200, $headers);
