@@ -16,4 +16,14 @@ class CampaignCustomerGroup extends Pivot
     ];
 
     public $timestamps = false;
+
+    public function campaign()
+    {
+        return $this->belongsTo(Campaign::class);
+    }
+
+    public function customerGroup()
+    {
+        return $this->belongsTo(CustomerGroup::class);
+    }
 }

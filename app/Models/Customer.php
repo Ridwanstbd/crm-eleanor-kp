@@ -28,4 +28,18 @@ class Customer extends Model
     {
         return $this->hasMany(MessageLogs::class);
     }
+
+    public function campaigns()
+    {
+        return $this->belongsToManyThrough(
+            Campaign::class,
+            CustomerGroup::class,
+            'customer_customer_group',
+            'campaign_customer_group',
+            'id',
+            'id',
+            'customer_group_id',
+            'customer_group_id'
+        );
+    }
 }

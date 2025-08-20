@@ -35,4 +35,18 @@ class Campaign extends Model
         return $this->belongsToMany(CustomerGroup::class, 'campaign_customer_group')
                 ->using(CampaignCustomerGroup::class);
     }
+
+    public function customers()
+    {
+        return $this->belongsToManyThrough(
+            Customer::class,
+            CustomerGroup::class,
+            'campaign_customer_group',
+            'customer_customer_group',
+            'id',
+            'id',
+            'customer_group_id',
+            'customer_group_id'
+        );
+    }
 }
