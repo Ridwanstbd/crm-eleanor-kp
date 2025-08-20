@@ -11,9 +11,11 @@
         </div>
 
         <div class="grid grid-cols-2 gap-4">
+            @if($product)
             <x-Molecules.Form.FormGroup label="Jumlah Beli" for="message_log_purchase_quantity">
                 <p class="text-gray-900" x-text="selectedMessageLog?.purchase_quantity || ''"></p>
             </x-Molecules.Form.FormGroup>
+            @endif
             
             <x-Molecules.Form.FormGroup label="Status" for="message_log_status">
                 <p class="text-gray-900" x-text="selectedMessageLog?.status || ''"></p>

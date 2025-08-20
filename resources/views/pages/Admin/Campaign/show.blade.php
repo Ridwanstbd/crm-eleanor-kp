@@ -6,21 +6,26 @@
                 <x-Atoms.Input name="name" value="{{$campaign->name}}" disabled readonly/>
             </x-Molecules.Form.FormGroup>
             <x-Molecules.Form.FormGroup label="Produk" for="product">
-                <x-Molecules.Select 
-                    name="product" 
-                    id="product"
-                    :options="collect([$product])"
-                    valueField="id"
-                    textField="name"
-                    :selected="$product->id"
-                    :allowEmpty="false"
-                    disabled
-                    readonly>
-                </x-Molecules.Select>
-                @error('product')
-                <span class="text-red-500 text-sm">{{ $message }}</span>
-                @enderror
-            </x-Molecules.Form.FormGroup>
+                    @if($product)
+                        <x-Molecules.Select 
+                            name="product" 
+                            id="product"
+                            :options="collect([$product])"
+                            valueField="id"
+                            textField="name"
+                            :selected="$product->id"
+                            :allowEmpty="false"
+                            disabled
+                            readonly>
+                        </x-Molecules.Select>
+                    @else
+                        <x-Atoms.Input name="product" value="Tanpa Produk" disabled readonly/>
+                        <p class="text-sm text-gray-500 mt-1">Kampanye ini tidak terkait dengan produk tertentu</p>
+                    @endif
+                    @error('product')
+                        <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
+                    @enderror
+                </x-Molecules.Form.FormGroup>
 
             <x-Molecules.Form.FormGroup label="Tanggal Terjual" for="tanggal_terjual">
                 <x-Atoms.InputDate
@@ -66,7 +71,9 @@
                 <x-Atoms.Table.th>No</x-Atoms.Table.th>
                 <x-Atoms.Table.th>Nama Pelanggan</x-Atoms.Table.th>
                 <x-Atoms.Table.th>Nomor Telepon</x-Atoms.Table.th>
+                @if($product)
                 <x-Atoms.Table.th>Jumlah Beli</x-Atoms.Table.th>
+                @endif
                 <x-Atoms.Table.th>Status Pesan</x-Atoms.Table.th>
                 <x-Atoms.Table.th>Waktu Kirim</x-Atoms.Table.th>
                 <x-Atoms.Table.th>Aksi</x-Atoms.Table.th>
@@ -80,9 +87,11 @@
                             {{ $messageLog->customer ? $messageLog->customer->name : '-' }}
                         </x-Atoms.Table.td>
                         <x-Atoms.Table.td>{{ $messageLog->target }}</x-Atoms.Table.td>
+                        @if($product)
                         <x-Atoms.Table.td>
                             {{ $messageLog->customer ? $messageLog->customer->purchase_quantity : '-' }}
                         </x-Atoms.Table.td>
+                        @endif
                         <x-Atoms.Table.td>
                             @if($messageLog->status == 'success')
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">

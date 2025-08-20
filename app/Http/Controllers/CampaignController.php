@@ -47,9 +47,10 @@ class CampaignController extends Controller
     {
         $products = Product::all();
         $templates = MessageTemplate::all();
-        $customers = Customer::get();
+        $customerGroups= CustomerGroup::withCount('customers')->get();
+        $customers = Customer::with('groups')->get();
                 
-        return view('pages.Admin.Campaign.create', compact("products","templates","customers"));
+        return view('pages.Admin.Campaign.create', compact("products","templates","customerGroups","customers"));
     }
 
     public function store(Request $request)
@@ -95,6 +96,7 @@ class CampaignController extends Controller
             $validationMessages['selected_customers.min'] = 'Pilih minimal satu pelanggan.';
             $validationMessages['selected_customers.*.exists'] = 'Pelanggan yang dipilih tidak valid.';
             
+            // Only require quantities if product is selected
             if ($request->filled('product')) {
                 $validationRules['customer_quantities'] = 'required|array';
                 $validationRules['customer_quantities.*'] = 'required|integer|min:1|max:999';
@@ -118,7 +120,7 @@ class CampaignController extends Controller
             $campaign = Campaign::create([
                 'name' => $request->name,
                 'user_id' => Auth::id(),
-                'product_id' => $request->product,
+                'product_id' => $request->filled('product') ? $request->product : null,
                 'message_template_id' => $request->template,
                 'schedule' => $request->tanggal_terjual,
                 'time_send' => $request->time_send,
@@ -258,7 +260,6 @@ class CampaignController extends Controller
                 array_shift($csvData);
             }
             
-            $processedCustomers = [];
             $totalQuantity = 0;
             $errors = [];
             $successCount = 0;
@@ -275,7 +276,9 @@ class CampaignController extends Controller
                 
                 $phone = isset($row[0]) ? trim((string) $row[0]) : '';
                 $name = isset($row[1]) ? trim((string) $row[1]) : '';
-                $purchaseQuantity = isset($row[2]) && !empty(trim((string) $row[2])) ? intval(trim((string) $row[2])) : 1;
+                $purchaseQuantity = ($campaign->product_id && isset($row[2]) && !empty(trim((string) $row[2]))) 
+                    ? intval(trim((string) $row[2])) 
+                    : 1;
                 
                 if (empty($phone) || empty($name)) {
                     $errors[] = "Baris " . ($rowIndex + 1) . ": Nomor telepon atau nama kosong";
@@ -439,11 +442,13 @@ class CampaignController extends Controller
                         continue;
                     }
 
+                    $delay = ($campaign->product_id === null) ? "3" : "3";
+
                     $messagesToSend[] = [
                         "target" => $formattedPhone,
                         "message" => $personalizedMessage,
                         "schedule" => $scheduleTimestamp,
-                        "delay" => "3",
+                        "delay" => $delay,
                     ];
                     
                 } catch (\Exception $e) {
@@ -488,11 +493,19 @@ class CampaignController extends Controller
                 }
             }
         } else {
-            $estimationDays = 1 * $purchaseQuantity;
-            $scheduledDate = $baseDate->copy()->addDays($estimationDays);
+            $scheduledDate = now();
             
-            if (!$timeSend) {
+            if ($timeSend) {
+                $timeParts = explode(':', $timeSend);
+                $hour = intval($timeParts[0]);
+                $minute = intval($timeParts[1]);
+                $scheduledDate->setTime($hour, $minute, 0);
+            } else {
                 $scheduledDate->setTime(9, 0, 0);
+            }
+            
+            if ($scheduledDate->isPast()) {
+                $scheduledDate = now();
             }
         }
         
@@ -502,7 +515,7 @@ class CampaignController extends Controller
     private function personalizeMessage($messageTemplate, $customer, $product, $quantity, $estimationDate)
     {
         $customerName = (string) ($customer->name ?? 'Customer');
-        $productName = $product ? (string) ($product->name ?? 'Product') : 'Product';
+        $productName = $product ? (string) ($product->name ?? 'Product') : '';
         $quantityStr = (string) $quantity;
         $estimationDateStr = (string) $estimationDate;
         
@@ -516,6 +529,9 @@ class CampaignController extends Controller
         if ($product) {
             $replacements['{product_name}'] = $productName;
             $replacements['{product}'] = $productName;
+        } else {
+            $replacements['{product_name}'] = '';
+            $replacements['{product}'] = '';
         }
         
         return str_replace(
@@ -693,33 +709,45 @@ class CampaignController extends Controller
         
         $customers = Customer::whereIn('id', $customerIds)
             ->with(['purchases' => function ($query) use ($campaign) {
-                $query->wherePivot('campaign_id', $campaign->id)
-                    ->wherePivot('product_id', $campaign->product_id);
+                if ($campaign->product_id) {
+                    $query->wherePivot('campaign_id', $campaign->id)
+                        ->wherePivot('product_id', $campaign->product_id);
+                }
             }])
             ->get();
         
         $customers->transform(function ($customer) use ($campaign) {
-            $purchaseData = $customer->purchases->first();
-            $customer->purchase_quantity = $purchaseData ? $purchaseData->pivot->last_purchase_quantity : 1;
+            if ($campaign->product_id) {
+                $purchaseData = $customer->purchases->first();
+                $customer->purchase_quantity = $purchaseData ? $purchaseData->pivot->last_purchase_quantity : 1;
+            } else {
+                $customer->purchase_quantity = 1; 
+            }
             return $customer;
         });
 
-        $product = Product::find($campaign->product_id);         
+        $product = $campaign->product_id ? Product::find($campaign->product_id) : null;         
         $template = MessageTemplate::find($campaign->message_template_id);
         
         $messageLogs = $campaign->messageLogs()
             ->with(['customer' => function($query) use ($campaign) {
-                $query->with(['purchases' => function ($subQuery) use ($campaign) {
-                    $subQuery->wherePivot('campaign_id', $campaign->id)
-                        ->wherePivot('product_id', $campaign->product_id);
-                }]);
+                if ($campaign->product_id) {
+                    $query->with(['purchases' => function ($subQuery) use ($campaign) {
+                        $subQuery->wherePivot('campaign_id', $campaign->id)
+                            ->wherePivot('product_id', $campaign->product_id);
+                    }]);
+                }
             }])
             ->paginate(10);
         
         foreach ($messageLogs as $messageLog) {
             if ($messageLog->customer) {
-                $purchaseData = $messageLog->customer->purchases->first();
-                $messageLog->customer->purchase_quantity = $purchaseData ? $purchaseData->pivot->last_purchase_quantity : 1;
+                if ($campaign->product_id) {
+                    $purchaseData = $messageLog->customer->purchases->first();
+                    $messageLog->customer->purchase_quantity = $purchaseData ? $purchaseData->pivot->last_purchase_quantity : 1;
+                } else {
+                    $messageLog->customer->purchase_quantity = 1; 
+                }
             }
         }
         

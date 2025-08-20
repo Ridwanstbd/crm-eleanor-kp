@@ -57,6 +57,13 @@ class MessageTemplateController extends Controller
 
     public function destroy(MessageTemplate $messageTemplate)
     {
+        $campaignCount = $messageTemplate->campaigns()->count();
+            
+            if ($campaignCount > 0) {
+                return redirect()->route('templates.index')
+                    ->with('error', "Template tidak dapat dihapus karena masih digunakan oleh {$campaignCount} campaign(s). Hapus campaign yang menggunakan template ini terlebih dahulu.");
+            }
+
         $messageTemplate->delete();
 
         return redirect()->route('templates.index')->with('success', 'Template deleted.');
