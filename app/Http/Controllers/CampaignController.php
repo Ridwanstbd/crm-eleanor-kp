@@ -402,6 +402,7 @@ class CampaignController extends Controller
         }
         
         $messagesToSend = [];
+        $scheduleData = [];
         $totalCustomers = 0;
 
         foreach ($customerGroups as $customerGroup) {
@@ -451,6 +452,13 @@ class CampaignController extends Controller
                         "delay" => $delay,
                     ];
                     
+                    $scheduleData[] = [
+                        'target' => $formattedPhone,
+                        'customer_id' => $customer->id,
+                        'scheduled_at' => $scheduledDate,
+                        'message' => $personalizedMessage
+                    ];
+                    
                 } catch (\Exception $e) {
                     Log::error("Error preparing message for customer " . $customer->id . ": " . $e->getMessage());
                 }
@@ -461,7 +469,7 @@ class CampaignController extends Controller
             throw new \Exception('Tidak ada pesan yang dapat dikirim. Periksa data customer dan nomor telepon.');
         }
 
-        $this->sendToFonnte($messagesToSend, $fonnteToken, $campaign);
+        $this->sendToFonnte($messagesToSend, $fonnteToken, $campaign, $scheduleData);
     }
 
     private function calculateScheduleDate($baseDate, $targetProduct, $purchaseQuantity, $timeSend)
@@ -541,7 +549,7 @@ class CampaignController extends Controller
         );
     }
 
-    private function sendToFonnte(array $messages, string $fonnteToken, Campaign $campaign)
+    private function sendToFonnte(array $messages, string $fonnteToken, Campaign $campaign, array $scheduleData = [])
     {
         $payload = [
             "data" => json_encode($messages),
@@ -567,6 +575,14 @@ class CampaignController extends Controller
                     if ($target && $messageContent) {
                         $customer = Customer::where('phone', $target)->first();
                         $customerId = $customer->id ?? null;
+                        
+                        $scheduleInfo = null;
+                        foreach ($scheduleData as $data) {
+                            if ($data['target'] === $target) {
+                                $scheduleInfo = $data;
+                                break;
+                            }
+                        }
 
                         MessageLogs::create([
                             'report_id' => $reportId,
@@ -578,6 +594,7 @@ class CampaignController extends Controller
                             'state' => null,
                             'customer_id' => $customerId,
                             'campaign_id' => $campaign->id,
+                            'scheduled_at' => $scheduleInfo ? $scheduleInfo['scheduled_at'] : null,
                         ]);
                     }
                 }

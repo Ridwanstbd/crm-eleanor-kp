@@ -75,7 +75,7 @@
                 <x-Atoms.Table.th>Jumlah Beli</x-Atoms.Table.th>
                 @endif
                 <x-Atoms.Table.th>Status Pesan</x-Atoms.Table.th>
-                <x-Atoms.Table.th>Waktu Kirim</x-Atoms.Table.th>
+                <x-Atoms.Table.th>Jadwal Kirim</x-Atoms.Table.th>
                 <x-Atoms.Table.th>Aksi</x-Atoms.Table.th>
             </x-Molecules.Table.Header>
 
@@ -124,12 +124,12 @@
                             @endif
                         </x-Atoms.Table.td>
                         <x-Atoms.Table.td>
-                            @if($messageLog->updated_at)
+                            @if($messageLog->scheduled_at)
                                 <div class="text-sm text-gray-900">
-                                    {{ \Carbon\Carbon::parse($messageLog->updated_at)->format('d/m/Y H:i') }}
+                                    {{ \Carbon\Carbon::parse($messageLog->scheduled_at)->format('d/m/Y H:i') }}
                                 </div>
                                 <div class="text-sm text-gray-500">
-                                    {{ \Carbon\Carbon::parse($messageLog->updated_at)->diffForHumans() }}
+                                    {{ \Carbon\Carbon::parse($messageLog->scheduled_at)->diffForHumans() }}
                                 </div>
                             @else
                                 <span class="text-sm text-gray-500">Belum dikirim</span>
@@ -145,7 +145,7 @@
                                         'purchase_quantity' => $messageLog->customer ? $messageLog->customer->purchase_quantity : '-',
                                         'status' => ucfirst($messageLog->status ?? 'Tidak Diketahui'),
                                         'state' => ucfirst($messageLog->state ?? 'Tidak Diketahui'),
-                                        'updated_at' => $messageLog->updated_at ? \Carbon\Carbon::parse($messageLog->updated_at)->format('d/m/Y H:i') : 'Belum dikirim',
+                                        'scheduled_at' => $messageLog->scheduled_at ? \Carbon\Carbon::parse($messageLog->scheduled_at)->format('d/m/Y H:i') : 'Belum dikirim',
                                         'message' => $messageLog->message
                                     ]) }})"
                                     class="px-3 py-1 text-sm text-white bg-yellow-500 rounded hover:bg-yellow-600">

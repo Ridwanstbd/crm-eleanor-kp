@@ -17,7 +17,7 @@ class MessageLogs extends Model
 
     protected $fillable = [
         'report_id', 'device', 'target', 'message', 'state_id', 'status', 'state',
-        'campaign_id', 'customer_id' 
+        'campaign_id', 'customer_id', 'scheduled_at' 
     ];
 
     public function campaign()

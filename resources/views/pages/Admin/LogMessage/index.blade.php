@@ -7,7 +7,7 @@
                 <x-Atoms.Table.th>Nama</x-Atoms.Table.th>
                 <x-Atoms.Table.th>Nomor</x-Atoms.Table.th>
                 <x-Atoms.Table.th>Status</x-Atoms.Table.th>
-                <x-Atoms.Table.th>Waktu Kirim</x-Atoms.Table.th>
+                <x-Atoms.Table.th>Jadwal Kirim</x-Atoms.Table.th>
                 <x-Atoms.Table.th>Aksi</x-Atoms.Table.th>
             </x-Molecules.Table.Header>
 
@@ -18,7 +18,7 @@
                         <x-Atoms.Table.td>{{ $log->customer ? $log->customer->name : '-' }}</x-Atoms.Table.td>
                         <x-Atoms.Table.td>{{ $log->target }}</x-Atoms.Table.td>
                         <x-Atoms.Table.td>{{ ucfirst($log->status) }}</x-Atoms.Table.td>
-                        <x-Atoms.Table.td>{{ \Carbon\Carbon::parse($log->updated_at)->format('d M Y, H:i') }}</x-Atoms.Table.td>
+                        <x-Atoms.Table.td>{{ \Carbon\Carbon::parse($log->scheduled_at ?? $log->created_at)->format('d M Y, H:i') }}</x-Atoms.Table.td>
                         <x-Atoms.Table.td>
                         <x-Atoms.Button 
                         @click="showDetail({{ json_encode([
@@ -27,7 +27,7 @@
                                     'target' => $log->target,
                                     'status' => ucfirst($log->status),
                                     'state' => ucfirst($log->state),
-                                    'updated_at' => \Carbon\Carbon::parse($log->updated_at)->format('d M Y, H:i'),
+                                    'scheduled_at' => \Carbon\Carbon::parse($log->scheduled_at ?? $log->created_at)->format('d M Y, H:i'),
                                     'message' => $log->message
                                 ]) }})"
                         variant="secondary">Detail
@@ -66,8 +66,8 @@
                     </x-Molecules.Form.FormGroup>
                 </div>
                 
-                <x-Molecules.Form.FormGroup label="Waktu Kirim" for="log_updated_at">
-                    <p class="text-gray-900" x-text="selectedLog?.updated_at || ''"></p>
+                <x-Molecules.Form.FormGroup label="Waktu Kirim" for="log_scheduled_at">
+                    <p class="text-gray-900" x-text="selectedLog?.scheduled_at || ''"></p>
                 </x-Molecules.Form.FormGroup>
                 
                 <x-Molecules.Form.FormGroup label="Isi Pesan" for="log_message">
