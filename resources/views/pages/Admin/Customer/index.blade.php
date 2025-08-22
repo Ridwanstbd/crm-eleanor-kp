@@ -1,70 +1,75 @@
 <x-Layouts.AdminLayout title="Pelanggan">
-    <x-Layouts.PageHeader title="Pelanggan">
-        <x-slot name="filters">
-            <x-Atoms.Form.SearchInput
-                name="search"
-                id="search"
-                value="{{ request('search') }}"
-                placeholder="Cari nama pelanggan..."
-                onchange="this.form.submit()"
-            />
-        </x-slot>
-        <x-slot name="actions">
-            <x-Atoms.Button @click="$dispatch('open-modal', 'create-customer')" >
-                <x-Atoms.Link href="#" >
-                    Tambah
-                </x-Atoms.Link>
+  <x-Layouts.PageHeader title="Pelanggan">
+    <x-slot name="filters">
+      <form method="GET">
+        <x-Atoms.Form.SearchInput
+          name="search"
+          id="search"
+          value="{{ request('search') }}"
+          placeholder="Cari nama/nomor..."
+          onchange="this.form.submit()"
+        />
+      </form>
+    </x-slot>
+    <x-slot name="actions">
+      <x-Atoms.Button @click="$dispatch('open-modal', 'create-customer')">
+        <x-Atoms.Link href="#">Tambah</x-Atoms.Link>
+      </x-Atoms.Button>
+    </x-slot>
+  </x-Layouts.PageHeader>
+
+  <x-Layouts.Table>
+    <x-Molecules.Table.Header>
+      <x-Atoms.Table.th>Nama Grup</x-Atoms.Table.th>
+      <x-Atoms.Table.th class="w-24 text-center">Jumlah</x-Atoms.Table.th>
+      <x-Atoms.Table.th class="w-36 text-center">Aksi</x-Atoms.Table.th>
+    </x-Molecules.Table.Header>
+
+    <x-Molecules.Table.Body>
+      {{-- Daftar grup --}}
+      @forelse ($groups as $group)
+        <tr>
+          <x-Atoms.Table.td>{{ $group->name }}</x-Atoms.Table.td>
+          <x-Atoms.Table.td class="text-center">
+            <span class="inline-block text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-700">
+              {{ $group->customers_count }}
+            </span>
+          </x-Atoms.Table.td>
+          <x-Atoms.Table.td class="text-center">
+            <x-Atoms.Button variant="secondary">
+              <x-Atoms.Link :href="route('customer-groups.show', $group)">Detail</x-Atoms.Link>
             </x-Atoms.Button>
-        </x-slot>
-    </x-Layouts.PageHeader>
-    <x-Layouts.Table>
-        <x-Molecules.Table.Header>
-            <x-Atoms.Table.th>No</x-Atoms.Table.th>
-            <x-Atoms.Table.th sortable :direction="$sortField === 'name' ? $sortDirection : null" onclick="window.location.href='{{ route('customers.index', array_merge(request()->query(), ['sort' => 'name', 'direction' => ($sortField === 'name' && $sortDirection === 'asc') ? 'desc' : 'asc'])) }}'">
-                Nama Pelanggan
-            </x-Atoms.Table.th>
-            <x-Atoms.Table.th sortable :direction="$sortField === 'phone' ? $sortDirection : null" onclick="window.location.href='{{ route('customers.index', array_merge(request()->query(), ['sort' => 'phone', 'direction' => ($sortField === 'phone' && $sortDirection === 'asc') ? 'desc' : 'asc'])) }}'">
-                Nomor Telepon
-            </x-Atoms.Table.th>
-            <x-Atoms.Table.th>Aksi</x-Atoms.Table.th>
-        </x-Molecules.Table.Header>
+          </x-Atoms.Table.td>
+        </tr>
+      @empty
+        <tr>
+          <td colspan="3" class="px-6 py-8 text-center text-gray-500">
+            Belum ada grup pelanggan.
+          </td>
+        </tr>
+      @endforelse
 
-        <x-Molecules.Table.Body>
-            @forelse ($customers as $customer)
-                <tr>
-                    <x-Atoms.Table.td>{{ $loop->iteration }}</x-Atoms.Table.td>
-                    <x-Atoms.Table.td>{{ $customer->name }}</x-Atoms.Table.td>
-                    <x-Atoms.Table.td>{{ $customer->phone }}</x-Atoms.Table.td>
-                    <x-Atoms.Table.td>
-                        <x-Atoms.Button @click="$dispatch('open-modal', 'edit-customer-{{ $customer->id }}')" variant="secondary">Ubah</x-Atoms.Button>
-                        <x-Atoms.Button @click="$dispatch('open-modal', 'delete-confirmation-{{ $customer->id }}')" variant="danger">Hapus</x-Atoms.Button>
-                    </x-Atoms.Table.td>
-                </tr>
-                <x-Organisms.CustomerModal :customer="$customer" mode="edit" />
-                <x-Layouts.Modal
-                    name="delete-confirmation-{{ $customer->id }}"
-                    title=""
-                    maxWidth="sm"
-                    :showIcon="false"
-                >
-                    <form action="{{ route('customers.destroy', $customer) }}" method="POST">
-                        @csrf
-                        @method('DELETE')
-                        <x-Molecules.ConfirmationContent :id="$customer->id">
-                            Yakin, Hapus {{$customer->name}}?
-                        </x-Molecules.ConfirmationContent>
-                    </form>
-                </x-Layouts.Modal>
-            @empty
-                <x-Atoms.Table.empty colspan="4">
-                    <p class="mt-1">Belum ada pelanggan.</p>
-                </x-Atoms.Table.empty>
-            @endforelse
-        </x-Molecules.Table.Body>
+      {{-- Baris Tanpa Grup --}}
+      <tr>
+        <x-Atoms.Table.td>Tanpa Grup</x-Atoms.Table.td>
+        <x-Atoms.Table.td class="text-center">
+          <span class="inline-block text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-700">
+            {{ $ungroupedCount }}
+          </span>
+        </x-Atoms.Table.td>
+        <x-Atoms.Table.td class="text-center">
+          <x-Atoms.Button variant="secondary">
+            <x-Atoms.Link :href="route('customers.ungrouped.show')">Detail</x-Atoms.Link>
+          </x-Atoms.Button>
+        </x-Atoms.Table.td>
+      </tr>
+    </x-Molecules.Table.Body>
 
-        <x-slot name="pagination">
-            <x-Molecules.Table.Pagination :paginator="$customers" />
-        </x-slot>
-    </x-Layouts.Table>
-    <x-Organisms.CustomerModal />
+    <x-slot name="pagination">
+      {{ $groups->links() }}
+    </x-slot>
+  </x-Layouts.Table>
+
+  {{-- Modal Tambah (jika dipakai) --}}
+  <x-Organisms.CustomerModal />
 </x-Layouts.AdminLayout>
