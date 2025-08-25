@@ -26,7 +26,7 @@
             "route": "customers.index",
             "icon": "M18 21a8 8 0 0 0-16 0 M15 8a5 5 0 1 0 -10 0a5 5 0 1 0 10 0 M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3",
             "text": "Pelanggan",
-            "activeRoutes": ["customers.index"]
+            "activeRoutes": ["customers.index", "customer-groups.show"]
         },
         {
             "route": "logs.index",

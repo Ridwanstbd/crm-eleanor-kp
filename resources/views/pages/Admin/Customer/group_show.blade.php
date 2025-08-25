@@ -1,36 +1,25 @@
 <x-Layouts.AdminLayout :title="'Grup: '.$group->name">
     <x-Layouts.PageHeader :title="'Grup: '.$group->name">
-        {{-- FILTER / SEARCH: tanpa tombol "Cari", submit via Enter / onchange --}}
         <x-slot name="filters">
             <form method="GET" action="{{ route('customer-groups.show', $group) }}">
-                {{-- Pertahankan sort/direction saat mencari --}}
                 <input type="hidden" name="sort" value="{{ $sort }}">
                 <input type="hidden" name="direction" value="{{ $dir }}">
 
                 <x-Atoms.Form.SearchInput
                     name="search"
                     value="{{ $search }}"
-                    placeholder="Cari nama/nomor telepon..."
+                    placeholder="Cari nomor telepon..."
                     onchange="this.form.submit()"
                 />
             </form>
         </x-slot>
-
-    {{-- ACTIONS: tombol tambah murni (tanpa Link) --}}
+        <x-slot name="actions">
             <x-Atoms.Button
                 as="a"
                 :href="$backUrl"
-                variant="secondary"
-                class="text-base font-medium leading-5 flex items-center justify-center"
-            >
-                Kembali
-            </x-Atoms.Button>
-
-        {{-- Tambah pelanggan (modal) --}}
-        <x-Atoms.Button type="button" @click="$dispatch('open-modal', 'create-customer')">
-            Tambah
-        </x-Atoms.Button>
-    </x-slot>
+                variant="primary"
+            >Kembali ke Daftar</x-Atoms.Button>
+        </x-slot>
 
     </x-Layouts.PageHeader>
 
@@ -38,7 +27,6 @@
         <x-Molecules.Table.Header>
             <x-Atoms.Table.th class="w-16">No</x-Atoms.Table.th>
 
-            {{-- Nama (sortable) --}}
             <x-Atoms.Table.th
                 sortable
                 :direction="$sort === 'name' ? $dir : null"
@@ -46,7 +34,6 @@
                 Nama Pelanggan
             </x-Atoms.Table.th>
 
-            {{-- Nomor telepon (sortable) --}}
             <x-Atoms.Table.th
                 sortable
                 :direction="$sort === 'phone' ? $dir : null"
@@ -77,14 +64,11 @@
                     </x-Atoms.Table.td>
                 </tr>
 
-                {{-- Modal edit (komponen yang sudah ada) --}}
                 <x-Organisms.CustomerModal :customer="$customer" mode="edit" />
 
-                {{-- Modal hapus: sertakan return_url agar tetap di halaman detail --}}
                 <x-Layouts.Modal name="delete-confirmation-{{ $customer->id }}" title="" maxWidth="sm" :showIcon="false">
                     <form action="{{ route('customers.destroy', $customer) }}" method="POST">
                         @csrf @method('DELETE')
-                        <input type="hidden" name="return_url" value="{{ url()->full() }}">
                         <x-Molecules.ConfirmationContent :id="$customer->id">
                             Yakin, Hapus {{ $customer->name }}?
                         </x-Molecules.ConfirmationContent>
@@ -101,7 +85,5 @@
             {{ $customers->links() }}
         </x-slot>
     </x-Layouts.Table>
-
-    {{-- Modal Tambah (dibutuhkan agar tombol "Tambah" berfungsi) --}}
     <x-Organisms.CustomerModal />
 </x-Layouts.AdminLayout>

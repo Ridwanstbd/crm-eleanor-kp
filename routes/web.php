@@ -35,8 +35,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/customer-groups/{group}', [CustomerController::class, 'showGroup'])
         ->whereNumber('group')
         ->name('customer-groups.show');
-    Route::get('/ungrouped-customers', [CustomerController::class, 'showUngrouped'])
-        ->name('customers.ungrouped.show');
 
 
     Route::get('/message-templates', [MessageTemplateController::class, 'index'])->name('templates.index');

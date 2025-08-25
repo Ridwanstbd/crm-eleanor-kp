@@ -1,21 +1,5 @@
 <x-Layouts.AdminLayout title="Pelanggan">
-  <x-Layouts.PageHeader title="Pelanggan">
-    <x-slot name="filters">
-      <form method="GET">
-        <x-Atoms.Form.SearchInput
-          name="search"
-          id="search"
-          value="{{ request('search') }}"
-          placeholder="Cari nama/nomor..."
-          onchange="this.form.submit()"
-        />
-      </form>
-    </x-slot>
-    <x-slot name="actions">
-      <x-Atoms.Button @click="$dispatch('open-modal', 'create-customer')">
-        <x-Atoms.Link href="#">Tambah</x-Atoms.Link>
-      </x-Atoms.Button>
-    </x-slot>
+  <x-Layouts.PageHeader title="Grup Pelanggan">
   </x-Layouts.PageHeader>
 
   <x-Layouts.Table>
@@ -26,7 +10,6 @@
     </x-Molecules.Table.Header>
 
     <x-Molecules.Table.Body>
-      {{-- Daftar grup --}}
       @forelse ($groups as $group)
         <tr>
           <x-Atoms.Table.td>{{ $group->name }}</x-Atoms.Table.td>
@@ -48,21 +31,6 @@
           </td>
         </tr>
       @endforelse
-
-      {{-- Baris Tanpa Grup --}}
-      <tr>
-        <x-Atoms.Table.td>Tanpa Grup</x-Atoms.Table.td>
-        <x-Atoms.Table.td class="text-center">
-          <span class="inline-block text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-700">
-            {{ $ungroupedCount }}
-          </span>
-        </x-Atoms.Table.td>
-        <x-Atoms.Table.td class="text-center">
-          <x-Atoms.Button variant="secondary">
-            <x-Atoms.Link :href="route('customers.ungrouped.show')">Detail</x-Atoms.Link>
-          </x-Atoms.Button>
-        </x-Atoms.Table.td>
-      </tr>
     </x-Molecules.Table.Body>
 
     <x-slot name="pagination">
@@ -70,6 +38,4 @@
     </x-slot>
   </x-Layouts.Table>
 
-  {{-- Modal Tambah (jika dipakai) --}}
-  <x-Organisms.CustomerModal />
 </x-Layouts.AdminLayout>
