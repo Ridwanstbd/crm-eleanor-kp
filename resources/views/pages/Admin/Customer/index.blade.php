@@ -22,7 +22,22 @@
             <x-Atoms.Button variant="secondary">
               <x-Atoms.Link :href="route('customer-groups.show', $group)">Detail</x-Atoms.Link>
             </x-Atoms.Button>
+            <x-Atoms.Button @click="$dispatch('open-modal', 'delete-confirmation-{{ $group->id }}')" variant="danger">Hapus</x-Atoms.Button>
           </x-Atoms.Table.td>
+          <x-Layouts.Modal
+                  name="delete-confirmation-{{ $group->id }}"
+                  title=""
+                  maxWidth="sm"
+                  :showIcon="false"
+              >
+                  <form action="{{ route('customers.destroy-group', $group) }}" method="POST">
+                      @csrf
+                      @method('DELETE')
+                      <x-Molecules.ConfirmationContent :id="$group->id">
+                          Yakin, Hapus {{$group->name}}?
+                      </x-Molecules.ConfirmationContent>
+                  </form>
+              </x-Layouts.Modal>
         </tr>
       @empty
         <tr>

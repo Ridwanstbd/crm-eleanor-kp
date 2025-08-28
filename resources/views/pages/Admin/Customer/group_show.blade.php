@@ -67,10 +67,20 @@
                 <x-Organisms.CustomerModal :customer="$customer" mode="edit" />
 
                 <x-Layouts.Modal name="delete-confirmation-{{ $customer->id }}" title="" maxWidth="sm" :showIcon="false">
-                    <form action="{{ route('customers.destroy', $customer) }}" method="POST">
+                    <form action="{{ route('customers.destroy', ['customer' => $customer, 'group' => $group]) }}" method="POST">
                         @csrf @method('DELETE')
+                        <input type="hidden" name="return_url" value="{{ request()->fullUrl() }}">
                         <x-Molecules.ConfirmationContent :id="$customer->id">
-                            Yakin, Hapus {{ $customer->name }}?
+                            Yakin, Hapus {{ $customer->name }} dari grup "{{ $group->name }}"?
+                            @if($customer->groups()->count() > 1)
+                                <div class="mt-2 text-xs text-gray-600">
+                                    <em>Customer ini akan dihapus dari grup "{{ $group->name }}" saja karena masih tergabung di {{ $customer->groups()->count() - 1 }} grup lainnya.</em>
+                                </div>
+                            @else
+                                <div class="mt-2 text-xs text-red-600">
+                                    <em><strong>Peringatan:</strong> Customer ini hanya ada di grup ini, sehingga akan dihapus sepenuhnya dari sistem.</em>
+                                </div>
+                            @endif
                         </x-Molecules.ConfirmationContent>
                     </form>
                 </x-Layouts.Modal>

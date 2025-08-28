@@ -59,7 +59,7 @@ class CampaignController extends Controller
             'name' => 'required|string|max:255',
             'product' => 'nullable|exists:products,id',
             'template' => 'required|exists:message_templates,id',
-            'tanggal_terjual' => 'nullable|date',
+            'schedule' => 'nullable|date',
             'time_send' => 'nullable|date_format:H:i',
         ];
 
@@ -68,7 +68,7 @@ class CampaignController extends Controller
             'template.required' => 'Template pesan wajib dipilih.',
             'template.exists' => 'Template pesan yang dipilih tidak valid.',
             'product.exists' => 'Produk yang dipilih tidak valid.',
-            'tanggal_terjual.date' => 'Format tanggal tidak valid.',
+            'schedule.date' => 'Format tanggal tidak valid.',
             'time_send.date_format' => 'Format waktu kirim tidak valid. Gunakan format HH:MM.',
         ];
 
@@ -96,7 +96,6 @@ class CampaignController extends Controller
             $validationMessages['selected_customers.min'] = 'Pilih minimal satu pelanggan.';
             $validationMessages['selected_customers.*.exists'] = 'Pelanggan yang dipilih tidak valid.';
 
-            // Only require quantities if product is selected
             if ($request->filled('product')) {
                 $validationRules['customer_quantities'] = 'required|array';
                 $validationRules['customer_quantities.*'] = 'required|integer|min:1|max:999';
@@ -122,7 +121,7 @@ class CampaignController extends Controller
                 'user_id' => Auth::id(),
                 'product_id' => $request->filled('product') ? $request->product : null,
                 'message_template_id' => $request->template,
-                'schedule' => $request->tanggal_terjual,
+                'schedule' => $request->schedule,
                 'time_send' => $request->time_send,
             ]);
 
@@ -136,7 +135,7 @@ class CampaignController extends Controller
                 $customerGroups[] = $this->handleExistingCustomers($request, $campaign);
             }
 
-            $this->scheduleReminderMessages($campaign, $customerGroups, $request->tanggal_terjual, $request->time_send);
+            $this->scheduleReminderMessages($campaign, $customerGroups, $request->schedule, $request->time_send);
 
             DB::commit();
 
@@ -194,8 +193,12 @@ class CampaignController extends Controller
 
     private function handleNewAudience(Request $request, Campaign $campaign)
     {
+        Log::info('Starting handleNewAudience process', ['campaign_id' => $campaign->id]);
+        
         $csvFile = $request->file('csv_file');
         $csvPath = $csvFile->store('csv_uploads', 'public');
+        
+        Log::info('CSV file uploaded', ['path' => $csvPath, 'original_name' => $csvFile->getClientOriginalName()]);
 
         try {
             $customerGroup = CustomerGroup::create([
@@ -203,36 +206,97 @@ class CampaignController extends Controller
             ]);
 
             $campaign->customerGroups()->attach($customerGroup->id);
+            Log::info('Customer group created', ['group_id' => $customerGroup->id, 'group_name' => $customerGroup->name]);
 
             $csvContent = file_get_contents(storage_path('app/public/' . $csvPath));
             $csvContent = str_replace("\xEF\xBB\xBF", '', $csvContent);
+            
+            Log::info('CSV content loaded', ['content_length' => strlen($csvContent)]);
 
             $lines = explode("\n", $csvContent);
             $csvData = [];
+            
+            Log::info('CSV lines split', ['total_lines' => count($lines)]);
 
-            foreach ($lines as $line) {
+            foreach ($lines as $lineIndex => $line) {
                 $line = trim((string) $line);
                 if (!empty($line)) {
-                    $row = str_getcsv($line, ',');
-                    if (count($row) == 1) {
-                        $row = str_getcsv($line, ';');
+                    Log::debug('Processing line', ['line_index' => $lineIndex, 'line_content' => $line]);
+                    
+                    $hasComma = strpos($line, ',') !== false;
+                    $hasSemicolon = strpos($line, ';') !== false;
+                    $hasTab = strpos($line, "\t") !== false;
+                    
+                    Log::debug('Delimiter detection', [
+                        'line_index' => $lineIndex,
+                        'has_comma' => $hasComma,
+                        'has_semicolon' => $hasSemicolon,
+                        'has_tab' => $hasTab
+                    ]);
+                    
+                    $row = [];
+                    
+                    if ($hasComma || $hasSemicolon || $hasTab) {
+                        $delimiters = [',', ';', "\t"];
+                        $maxColumns = 1;
+                        $bestRow = [trim($line)];
+                        $bestDelimiter = 'none';
+                        
+                        foreach ($delimiters as $delimiter) {
+                            if (($delimiter === ',' && $hasComma) || 
+                                ($delimiter === ';' && $hasSemicolon) || 
+                                ($delimiter === "\t" && $hasTab)) {
+                                
+                                $testRow = str_getcsv($line, $delimiter);
+                                Log::debug('Testing delimiter', [
+                                    'line_index' => $lineIndex,
+                                    'delimiter' => $delimiter === "\t" ? 'TAB' : $delimiter,
+                                    'columns_found' => count($testRow),
+                                    'parsed_data' => $testRow
+                                ]);
+                                
+                                if (count($testRow) > $maxColumns) {
+                                    $maxColumns = count($testRow);
+                                    $bestRow = $testRow;
+                                    $bestDelimiter = $delimiter === "\t" ? 'TAB' : $delimiter;
+                                }
+                            }
+                        }
+                        $row = $bestRow;
+                        
+                        Log::debug('Best delimiter chosen', [
+                            'line_index' => $lineIndex,
+                            'best_delimiter' => $bestDelimiter,
+                            'columns' => $maxColumns,
+                            'final_row' => $row
+                        ]);
+                    } else {
+                        $row = [trim($line)];
+                        Log::debug('No delimiter found, treating as single value', [
+                            'line_index' => $lineIndex,
+                            'single_value' => trim($line)
+                        ]);
                     }
-                    if (count($row) == 1) {
-                        $row = str_getcsv($line, "\t");
-                    }
+                    
                     $row = array_map(function($item) {
-                        return (string) $item;
+                        return trim((string) $item);
                     }, $row);
+                    
                     $csvData[] = $row;
                 }
             }
+            
+            Log::info('CSV parsing completed', ['total_data_rows' => count($csvData)]);
 
             if (empty($csvData)) {
+                Log::error('CSV data is empty after parsing');
                 throw new \Exception('File CSV kosong atau tidak dapat dibaca');
             }
 
             $firstRow = $csvData[0] ?? [];
             $hasHeaders = false;
+            
+            Log::info('Checking for headers', ['first_row' => $firstRow]);
 
             if (!empty($firstRow)) {
                 $firstRow = array_map(function($item) {
@@ -240,9 +304,9 @@ class CampaignController extends Controller
                 }, $firstRow);
             }
 
-            if (!empty($firstRow) && count($firstRow) >= 2) {
+            if (!empty($firstRow) && count($firstRow) >= 1) {
                 $firstCol = strtolower(trim($firstRow[0]));
-                $secondCol = strtolower(trim($firstRow[1]));
+                $secondCol = isset($firstRow[1]) ? strtolower(trim($firstRow[1])) : '';
                 $thirdCol = isset($firstRow[2]) ? strtolower(trim($firstRow[2])) : '';
 
                 $phoneHeaders = ['nomor', 'phone', 'telepon', 'nomor telepon', 'no_hp', 'hp', 'whatsapp', 'wa'];
@@ -254,23 +318,39 @@ class CampaignController extends Controller
                     in_array($thirdCol, $quantityHeaders)) {
                     $hasHeaders = true;
                 }
+                
+                Log::info('Header detection result', [
+                    'has_headers' => $hasHeaders,
+                    'first_col' => $firstCol,
+                    'second_col' => $secondCol,
+                    'third_col' => $thirdCol
+                ]);
             }
 
             if ($hasHeaders) {
                 array_shift($csvData);
+                Log::info('Headers removed, remaining data rows', ['count' => count($csvData)]);
             }
 
             $totalQuantity = 0;
             $errors = [];
             $successCount = 0;
+            $processedCustomers = [];
+
+            Log::info('Starting customer processing', ['total_rows_to_process' => count($csvData)]);
 
             foreach ($csvData as $rowIndex => $row) {
+                Log::debug('Processing customer row', ['row_index' => $rowIndex, 'row_data' => $row]);
+                
                 if (empty(array_filter($row, function($value) { return !empty(trim($value)); }))) {
+                    Log::debug('Skipping empty row', ['row_index' => $rowIndex]);
                     continue;
                 }
 
-                if (count($row) < 2) {
-                    $errors[] = "Baris " . ($rowIndex + 1) . ": Data tidak lengkap (minimal nomor dan nama)";
+                if (count($row) < 1) {
+                    $error = "Baris " . ($rowIndex + 1) . ": Data tidak lengkap (minimal nomor telepon)";
+                    $errors[] = $error;
+                    Log::warning($error, ['row_index' => $rowIndex]);
                     continue;
                 }
 
@@ -279,34 +359,85 @@ class CampaignController extends Controller
                 $purchaseQuantity = ($campaign->product_id && isset($row[2]) && !empty(trim((string) $row[2])))
                     ? intval(trim((string) $row[2]))
                     : 1;
+                
+                Log::debug('Row data extracted', [
+                    'row_index' => $rowIndex,
+                    'phone' => $phone,
+                    'name' => $name,
+                    'purchase_quantity' => $purchaseQuantity
+                ]);
 
-                if (empty($phone) || empty($name)) {
-                    $errors[] = "Baris " . ($rowIndex + 1) . ": Nomor telepon atau nama kosong";
+                if (empty($phone)) {
+                    $error = "Baris " . ($rowIndex + 1) . ": Nomor telepon kosong";
+                    $errors[] = $error;
+                    Log::warning($error, ['row_index' => $rowIndex]);
                     continue;
+                }
+
+                if (empty($name)) {
+                    $name = 'Customer ' . ($rowIndex + 1);
+                    Log::debug('Generated default name', ['row_index' => $rowIndex, 'generated_name' => $name]);
                 }
 
                 if ($purchaseQuantity < 1 || $purchaseQuantity > 999) {
                     $purchaseQuantity = 1;
+                    Log::debug('Purchase quantity adjusted to 1', ['row_index' => $rowIndex]);
                 }
 
                 try {
                     $cleanPhone = $this->cleanPhoneNumber($phone);
+                    Log::debug('Phone number cleaned', [
+                        'row_index' => $rowIndex,
+                        'original_phone' => $phone,
+                        'cleaned_phone' => $cleanPhone
+                    ]);
 
                     if (!$this->isValidPhoneNumber($cleanPhone)) {
-                        $errors[] = "Baris " . ($rowIndex + 1) . ": Format nomor telepon tidak valid ($phone)";
+                        $error = "Baris " . ($rowIndex + 1) . ": Format nomor telepon tidak valid ($phone)";
+                        $errors[] = $error;
+                        Log::warning($error, [
+                            'row_index' => $rowIndex,
+                            'original_phone' => $phone,
+                            'cleaned_phone' => $cleanPhone
+                        ]);
                         continue;
                     }
 
                     $customer = Customer::where('phone', $cleanPhone)->first();
-
+                    
                     if ($customer) {
-                        if (empty($customer->name) || $customer->name === 'Unknown' || strlen($name) > strlen($customer->name)) {
+                        Log::debug('Existing customer found', [
+                            'row_index' => $rowIndex,
+                            'customer_id' => $customer->id,
+                            'existing_name' => $customer->name
+                        ]);
+                        
+                        // Update nama jika ada nama dari CSV dan nama lebih baik dari yang existing
+                        if (!empty($name) && 
+                            !str_contains($name, 'Customer ') && 
+                            (empty($customer->name) || 
+                            str_contains($customer->name, 'Customer ') || 
+                            $customer->name === 'Unknown' || 
+                            strlen(trim($name)) > strlen(trim($customer->name)))) {
+                            $oldName = $customer->name;
                             $customer->update(['name' => $name]);
+                            Log::debug('Customer name updated', [
+                                'row_index' => $rowIndex,
+                                'customer_id' => $customer->id,
+                                'old_name' => $oldName,
+                                'new_name' => $name
+                            ]);
                         }
                     } else {
                         $customer = Customer::create([
                             'phone' => $cleanPhone,
                             'name' => $name,
+                        ]);
+                        Log::debug('New customer created', [
+                            'row_index' => $rowIndex,
+                            'customer_id' => $customer->id,
+                            'phone' => $cleanPhone,
+                            'name' => $name
                         ]);
                     }
 
@@ -325,17 +456,32 @@ class CampaignController extends Controller
                                 'updated_at' => now()
                             ]
                         ]);
+                        Log::debug('Purchase data synced', [
+                            'row_index' => $rowIndex,
+                            'customer_id' => $customer->id,
+                            'product_id' => $campaign->product_id,
+                            'quantity' => $purchaseQuantity
+                        ]);
                     }
 
                 } catch (\Exception $e) {
-                    $errors[] = "Baris " . ($rowIndex + 1) . ": Error - " . $e->getMessage();
+                    $error = "Baris " . ($rowIndex + 1) . ": Error - " . $e->getMessage();
+                    $errors[] = $error;
                     Log::error("Error processing customer row " . ($rowIndex + 1), [
+                        'row_index' => $rowIndex,
                         'phone' => $phone,
                         'name' => $name,
-                        'error' => $e->getMessage()
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString()
                     ]);
                 }
             }
+            
+            Log::info('Customer processing completed', [
+                'success_count' => $successCount,
+                'error_count' => count($errors),
+                'total_quantity' => $totalQuantity
+            ]);
 
             if ($successCount == 0) {
                 $errorMsg = "Tidak ada customer yang berhasil diproses.";
@@ -792,9 +938,10 @@ class CampaignController extends Controller
     public function downloadCsvTemplate()
     {
         $sampleData = [
-            [ 'nomor','nama', 'jumlah_beli'],
-            ['6285704412510','Ridwan Setio Budi',  '1'],
-            ['6282337440435', 'Davindra', '2'],
+            ['nomor','nama','jumlah_beli'],
+            ['6285704412510','Ridwan Setio Budi','1'],
+            ['6282337440435','Davindra','2'],
+            ['628123456789','','1'],
         ];
 
         $filename = 'template_customer.csv';
@@ -812,7 +959,7 @@ class CampaignController extends Controller
             fwrite($output, "\xEF\xBB\xBF");
 
             foreach ($sampleData as $row) {
-                fputcsv($output, $row, ';');
+                fputcsv($output, $row, ',');
             }
 
             fclose($output);

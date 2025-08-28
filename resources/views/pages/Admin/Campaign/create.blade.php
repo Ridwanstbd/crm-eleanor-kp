@@ -39,11 +39,11 @@
                 </x-Atoms.Select>
             </x-Molecules.Form.FormGroup>
             
-            <x-Molecules.Form.FormGroup label="Tanggal Terjual" for="tanggal_terjual">
+            <x-Molecules.Form.FormGroup label="Tanggal Kampanye" for="schedule">
                 <x-Atoms.InputDate
-                    name="tanggal_terjual"
-                    id="tanggal_terjual"
-                    value="{{ old('tanggal_terjual') }}"
+                    name="schedule"
+                    id="schedule"
+                    value="{{ old('schedule') }}"
                     min="{{ date('Y-m-d') }}"
                 />
             </x-Molecules.Form.FormGroup>
@@ -271,7 +271,8 @@
         </div>
     </div>
 
-        <div class="flex justify-end mt-6">
+        <div class="flex justify-end mt-6" 
+             x-show="!(customer && !showCustomerSelection)">
             <x-Atoms.Button type="submit" variant="danger">Kirim Pesan Kampanye</x-Atoms.Button>
         </div>
     </div>

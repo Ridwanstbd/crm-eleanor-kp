@@ -31,7 +31,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
     Route::get('/customers/{customer}', [CustomerController::class, 'show'])->name('customers.show');
     Route::put('/customers/{customer}', [CustomerController::class, 'update'])->name('customers.update');
-    Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
+    Route::delete('/customers/{customer}/group/{group}', [CustomerController::class, 'destroy'])->name('customers.destroy');
+    Route::delete('/customer-groups/{group}', [CustomerController::class, 'destroyGroup'])->name('customers.destroy-group');
     Route::get('/customer-groups/{group}', [CustomerController::class, 'showGroup'])
         ->whereNumber('group')
         ->name('customer-groups.show');

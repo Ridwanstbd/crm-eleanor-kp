@@ -15,11 +15,10 @@
                             textField="name"
                             :selected="$product->id"
                             :allowEmpty="false"
-                            disabled
                             readonly>
                         </x-Molecules.Select>
                     @else
-                        <x-Atoms.Input name="product" value="Tanpa Produk" disabled readonly/>
+                        <x-Atoms.Input name="product" value="Tanpa Produk" readonly/>
                         <p class="text-sm text-gray-500 mt-1">Kampanye ini tidak terkait dengan produk tertentu</p>
                     @endif
                     @error('product')
@@ -33,7 +32,6 @@
                     id="tanggal_terjual"
                     value="{{ $campaign->schedule }}"
                     readonly
-                    disabled
                 />
                 @error('tanggal_terjual')
                     <span class="text-red-500 text-sm">{{ $message }}</span>
@@ -46,7 +44,6 @@
                     id="time_send"
                     value="{{ $campaign->time_send }}"
                     readonly
-                    disabled
                 />
                 @error('time_send')
                     <span class="text-red-500 text-sm">{{ $message }}</span>
@@ -63,7 +60,7 @@
                 placeholder="Ketik template pesan Anda..."
                 class="mb-2"
                 :class="$errors->has('content') ? 'border-red-500 focus:ring-red-500' : ''"
-                disabled readonly>{{ $template->content }}</x-Atoms.TextArea>
+                readonly>{{ $template->content }}</x-Atoms.TextArea>
         </x-Molecules.Form.FormGroup>
         
         <x-Layouts.Table min-height="500px">

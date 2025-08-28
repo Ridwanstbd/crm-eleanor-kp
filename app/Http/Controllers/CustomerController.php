@@ -98,12 +98,38 @@ class CustomerController extends Controller
             ->with('success', 'Pelanggan berhasil diperbarui.');
     }
 
-    public function destroy(Request $request, Customer $customer)
+    public function destroy(Request $request, Customer $customer, CustomerGroup $group)
     {
-        $customer->delete();
+        $totalGroups = $customer->groups()->count();
+            
+        if ($totalGroups <= 1) {
+            $customer->delete();
+            $message = 'Pelanggan berhasil dihapus sepenuhnya.';
+        } else {
+            $customer->groups()->detach($group->id);
+            $message = "Pelanggan berhasil dihapus dari grup {$group->name}.";
+        }
 
-        return $this->redirectToReturnOrBack($request)
-            ->with('success', 'Pelanggan berhasil dihapus.');
+        return $this->redirectToReturnOrBack($request)->with('success', $message);
+    }
+
+    public function destroyGroup(Request $request, CustomerGroup $group)
+    {
+        $groupName = $group->name;
+        $customersCount = $group->customers()->count();
+        
+        $group->customers()->detach();
+        
+        $group->delete();
+        
+        $message = "Grup '{$groupName}' berhasil dihapus";
+        if ($customersCount > 0) {
+            $message .= " beserta {$customersCount} pelanggan yang terkait.";
+        } else {
+            $message .= ".";
+        }
+
+        return $this->redirectToReturnOrBack($request)->with('success', $message);
     }
 
     private function redirectToReturnOrBack(Request $request)
