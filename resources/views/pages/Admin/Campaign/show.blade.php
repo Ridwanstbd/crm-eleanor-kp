@@ -138,6 +138,7 @@
                                     @click="showDetail({{ json_encode([
                                         'id' => $messageLog->id,
                                         'customer_name' => $messageLog->customer ? $messageLog->customer->name : 'Pelanggan Tidak Ditemukan',
+                                        'device' => $messageLog->device,
                                         'target' => $messageLog->target,
                                         'purchase_quantity' => $messageLog->customer ? $messageLog->customer->purchase_quantity : '-',
                                         'status' => ucfirst($messageLog->status ?? 'Tidak Diketahui'),

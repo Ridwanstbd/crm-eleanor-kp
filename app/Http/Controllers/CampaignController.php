@@ -591,8 +591,11 @@ class CampaignController extends Controller
             $res = $response->json();
 
             if ($response->successful() && isset($res['id']) && is_array($res['id'])) {
-                $rawDevice = $res['quota'] ?? null;
-                $device = is_array($rawDevice) ? ($rawDevice[0] ?? null) : $rawDevice;
+                $device = null;
+                if (isset($res['quota']) && is_array($res['quota'])) {
+                    $deviceNumbers = array_keys($res['quota']);
+                    $device = $deviceNumbers[0] ?? null;
+                }
 
                 $processStatus = $res['process'] ?? 'pending';
 

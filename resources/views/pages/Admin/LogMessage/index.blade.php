@@ -24,6 +24,7 @@
                         @click="showDetail({{ json_encode([
                                     'id' => $log->id,
                                     'name' => $log->customer ? $log->customer->name : '-',
+                                    'device' => $log->device,
                                     'target' => $log->target,
                                     'status' => ucfirst($log->status),
                                     'state' => ucfirst($log->state),
@@ -50,6 +51,11 @@
                 <div class="grid grid-cols-2 gap-4">
                     <x-Molecules.Form.FormGroup label="Nama" for="log_name">
                         <p class="text-gray-900" x-text="selectedLog?.name || ''"></p>
+                    </x-Molecules.Form.FormGroup>
+                </div>                
+                <div class="grid grid-cols-2 gap-4">
+                    <x-Molecules.Form.FormGroup label="Nomor Pengirim" for="log_device">
+                        <p class="text-gray-900" x-text="selectedLog?.device || ''"></p>
                     </x-Molecules.Form.FormGroup>
     
                     <x-Molecules.Form.FormGroup label="Nomor Tujuan" for="log_target">

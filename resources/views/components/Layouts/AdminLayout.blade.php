@@ -74,7 +74,7 @@
             x-show="show"
             class="fixed top-4 right-2 z-50 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-lg"
             role="alert">
-            <p>Terjadi kesalahan sistem. Silakan coba lagi atau hubungi administrator.</p>
+            <p>Terjadi kesalahan sistem. Silakan coba lagi atau hubungi administrator. </p>
             <button @click="show = false" class="mt-2 text-sm text-red-500 underline">
                 Close
             </button>

@@ -5,8 +5,14 @@
                 <p class="text-gray-900" x-text="selectedMessageLog?.customer_name || ''"></p>
             </x-Molecules.Form.FormGroup>
             
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+            <x-Molecules.Form.FormGroup label="Nomor Pengirim" for="message_log_customer_name">
+                <p class="text-gray-900" x-text="selectedMessageLog?.device || '-'"></p>
+            </x-Molecules.Form.FormGroup>
+            
             <x-Molecules.Form.FormGroup label="Nomor Telepon" for="message_log_target">
-                <p class="text-gray-900" x-text="selectedMessageLog?.target || ''"></p>
+                <p class="text-gray-900" x-text="selectedMessageLog?.target || '-'"></p>
             </x-Molecules.Form.FormGroup>
         </div>
 
