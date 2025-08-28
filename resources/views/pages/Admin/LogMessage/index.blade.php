@@ -5,7 +5,8 @@
             <x-Molecules.Table.Header>
                 <x-Atoms.Table.th>No</x-Atoms.Table.th>
                 <x-Atoms.Table.th>Nama</x-Atoms.Table.th>
-                <x-Atoms.Table.th>Nomor</x-Atoms.Table.th>
+                <x-Atoms.Table.th>Nomor Kirim</x-Atoms.Table.th>
+                <x-Atoms.Table.th>Nomor Tujuan</x-Atoms.Table.th>
                 <x-Atoms.Table.th>Status</x-Atoms.Table.th>
                 <x-Atoms.Table.th>Jadwal Kirim</x-Atoms.Table.th>
                 <x-Atoms.Table.th>Aksi</x-Atoms.Table.th>
@@ -16,6 +17,7 @@
                     <tr>
                         <x-Atoms.Table.td>{{ $loop->iteration }}</x-Atoms.Table.td>
                         <x-Atoms.Table.td>{{ $log->customer ? $log->customer->name : '-' }}</x-Atoms.Table.td>
+                        <x-Atoms.Table.td>{{ $log->device ?? "-" }}</x-Atoms.Table.td>
                         <x-Atoms.Table.td>{{ $log->target }}</x-Atoms.Table.td>
                         <x-Atoms.Table.td>{{ ucfirst($log->status) }}</x-Atoms.Table.td>
                         <x-Atoms.Table.td>{{ \Carbon\Carbon::parse($log->scheduled_at ?? $log->created_at)->format('d M Y, H:i') }}</x-Atoms.Table.td>
