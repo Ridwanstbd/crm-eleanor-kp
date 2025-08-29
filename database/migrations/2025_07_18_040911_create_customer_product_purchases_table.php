@@ -15,7 +15,7 @@ return new class extends Migration
             $table->foreignId('customer_id')->constrained()->onDelete('cascade');
             $table->foreignId('campaign_id')->constrained()->onDelete('cascade');
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
-            $table->integer('last_purchase_quantity');
+            $table->integer('last_purchase_quantity')->default(1);
             $table->primary(['customer_id','campaign_id', 'product_id']);
         });
     }

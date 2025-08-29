@@ -22,32 +22,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'fonnte_token'
+        'fonnte_token',
+        'delay_message'
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    
-    public static function validRoles(): array
-    {
-        return [
-            self::ROLE_ADMIN,
-            self::ROLE_USER,
-        ];
-    }
-
-    public function isAdmin(): bool
-    {
-        return $this->role === self::ROLE_ADMIN;
-    }
-
-    public function isUser(): bool
-    {
-        return $this->role === self::ROLE_USER;
-    }
     protected $hidden = [
         'password',
         'remember_token',

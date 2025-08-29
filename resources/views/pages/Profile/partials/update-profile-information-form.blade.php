@@ -33,8 +33,14 @@
             @endif
         </x-Molecules.Form.FormGroup>
 
-        <x-Molecules.Form.FormGroup :message="$errors->get('name')" :label="__('Fonnte Token')" for="name">
+        <x-Molecules.Form.FormGroup :message="$errors->get('fonnte_token')" :label="__('Fonnte Token')" for="fonnte_token">
             <x-Atoms.Form.Input name="fonnte_token" id="fonnte_token" :value="old('fonnte_token', $user->fonnte_token)" required autofocus autocomplete="fonnte_token"/>
+        </x-Molecules.Form.FormGroup>
+        <x-Molecules.Form.FormGroup :message="$errors->get('delay_message')" :label="__('Tunda Pesan /detik')" for="delay_message">
+            <x-Atoms.Form.Input name="delay_message" type="number" id="delay_message" :value="old('delay_message', $user->delay_message)" required autofocus autocomplete="delay_message"/>
+        </x-Molecules.Form.FormGroup>
+        <x-Molecules.Form.FormGroup :message="$errors->get('delay_message')" :label="__('URL Webhook untuk pembaruan status pesan')" for="delay_message">
+             <p class="text-gray-900" >https://crm.eleanordigital.com/webhook/update-status</p>
         </x-Molecules.Form.FormGroup>
 
         <div class="flex items-center gap-4">

@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Response; 
 
 class CampaignController extends Controller
 {
@@ -98,7 +99,7 @@ class CampaignController extends Controller
             if ($request->filled('product')) {
                 $validationRules['customer_quantities'] = 'required|array';
                 $validationRules['customer_quantities.*'] = 'required|integer|min:1|max:999';
-
+                $validationRules['customer_receipts.*'] = 'nullable|string|max:255'; 
                 $validationMessages['customer_quantities.required'] = 'Jumlah pembelian untuk setiap pelanggan wajib diisi.';
                 $validationMessages['customer_quantities.*.required'] = 'Jumlah pembelian wajib diisi.';
                 $validationMessages['customer_quantities.*.min'] = 'Jumlah pembelian minimal adalah 1.';
@@ -154,6 +155,7 @@ class CampaignController extends Controller
     {
         $selectedCustomers = $request->selected_customers;
         $customerQuantities = $request->customer_quantities ?? [];
+        $customerReceipts = $request->customer_receipts ?? [];
 
         $customerGroup = CustomerGroup::create([
             'name' => 'Pelanggan Terpilih - ' . $campaign->name,
@@ -171,6 +173,8 @@ class CampaignController extends Controller
 
                 $purchaseQuantity = isset($customerQuantities[$customerId]) ?
                     intval($customerQuantities[$customerId]) : 1;
+                
+                $receipt = $customerReceipts[$customerId] ?? null;
 
                 if ($purchaseQuantity < 1 || $purchaseQuantity > 999) {
                     $purchaseQuantity = 1;
@@ -180,6 +184,7 @@ class CampaignController extends Controller
                     $campaign->product_id => [
                         'campaign_id' => $campaign->id,
                         'last_purchase_quantity' => $purchaseQuantity,
+                        'receipt' => $receipt,
                         'created_at' => now(),
                         'updated_at' => now()
                     ]
@@ -267,14 +272,17 @@ class CampaignController extends Controller
                 $firstCol = strtolower(trim($firstRow[0]));
                 $secondCol = isset($firstRow[1]) ? strtolower(trim($firstRow[1])) : '';
                 $thirdCol = isset($firstRow[2]) ? strtolower(trim($firstRow[2])) : '';
+                $fourthCol = isset($firstRow[3]) ? strtolower(trim($firstRow[3])) : '';
 
                 $phoneHeaders = ['nomor', 'phone', 'telepon', 'nomor telepon', 'no_hp', 'hp', 'whatsapp', 'wa'];
                 $nameHeaders = ['nama', 'name', 'customer', 'pelanggan', 'nama customer'];
                 $quantityHeaders = ['jumlah', 'quantity', 'qty', 'jumlah_beli', 'jumlah beli', 'amount'];
+                $receiptHeaders = ['resi', 'receipt', 'nomor resi', 'no resi']; 
 
                 if (in_array($firstCol, $phoneHeaders) ||
                     in_array($secondCol, $nameHeaders) ||
-                    in_array($thirdCol, $quantityHeaders)) {
+                    in_array($thirdCol, $quantityHeaders) ||
+                    in_array($fourthCol, $receiptHeaders)) {
                     $hasHeaders = true;
                 }
             }
@@ -304,6 +312,7 @@ class CampaignController extends Controller
                 $purchaseQuantity = ($campaign->product_id && isset($row[2]) && !empty(trim((string) $row[2])))
                     ? intval(trim((string) $row[2]))
                     : 1;
+                $receipt = ($campaign->product_id && isset($row[3])) ? trim((string) $row[3]) : null;
 
                 if (empty($phone)) {
                     $error = "Baris " . ($rowIndex + 1) . ": Nomor telepon kosong";
@@ -331,7 +340,6 @@ class CampaignController extends Controller
                     $customer = Customer::where('phone', $cleanPhone)->first();
                     
                     if ($customer) {
-                        // Update nama jika ada nama dari CSV dan nama lebih baik dari yang existing
                         if (!empty($name) && 
                             !str_contains($name, 'Customer ') && 
                             (empty($customer->name) || 
@@ -358,6 +366,7 @@ class CampaignController extends Controller
                             $campaign->product_id => [
                                 'campaign_id' => $campaign->id,
                                 'last_purchase_quantity' => $purchaseQuantity,
+                                'receipt' => $receipt, // Save the receipt number
                                 'created_at' => now(),
                                 'updated_at' => now()
                             ]
@@ -381,7 +390,7 @@ class CampaignController extends Controller
             $customerGroup->update([
                 'total_customers' => $successCount,
                 'description' => "Imported from CSV | Total customers: $successCount | Total quantity: $totalQuantity" .
-                            (!empty($errors) ? " | Errors: " . count($errors) : ""),
+                                (!empty($errors) ? " | Errors: " . count($errors) : ""),
             ]);
 
             if (isset($csvPath) && Storage::disk('public')->exists($csvPath)) {
@@ -441,6 +450,7 @@ class CampaignController extends Controller
             foreach ($customers as $customer) {
                 try {
                     $purchaseQuantity = 1;
+                    $receipt = null;
 
                     if ($targetProduct) {
                         $purchaseData = $customer->purchases()
@@ -450,6 +460,7 @@ class CampaignController extends Controller
 
                         if ($purchaseData) {
                             $purchaseQuantity = $purchaseData->pivot->last_purchase_quantity ?? 1;
+                            $receipt = $purchaseData->pivot->receipt ?? null;
                         }
                     }
 
@@ -463,7 +474,8 @@ class CampaignController extends Controller
                         $customer,
                         $targetProduct,
                         $purchaseQuantity,
-                        $formattedEstimationDate
+                        $formattedEstimationDate,
+                        $receipt 
                     );
 
                     $formattedPhone = $this->formatPhoneForFonnte($customer->phone);
@@ -471,7 +483,7 @@ class CampaignController extends Controller
                         continue;
                     }
 
-                    $delay = ($campaign->product_id === null) ? "3" : "3";
+                    $delay = $user->delay_message;
 
                     $messagesToSend[] = [
                         "target" => $formattedPhone,
@@ -548,18 +560,20 @@ class CampaignController extends Controller
         return $scheduledDate;
     }
 
-    private function personalizeMessage($messageTemplate, $customer, $product, $quantity, $estimationDate)
+    private function personalizeMessage($messageTemplate, $customer, $product, $quantity, $estimationDate, $receipt = null)
     {
         $customerName = (string) ($customer->name ?? 'Customer');
         $productName = $product ? (string) ($product->name ?? 'Product') : '';
         $quantityStr = (string) $quantity;
         $estimationDateStr = (string) $estimationDate;
+        $receiptStr = (string) ($receipt ?? '');
 
         $replacements = [
             '{name}' => $customerName,
             '{customer_name}' => $customerName,
             '{quantity_purchased}' => $quantityStr,
             '{estimated_finish_date}' => $estimationDateStr,
+            '{receipt}' => $receiptStr,
         ];
 
         if ($product) {
@@ -762,8 +776,10 @@ class CampaignController extends Controller
             if ($campaign->product_id) {
                 $purchaseData = $customer->purchases->first();
                 $customer->purchase_quantity = $purchaseData ? $purchaseData->pivot->last_purchase_quantity : 1;
+                $customer->receipt = $purchaseData ? $purchaseData->pivot->receipt : null; // Get receipt
             } else {
                 $customer->purchase_quantity = 1;
+                $customer->receipt = null;
             }
             return $customer;
         });
@@ -787,8 +803,10 @@ class CampaignController extends Controller
                 if ($campaign->product_id) {
                     $purchaseData = $messageLog->customer->purchases->first();
                     $messageLog->customer->purchase_quantity = $purchaseData ? $purchaseData->pivot->last_purchase_quantity : 1;
+                    $messageLog->customer->receipt = $purchaseData ? $purchaseData->pivot->receipt : null; // Get receipt
                 } else {
                     $messageLog->customer->purchase_quantity = 1;
+                    $messageLog->customer->receipt = null;
                 }
             }
         }
@@ -816,34 +834,18 @@ class CampaignController extends Controller
 
     public function downloadCsvTemplate()
     {
-        $sampleData = [
-            ['nomor','nama','jumlah_beli'],
-            ['6285704412510','Ridwan Setio Budi','1'],
-            ['6282337440435','Davindra','2'],
-        ];
-
+        $filePath = public_path('assets/template_customers.csv');
         $filename = 'template_customer.csv';
+
+        if (!file_exists($filePath)) {
+            abort(404, 'File not found.');
+        }
 
         $headers = [
             'Content-Type' => 'text/csv; charset=utf-8',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-            'Cache-Control' => 'no-cache, must-revalidate',
-            'Expires' => 'Mon, 26 Jul 1997 05:00:00 GMT',
         ];
 
-        $callback = function() use ($sampleData) {
-            $output = fopen('php://output', 'w');
-
-            fwrite($output, "\xEF\xBB\xBF");
-
-            foreach ($sampleData as $row) {
-                fputcsv($output, $row, ',');
-            }
-
-            fclose($output);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        return Response::download($filePath, $filename, $headers);
     }
-
 }

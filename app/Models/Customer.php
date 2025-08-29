@@ -20,7 +20,7 @@ class Customer extends Model
     public function purchases()
     {
         return $this->belongsToMany(Product::class, 'customer_product_purchases')
-                    ->withPivot(['campaign_id','last_purchase_quantity'])
+                    ->withPivot(['campaign_id','last_purchase_quantity','receipt'])
                     ->using(CustomerProductPurchase::class);
     }
 

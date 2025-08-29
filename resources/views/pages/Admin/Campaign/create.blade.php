@@ -7,13 +7,13 @@
         <div class="grid grid-cols-2 gap-2 w-full">
             <x-Molecules.Form.FormGroup label="Nama" for="name" >
                 <x-Atoms.Input  
-                        name="name"
-                        id="name"
-                        value="{{ old('name') }}"
-                        placeholder="Nama Kampanye"
-                        class="w-full" 
-                        required
-                        />
+                            name="name"
+                            id="name"
+                            value="{{ old('name') }}"
+                            placeholder="Nama Kampanye"
+                            class="w-full" 
+                            required
+                            />
             </x-Molecules.Form.FormGroup>
             
             <x-Molecules.Form.FormGroup label="Produk (Opsional)" for="product" >
@@ -104,7 +104,7 @@
             
             <div x-show="!selectedProduct" class="mt-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
                 <p class="text-sm text-amber-700">
-                    <strong>Catatan:</strong> Karena tidak ada produk yang dipilih, kolom "jumlah_beli" dalam CSV akan diabaikan.
+                    <strong>Catatan:</strong> Karena tidak ada produk yang dipilih, kolom "jumlah_beli" dan "resi" dalam CSV akan diabaikan.
                 </p>
             </div>
         </div>
@@ -193,6 +193,7 @@
                     <x-Atoms.Table.th>Nomor Telepon</x-Atoms.Table.th>
                     <x-Atoms.Table.th>Grup</x-Atoms.Table.th>
                     <x-Atoms.Table.th x-show="selectedProduct">Jumlah Pembelian</x-Atoms.Table.th>
+                    <x-Atoms.Table.th x-show="selectedProduct">Nomor Resi</x-Atoms.Table.th> <!-- New Header -->
                 </x-Molecules.Table.Header>
                 <x-Molecules.Table.Body>
                     <template x-for="customerItem in getDisplayedCustomers()" :key="customerItem.id">
@@ -234,16 +235,26 @@
                                     @input="updateCustomerQuantity(customerItem.id, $event.target.value)"
                                 />
                             </td>
+                            <td class="px-6 py-4 whitespace-nowrap" x-show="selectedProduct">
+                                <input 
+                                    type="text"
+                                    x-bind:name="'customer_receipts[' + customerItem.id + ']'"
+                                    x-bind:value="getCustomerReceipt(customerItem.id)"
+                                    placeholder="Nomor Resi"
+                                    class="w-40 border border-gray-300 rounded px-2 py-1" 
+                                    @input="updateCustomerReceipt(customerItem.id, $event.target.value)"
+                                />
+                            </td>
                         </tr>
                     </template>
                     <tr x-show="getFilteredCustomersByGroups().length === 0">
-                        <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
+                        <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
                             Tidak ada pelanggan dalam grup yang dipilih
                         </td>
                     </tr>
                     
                     <tr x-show="searchQuery.length > 0 && getDisplayedCustomers().length === 0 && getFilteredCustomersByGroups().length > 0">
-                        <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">
+                        <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
                             Tidak ada pelanggan yang ditemukan dengan kata kunci "<span x-text="searchQuery"></span>"
                         </td>
                     </tr>
@@ -258,14 +269,13 @@
             
             <div x-show="selectedProduct" class="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <p class="text-sm text-blue-700">
-                    <strong>Catatan:</strong> Setiap pelanggan dapat memiliki jumlah pembelian yang berbeda. 
-                    Atur jumlah pembelian di kolom "Jumlah Pembelian" untuk setiap pelanggan yang dipilih.
+                    <strong>Catatan:</strong> Setiap pelanggan dapat memiliki jumlah pembelian dan nomor resi yang berbeda.
                 </p>
             </div>
             
             <div x-show="!selectedProduct" class="mt-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
                 <p class="text-sm text-amber-700">
-                    <strong>Catatan:</strong> Tidak ada produk yang dipilih, jadi jumlah pembelian tidak diperlukan.
+                    <strong>Catatan:</strong> Tidak ada produk yang dipilih, jadi jumlah pembelian dan nomor resi tidak diperlukan.
                 </p>
             </div>
         </div>
@@ -286,6 +296,7 @@
                 showCustomerSelection: false,
                 selectedProduct: '{{ old('product') }}',
                 customerQuantities: {},
+                customerReceipts: {}, 
                 allFilteredCustomersSelected: false,
                 searchQuery: '',
                 selectedGroups: @json(old('selected_customer_groups', [])),
@@ -346,6 +357,7 @@
                 goBackToGroupSelection() {
                     this.selectedCustomers = [];
                     this.customerQuantities = {};
+                    this.customerReceipts = {}; 
                     this.allFilteredCustomersSelected = false;
                     this.searchQuery = '';
                     this.showCustomerSelection = false;
@@ -412,10 +424,12 @@
                         }
                         if (this.selectedProduct) {
                             this.initCustomerQuantity(customerId);
+                            this.initCustomerReceipt(customerId);
                         }
                     } else {
                         this.selectedCustomers = this.selectedCustomers.filter(id => id !== customerId);
                         delete this.customerQuantities[customerId];
+                        delete this.customerReceipts[customerId];
                     }
                     this.updateSelectAllFilteredState();
                 },
@@ -429,6 +443,7 @@
                                 this.selectedCustomers.push(customer.id);
                                 if (this.selectedProduct) {
                                     this.initCustomerQuantity(customer.id);
+                                    this.initCustomerReceipt(customer.id);
                                 }
                             }
                         });
@@ -436,6 +451,7 @@
                         displayedCustomers.forEach(customer => {
                             this.selectedCustomers = this.selectedCustomers.filter(id => id !== customer.id);
                             delete this.customerQuantities[customer.id];
+                            delete this.customerReceipts[customer.id]; // Delete receipt
                         });
                     }
                     
@@ -461,19 +477,34 @@
                         this.customerQuantities[customerId] = 1;
                     }
                 },
+
+                initCustomerReceipt(customerId) {
+                    if (!this.customerReceipts[customerId]) {
+                        this.customerReceipts[customerId] = '';
+                    }
+                },
                 
                 getCustomerQuantity(customerId) {
                     return this.customerQuantities[customerId] || 1;
                 },
+
+                getCustomerReceipt(customerId) {
+                    return this.customerReceipts[customerId] || '';
+                },
                 
                 updateCustomerQuantity(customerId, value) {
                     this.customerQuantities[customerId] = parseInt(value) || 1;
+                },
+
+                updateCustomerReceipt(customerId, value) {
+                    this.customerReceipts[customerId] = value;
                 },
                 
                 resetCustomerFlow() {
                     this.selectedGroups = [];
                     this.selectedCustomers = [];
                     this.customerQuantities = {};
+                    this.customerReceipts = {};
                     this.allFilteredCustomersSelected = false;
                     this.searchQuery = '';
                     this.showCustomerSelection = false;

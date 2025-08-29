@@ -25,7 +25,8 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
-            'fonnte_token' => ['nullable','string','max:255']
+            'fonnte_token' => ['nullable','string','max:255'],
+            'delay_message' => ['required', 'numeric' , 'min:3']
         ];
     }
 }

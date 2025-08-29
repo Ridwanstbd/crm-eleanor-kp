@@ -32,10 +32,11 @@
                 :selected="old('template')"
                 class="w-1/2"
             >
-                <x-Atoms.Option value="{name}">Nama</x-Atoms.Option>
+                <x-Atoms.Option value="{customer_name}">Nama Pembeli</x-Atoms.Option>
                 <x-Atoms.Option value="{product_name}">Nama Produk</x-Atoms.Option>
                 <x-Atoms.Option value="{quantity_purchased}">Jumlah dibeli</x-Atoms.Option>
                 <x-Atoms.Option value="{estimated_finish_date}">Tanggal Estimasi</x-Atoms.Option>
+                <x-Atoms.Option value="{receipt}">Nomor Resi</x-Atoms.Option>
             </x-Atoms.Select>
             <x-Atoms.Button id="insertPlaceholderBtn-{{ $template->id }}">
                 Masukkan
@@ -81,8 +82,6 @@
                 textarea.focus();
                 textarea.setSelectionRange(start + placeholder.length, start + placeholder.length);
                 
-                placeholderSelect.value = '';
-                toggleInsertButton();
             }
 
             if (placeholderSelect) {
@@ -161,10 +160,11 @@
                 :selected="old('template')"
                 class="w-1/2"
             >
-            <x-Atoms.Option value="{name}">Nama Pembeli</x-Atoms.Option>
+            <x-Atoms.Option value="{customer_name}">Nama Pembeli</x-Atoms.Option>
             <x-Atoms.Option value="{product_name}">Nama Produk</x-Atoms.Option>
             <x-Atoms.Option value="{quantity_purchased}">Jumlah dibeli</x-Atoms.Option>
             <x-Atoms.Option value="{estimated_finish_date}">Tanggal Estimasi</x-Atoms.Option>
+            <x-Atoms.Option value="{receipt}">Nomor Resi</x-Atoms.Option>
             </x-Atoms.Select>
             <x-Atoms.Button id="insertPlaceholderBtn" type="button">
                 Masukkan
@@ -206,8 +206,6 @@
                 textarea.focus();
                 textarea.setSelectionRange(start + placeholder.length, start + placeholder.length);
                 
-                placeholderSelect.value = '';
-                toggleInsertButton();
             }
 
             if (placeholderSelect) {
