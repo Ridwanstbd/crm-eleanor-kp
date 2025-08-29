@@ -175,7 +175,7 @@
             
             <x-Organisms.SearchInputCustomers 
                 :totalCustomers="0"
-                placeholder="Cari nama atau nomor telepon..."
+                placeholder="Ketik 3 digit terakhir.."
             />
             
             <x-Layouts.Table minHeight="400px">
@@ -282,7 +282,7 @@
     </div>
 
         <div class="flex justify-end mt-6" 
-             x-show="!(customer && !showCustomerSelection)">
+             x-show="(newAudiens || customer) && !(customer && !showCustomerSelection)">
             <x-Atoms.Button type="submit" variant="danger">Kirim Pesan Kampanye</x-Atoms.Button>
         </div>
     </div>
@@ -451,7 +451,7 @@
                         displayedCustomers.forEach(customer => {
                             this.selectedCustomers = this.selectedCustomers.filter(id => id !== customer.id);
                             delete this.customerQuantities[customer.id];
-                            delete this.customerReceipts[customer.id]; // Delete receipt
+                            delete this.customerReceipts[customer.id]; 
                         });
                     }
                     

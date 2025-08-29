@@ -15,7 +15,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Response; 
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Log;
 
 class CampaignController extends Controller
 {
@@ -55,6 +56,12 @@ class CampaignController extends Controller
 
     public function store(Request $request)
     {
+        if (!$request->has('new_audiens') && !$request->has('customer')) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Pilih minimal satu target audiens (Audiens Baru atau Pelanggan).');
+        }
+
         $validationRules = [
             'name' => 'required|string|max:255',
             'product' => 'nullable|exists:products,id',
@@ -71,12 +78,6 @@ class CampaignController extends Controller
             'schedule.date' => 'Format tanggal tidak valid.',
             'time_send.date_format' => 'Format waktu kirim tidak valid. Gunakan format HH:MM.',
         ];
-
-        if (!$request->has('new_audiens') && !$request->has('customer')) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Pilih minimal satu target audiens (Audiens Baru atau Pelanggan).');
-        }
 
         if ($request->has('new_audiens') && $request->new_audiens == '1') {
             $validationRules['name_group_customer'] = 'required|string|max:255';
@@ -144,6 +145,9 @@ class CampaignController extends Controller
 
         } catch (\Exception $e) {
             DB::rollback();
+            Log::error('Campaign creation failed: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
 
             return redirect()->back()
                 ->withInput()
@@ -366,7 +370,7 @@ class CampaignController extends Controller
                             $campaign->product_id => [
                                 'campaign_id' => $campaign->id,
                                 'last_purchase_quantity' => $purchaseQuantity,
-                                'receipt' => $receipt, // Save the receipt number
+                                'receipt' => $receipt,
                                 'created_at' => now(),
                                 'updated_at' => now()
                             ]
@@ -390,7 +394,7 @@ class CampaignController extends Controller
             $customerGroup->update([
                 'total_customers' => $successCount,
                 'description' => "Imported from CSV | Total customers: $successCount | Total quantity: $totalQuantity" .
-                                (!empty($errors) ? " | Errors: " . count($errors) : ""),
+                                 (!empty($errors) ? " | Errors: " . count($errors) : ""),
             ]);
 
             if (isset($csvPath) && Storage::disk('public')->exists($csvPath)) {
@@ -409,107 +413,115 @@ class CampaignController extends Controller
 
     private function scheduleReminderMessages(Campaign $campaign, array $customerGroups, $tanggalTerjual = null, $timeSend = null)
     {
-        $user = User::find(auth()->id());
-        $fonnteToken = $user->fonnte_token ?? null;
+        try {
+            $user = User::find(auth()->id());
+            $fonnteToken = $user->fonnte_token ?? null;
 
-        if (!$fonnteToken) {
-            throw new \Exception('Fonnte token tidak ditemukan. Silakan konfigurasi token Fonnte terlebih dahulu.');
-        }
-
-        $messageTemplateContent = $campaign->messageTemplate->content ?? null;
-        if (!$messageTemplateContent) {
-            throw new \Exception('Template pesan tidak ditemukan.');
-        }
-
-        $targetProduct = null;
-        if ($campaign->product_id) {
-            $targetProduct = Product::find($campaign->product_id);
-        }
-
-        $baseDate = $tanggalTerjual ? \Carbon\Carbon::parse($tanggalTerjual) : now();
-
-        if ($timeSend) {
-            try {
-                $timeParts = explode(':', $timeSend);
-                $hour = intval($timeParts[0]);
-                $minute = intval($timeParts[1]);
-                $baseDate->setTime($hour, $minute, 0);
-            } catch (\Exception $e) {
-                $baseDate->setTime(9, 0, 0);
+            if (!$fonnteToken) {
+                throw new \Exception('Fonnte token tidak ditemukan. Silakan konfigurasi token Fonnte terlebih dahulu.');
             }
-        }
 
-        $messagesToSend = [];
-        $scheduleData = [];
-        $totalCustomers = 0;
+            $messageTemplateContent = $campaign->messageTemplate->content ?? null;
+            if (!$messageTemplateContent) {
+                throw new \Exception('Template pesan tidak ditemukan.');
+            }
 
-        foreach ($customerGroups as $customerGroup) {
-            $customers = $customerGroup->customers()->get();
-            $totalCustomers += $customers->count();
-
-            foreach ($customers as $customer) {
-                try {
-                    $purchaseQuantity = 1;
-                    $receipt = null;
-
-                    if ($targetProduct) {
-                        $purchaseData = $customer->purchases()
-                            ->where('product_id', $targetProduct->id)
-                            ->wherePivot('campaign_id', $campaign->id)
-                            ->first();
-
-                        if ($purchaseData) {
-                            $purchaseQuantity = $purchaseData->pivot->last_purchase_quantity ?? 1;
-                            $receipt = $purchaseData->pivot->receipt ?? null;
-                        }
-                    }
-
-                    $scheduledDate = $this->calculateScheduleDate($baseDate, $targetProduct, $purchaseQuantity, $timeSend);
-
-                    $scheduleTimestamp = $scheduledDate->timestamp;
-                    $formattedEstimationDate = $scheduledDate->format('d M Y');
-
-                    $personalizedMessage = $this->personalizeMessage(
-                        $messageTemplateContent,
-                        $customer,
-                        $targetProduct,
-                        $purchaseQuantity,
-                        $formattedEstimationDate,
-                        $receipt 
-                    );
-
-                    $formattedPhone = $this->formatPhoneForFonnte($customer->phone);
-                    if (!$this->isValidPhoneNumber($formattedPhone)) {
-                        continue;
-                    }
-
-                    $delay = $user->delay_message;
-
-                    $messagesToSend[] = [
-                        "target" => $formattedPhone,
-                        "message" => $personalizedMessage,
-                        "schedule" => $scheduleTimestamp,
-                        "delay" => $delay,
-                    ];
-
-                    $scheduleData[] = [
-                        'target' => $formattedPhone,
-                        'customer_id' => $customer->id,
-                        'scheduled_at' => $scheduledDate,
-                        'message' => $personalizedMessage
-                    ];
-
-                } catch (\Exception $e) {
-                    // Skip this customer if error occurs
+            $targetProduct = null;
+            if ($campaign->product_id) {
+                $targetProduct = Product::find($campaign->product_id);
+                if (!$targetProduct) {
+                    throw new \Exception('Produk dengan ID ' . $campaign->product_id . ' tidak ditemukan.');
                 }
             }
-        }
 
-        if (empty($messagesToSend)) {
-            throw new \Exception('Tidak ada pesan yang dapat dikirim. Periksa data customer dan nomor telepon.');
-        }
+            $baseDate = $tanggalTerjual ? \Carbon\Carbon::parse($tanggalTerjual) : now();
 
-        $this->sendToFonnte($messagesToSend, $fonnteToken, $campaign, $scheduleData);
+            if ($timeSend) {
+                try {
+                    $timeParts = explode(':', $timeSend);
+                    $hour = intval($timeParts[0]);
+                    $minute = intval($timeParts[1]);
+                    $baseDate->setTime($hour, $minute, 0);
+                } catch (\Exception $e) {
+                    $baseDate->setTime(9, 0, 0);
+                }
+            }
+
+            $messagesToSend = [];
+            $scheduleData = [];
+            $totalCustomers = 0;
+
+            foreach ($customerGroups as $customerGroup) {
+                if (!$customerGroup) continue;
+                $customers = $customerGroup->customers()->get();
+                $totalCustomers += $customers->count();
+
+                foreach ($customers as $customer) {
+                    try {
+                        $purchaseQuantity = 1;
+                        $receipt = null;
+
+                        if ($targetProduct) {
+                            $purchaseData = $customer->purchases()
+                                ->where('product_id', $targetProduct->id)
+                                ->wherePivot('campaign_id', $campaign->id)
+                                ->first();
+
+                            if ($purchaseData && isset($purchaseData->pivot)) {
+                                $purchaseQuantity = $purchaseData->pivot->last_purchase_quantity ?? 1;
+                                $receipt = $purchaseData->pivot->receipt ?? null;
+                            }
+                        }
+
+                        $scheduledDate = $this->calculateScheduleDate($baseDate, $targetProduct, $purchaseQuantity, $timeSend);
+
+                        $scheduleTimestamp = $scheduledDate->timestamp;
+                        $formattedEstimationDate = $scheduledDate->format('d M Y');
+
+                        $personalizedMessage = $this->personalizeMessage(
+                            $messageTemplateContent,
+                            $customer,
+                            $targetProduct,
+                            $purchaseQuantity,
+                            $formattedEstimationDate,
+                            $receipt 
+                        );
+
+                        $formattedPhone = $this->formatPhoneForFonnte($customer->phone);
+                        if (!$this->isValidPhoneNumber($formattedPhone)) {
+                            continue;
+                        }
+                        
+                        $delay = (string) ($user->delay_message ?? '3');
+
+                        $messagesToSend[] = [
+                            "target" => $formattedPhone,
+                            "message" => $personalizedMessage,
+                            "schedule" => $scheduleTimestamp,
+                            "delay" => $delay,
+                        ];
+
+                        $scheduleData[] = [
+                            'target' => $formattedPhone,
+                            'customer_id' => $customer->id,
+                            'scheduled_at' => $scheduledDate,
+                            'message' => $personalizedMessage
+                        ];
+
+                    } catch (\Exception $e) {
+                    }
+                }
+            }
+
+            if (empty($messagesToSend)) {
+                return;
+            }
+
+            $this->sendToFonnte($messagesToSend, $fonnteToken, $campaign, $scheduleData);
+        
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 
     private function calculateScheduleDate($baseDate, $targetProduct, $purchaseQuantity, $timeSend)
@@ -569,8 +581,8 @@ class CampaignController extends Controller
         $receiptStr = (string) ($receipt ?? '');
 
         $replacements = [
-            '{name}' => $customerName,
             '{customer_name}' => $customerName,
+            '{product_name}' => $productName,
             '{quantity_purchased}' => $quantityStr,
             '{estimated_finish_date}' => $estimationDateStr,
             '{receipt}' => $receiptStr,
@@ -584,23 +596,26 @@ class CampaignController extends Controller
             $replacements['{product}'] = '';
         }
 
-        return str_replace(
+        $finalMessage = str_replace(
             array_keys($replacements),
             array_values($replacements),
             (string) $messageTemplate
         );
+
+        $cleanedMessage = preg_replace('/\s+/u', ' ', $finalMessage);
+        return trim($cleanedMessage);
     }
 
     private function sendToFonnte(array $messages, string $fonnteToken, Campaign $campaign, array $scheduleData = [])
     {
         $payload = [
-            "data" => json_encode($messages),
+            'data' => json_encode($messages)
         ];
 
         try {
             $response = Http::withHeaders([
-                'Authorization' => $fonnteToken,
-            ])->post('https://api.fonnte.com/send', $payload);
+                'Authorization' => $fonnteToken
+            ])->asForm()->post('https://api.fonnte.com/send', $payload);
 
             $res = $response->json();
 
@@ -646,7 +661,6 @@ class CampaignController extends Controller
             }
 
         } catch (\Exception $e) {
-            // Error handling without logging
         }
     }
 
@@ -767,7 +781,7 @@ class CampaignController extends Controller
             ->with(['purchases' => function ($query) use ($campaign) {
                 if ($campaign->product_id) {
                     $query->wherePivot('campaign_id', $campaign->id)
-                        ->wherePivot('product_id', $campaign->product_id);
+                          ->wherePivot('product_id', $campaign->product_id);
                 }
             }])
             ->get();
@@ -776,7 +790,7 @@ class CampaignController extends Controller
             if ($campaign->product_id) {
                 $purchaseData = $customer->purchases->first();
                 $customer->purchase_quantity = $purchaseData ? $purchaseData->pivot->last_purchase_quantity : 1;
-                $customer->receipt = $purchaseData ? $purchaseData->pivot->receipt : null; // Get receipt
+                $customer->receipt = $purchaseData ? $purchaseData->pivot->receipt : null;
             } else {
                 $customer->purchase_quantity = 1;
                 $customer->receipt = null;
@@ -803,7 +817,7 @@ class CampaignController extends Controller
                 if ($campaign->product_id) {
                     $purchaseData = $messageLog->customer->purchases->first();
                     $messageLog->customer->purchase_quantity = $purchaseData ? $purchaseData->pivot->last_purchase_quantity : 1;
-                    $messageLog->customer->receipt = $purchaseData ? $purchaseData->pivot->receipt : null; // Get receipt
+                    $messageLog->customer->receipt = $purchaseData ? $purchaseData->pivot->receipt : null;
                 } else {
                     $messageLog->customer->purchase_quantity = 1;
                     $messageLog->customer->receipt = null;
@@ -812,18 +826,6 @@ class CampaignController extends Controller
         }
 
         return view('pages.Admin.Campaign.show', compact('campaign','customers', 'customerGroups','product','template','messageLogs'));
-    }
-
-    public function update(Request $request, Campaign $campaign)
-    {
-        $request->validate([
-            'name' => 'required',
-            'schedule' => 'required|date',
-        ]);
-
-        $campaign->update($request->only('name', 'schedule'));
-
-        return redirect()->route('campaigns.index')->with('success', 'Kampanye berhasil diperbarui.');
     }
 
     public function destroy(Campaign $campaign)

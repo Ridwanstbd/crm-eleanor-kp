@@ -49,7 +49,7 @@
     </x-Molecules.Table.Body>
 
     <x-slot name="pagination">
-      {{ $groups->links() }}
+      <x-Molecules.Table.Pagination :paginator="$groups"/>
     </x-slot>
   </x-Layouts.Table>
 

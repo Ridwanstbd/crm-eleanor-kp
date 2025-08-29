@@ -26,14 +26,14 @@
                     @enderror
                 </x-Molecules.Form.FormGroup>
 
-            <x-Molecules.Form.FormGroup label="Tanggal Terjual" for="tanggal_terjual">
+            <x-Molecules.Form.FormGroup label="Tanggal Kampanye" for="tanggal_kampanye">
                 <x-Atoms.InputDate
-                    name="tanggal_terjual"
-                    id="tanggal_terjual"
+                    name="tanggal_kampanye"
+                    id="tanggal_kampanye"
                     value="{{ $campaign->schedule }}"
                     readonly
                 />
-                @error('tanggal_terjual')
+                @error('tanggal_kampanye')
                     <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror
             </x-Molecules.Form.FormGroup>
@@ -165,15 +165,7 @@
                         </x-Atoms.Table.td>
                     </tr>
                 @empty
-                    <x-Atoms.Table.empty colspan="7">
-                        <div class="text-center py-8">
-                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2 2v-5m16 0h-2M4 13h2m8-8v2m0 6V9.5"></path>
-                            </svg>
-                            <p class="mt-2 text-sm font-medium text-gray-900">Belum ada log pesan</p>
-                            <p class="mt-1 text-sm text-gray-500">Pesan untuk kampanye ini belum ada yang dikirim.</p>
-                        </div>
-                    </x-Atoms.Table.empty>
+                    <x-Atoms.Table.empty colspan="7" />
                 @endforelse
             </x-Molecules.Table.Body>
 

@@ -49,7 +49,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/campaigns/create', [CampaignController::class, 'create'])->name('campaigns.create');
     Route::post('/campaigns', [CampaignController::class, 'store'])->name('campaigns.store');
     Route::get('/campaigns/{campaign}', [CampaignController::class, 'edit'])->name('campaigns.edit');
-    Route::put('/campaigns/{campaign}', [CampaignController::class, 'update'])->name('campaigns.update');
     Route::delete('/campaigns/{campaign}', [CampaignController::class, 'destroy'])->name('campaigns.destroy');
     Route::get('/download-csv-template',[CampaignController::class, 'downloadCsvTemplate'])->name('download.csv.template');
 
