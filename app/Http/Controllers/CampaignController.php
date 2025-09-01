@@ -626,7 +626,19 @@ class CampaignController extends Controller
                     $device = $deviceNumbers[0] ?? null;
                 }
 
+                $statusMapping = [
+                    'sent' => 'Terkirim',
+                    'pending' => 'Tertunda', 
+                    'waiting' => 'Menunggu',
+                    'invalid' => 'Tidak Valid',
+                    'expired' => 'Kedaluwarsa',
+                    'processing' => 'Memproses',
+                    'url unreachable' => 'URL Tidak Dapat Diakses'
+                ];
+
                 $processStatus = $res['process'] ?? 'pending';
+
+                $processStatusIndo = $statusMapping[strtolower($processStatus)] ?? 'Tertunda';
 
                 foreach ($res['id'] as $k => $reportId) {
                     $target = $res['target'][$k] ?? null;
@@ -648,7 +660,7 @@ class CampaignController extends Controller
                             'report_id' => $reportId,
                             'target' => $target,
                             'message' => $messageContent,
-                            'status' => $processStatus,
+                            'status' => $processStatusIndo,
                             'device' => $device,
                             'state_id' => null,
                             'state' => null,

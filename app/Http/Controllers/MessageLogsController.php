@@ -63,9 +63,36 @@ class MessageLogsController extends Controller
             }
 
             $attributes = [];
+
+            $statusMapping = [
+                'sent' => 'Terkirim',
+                'pending' => 'Tertunda', 
+                'waiting' => 'Menunggu',
+                'invalid' => 'Tidak Valid',
+                'expired' => 'Kedaluwarsa',
+                'processing' => 'Memproses',
+                'url unreachable' => 'URL Tidak Dapat Diakses'
+            ];
+
+            $stateMapping = [
+                'delivered' => 'Tersampaikan',
+                'read' => 'Dibaca',
+                'sent' => 'Terkirim',
+            ];
+
             if (isset($payload['device'])) $attributes['device'] = $payload['device'];
-            if (isset($payload['status'])) $attributes['status'] = $payload['status'];
-            if (isset($payload['state'])) $attributes['state'] = $payload['state'];
+            
+            if (isset($payload['status'])) {
+                $originalStatus = $payload['status'];
+                $statusIndo = $statusMapping[strtolower($originalStatus)] ?? $originalStatus;
+                $attributes['status'] = $statusIndo;
+            }
+            
+            if (isset($payload['state'])) {
+                $originalState = $payload['state'];
+                $stateIndo = $stateMapping[strtolower($originalState)] ?? $originalState;
+                $attributes['state'] = $stateIndo;
+            }
             
             if ($reportId && isset($payload['id'])) {
                 $attributes['report_id'] = $reportId;

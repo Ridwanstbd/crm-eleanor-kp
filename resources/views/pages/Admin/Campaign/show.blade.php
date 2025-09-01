@@ -1,6 +1,10 @@
 <x-Layouts.AdminLayout>
     <div x-data="messageLogModal()">
         <x-Layouts.PageHeader title="Detail Kampanye {{$campaign->name}}" />
+        <x-Organisms.StatisticMessage 
+            :messageLogs="$messageLogs" 
+            :totalMessages="$messageLogs->total()" 
+        />
         <div class="grid grid-cols-2 gap-2">
             <x-Molecules.Form.FormGroup label="Nama Kampanye" for="name">
                 <x-Atoms.Input name="name" value="{{$campaign->name}}" disabled readonly/>
@@ -104,7 +108,7 @@
                                     </svg>
                                     Gagal
                                 </span>
-                            @elseif($messageLog->status == 'pending')
+                            @elseif($messageLog->status == 'tertunda')
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                     <svg class="w-2 h-2 mr-1" fill="currentColor" viewBox="0 0 8 8">
                                         <circle cx="4" cy="4" r="3" />
