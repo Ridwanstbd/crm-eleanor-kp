@@ -7,12 +7,12 @@
       @forelse ($groups as $group)
         <tr>
           <x-Atoms.Table.td>{{ $group->name }}</x-Atoms.Table.td>
-          <x-Atoms.Table.td class="text-center">
+          <x-Atoms.Table.td>
             <span class="inline-block text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-700">
               {{ $group->customers_count }}
             </span>
           </x-Atoms.Table.td>
-          <x-Atoms.Table.td class="text-center">
+          <x-Atoms.Table.td>
             <x-Atoms.Button variant="secondary" :href="route('customer-groups.show', $group)">
               Detail
             </x-Atoms.Button>

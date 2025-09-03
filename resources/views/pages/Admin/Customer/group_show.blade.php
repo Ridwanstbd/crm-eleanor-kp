@@ -46,14 +46,12 @@
             <x-Atoms.Table.td>{{ $customer->name }}</x-Atoms.Table.td>
             <x-Atoms.Table.td>{{ $customer->phone }}</x-Atoms.Table.td>
             <x-Atoms.Table.td>
-                <div class="flex items-center justify-center gap-2">
-                    <x-Atoms.Button variant="secondary" @click="$dispatch('open-modal', 'edit-customer-{{ $customer->id }}')">
-                        Ubah
-                    </x-Atoms.Button>
-                    <x-Atoms.Button variant="danger" @click="$dispatch('open-modal', 'delete-confirmation-{{ $customer->id }}')">
-                        Hapus
-                    </x-Atoms.Button>
-                </div>
+                <x-Atoms.Button variant="secondary" @click="$dispatch('open-modal', 'edit-customer-{{ $customer->id }}')">
+                    Ubah
+                </x-Atoms.Button>
+                <x-Atoms.Button variant="danger" @click="$dispatch('open-modal', 'delete-confirmation-{{ $customer->id }}')">
+                    Hapus
+                </x-Atoms.Button>
             </x-Atoms.Table.td>
         </tr>
         <x-Organisms.CrudModal
