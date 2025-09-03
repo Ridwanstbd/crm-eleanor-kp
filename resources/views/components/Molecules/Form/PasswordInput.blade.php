@@ -1,8 +1,8 @@
 @props([
     'name' => 'password',
     'id' => 'password',
-    'label' => 'Password',
-    'placeholder' => 'Password'
+    'label' => 'Kata Sandi',
+    'placeholder' => 'password'
 ])
 
 <div>
@@ -20,7 +20,6 @@
             {{ $attributes }}
         />
         
-        {{-- Toggle Password Visibility Button --}}
         <button 
             type="button"
             class="absolute inset-y-0 right-0 flex items-center pr-3"

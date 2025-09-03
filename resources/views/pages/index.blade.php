@@ -6,7 +6,7 @@
             <x-Molecules.Form.EmailInput
                 name="email"
                 id="email"
-                placeholder="boypamitdangdutan@gmail.com"
+                placeholder="eleanordigital@gmail.com"
                 required
             />
 

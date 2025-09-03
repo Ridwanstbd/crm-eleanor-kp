@@ -1,15 +1,9 @@
-<x-Layouts.AdminLayout title="Pelanggan">
-  <x-Layouts.PageHeader title="Grup Pelanggan">
-  </x-Layouts.PageHeader>
-
-  <x-Layouts.Table>
-    <x-Molecules.Table.Header>
+<x-Templates.IndexTemplate title="Grup Pelanggan" :paginator="$groups">
+  <x-slot name="tableHeader">
       <x-Atoms.Table.th>Nama Grup</x-Atoms.Table.th>
-      <x-Atoms.Table.th class="w-24 text-center">Jumlah</x-Atoms.Table.th>
-      <x-Atoms.Table.th class="w-36 text-center">Aksi</x-Atoms.Table.th>
-    </x-Molecules.Table.Header>
-
-    <x-Molecules.Table.Body>
+      <x-Atoms.Table.th>Jumlah</x-Atoms.Table.th>
+      <x-Atoms.Table.th>Aksi</x-Atoms.Table.th>
+  </x-slot>
       @forelse ($groups as $group)
         <tr>
           <x-Atoms.Table.td>{{ $group->name }}</x-Atoms.Table.td>
@@ -19,10 +13,10 @@
             </span>
           </x-Atoms.Table.td>
           <x-Atoms.Table.td class="text-center">
-            <x-Atoms.Button variant="secondary">
-              <x-Atoms.Link :href="route('customer-groups.show', $group)">Detail</x-Atoms.Link>
+            <x-Atoms.Button variant="secondary" :href="route('customer-groups.show', $group)">
+              Detail
             </x-Atoms.Button>
-            <x-Atoms.Button @click="$dispatch('open-modal', 'delete-confirmation-{{ $group->id }}')" variant="danger">Hapus</x-Atoms.Button>
+            <x-Atoms.Button variant="danger" @click="$dispatch('open-modal', 'delete-confirmation-{{ $group->id }}')">Hapus</x-Atoms.Button>
           </x-Atoms.Table.td>
           <x-Layouts.Modal
                   name="delete-confirmation-{{ $group->id }}"
@@ -46,11 +40,4 @@
           </td>
         </tr>
       @endforelse
-    </x-Molecules.Table.Body>
-
-    <x-slot name="pagination">
-      <x-Molecules.Table.Pagination :paginator="$groups"/>
-    </x-slot>
-  </x-Layouts.Table>
-
-</x-Layouts.AdminLayout>
+</x-Templates.IndexTemplate>
