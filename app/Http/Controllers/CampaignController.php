@@ -573,38 +573,42 @@ class CampaignController extends Controller
     }
 
     private function personalizeMessage($messageTemplate, $customer, $product, $quantity, $estimationDate, $receipt = null)
-    {
-        $customerName = (string) ($customer->name ?? 'Customer');
-        $productName = $product ? (string) ($product->name ?? 'Product') : '';
-        $quantityStr = (string) $quantity;
-        $estimationDateStr = (string) $estimationDate;
-        $receiptStr = (string) ($receipt ?? '');
+{
+    $customerName = (string) ($customer->name ?? 'Customer');
+    $productName = $product ? (string) ($product->name ?? 'Product') : '';
+    $quantityStr = (string) $quantity;
+    $estimationDateStr = (string) $estimationDate;
+    $receiptStr = (string) ($receipt ?? '');
 
-        $replacements = [
-            '{customer_name}' => $customerName,
-            '{product_name}' => $productName,
-            '{quantity_purchased}' => $quantityStr,
-            '{estimated_finish_date}' => $estimationDateStr,
-            '{receipt}' => $receiptStr,
-        ];
+    $replacements = [
+        '{customer_name}' => $customerName,
+        '{product_name}' => $productName,
+        '{quantity_purchased}' => $quantityStr,
+        '{estimated_finish_date}' => $estimationDateStr,
+        '{receipt}' => $receiptStr,
+    ];
 
-        if ($product) {
-            $replacements['{product_name}'] = $productName;
-            $replacements['{product}'] = $productName;
-        } else {
-            $replacements['{product_name}'] = '';
-            $replacements['{product}'] = '';
-        }
-
-        $finalMessage = str_replace(
-            array_keys($replacements),
-            array_values($replacements),
-            (string) $messageTemplate
-        );
-
-        $cleanedMessage = preg_replace('/\s+/u', ' ', $finalMessage);
-        return trim($cleanedMessage);
+    if ($product) {
+        $replacements['{product_name}'] = $productName;
+        $replacements['{product}'] = $productName;
+    } else {
+        $replacements['{product_name}'] = '';
+        $replacements['{product}'] = '';
     }
+
+    $finalMessage = str_replace(
+        array_keys($replacements),
+        array_values($replacements),
+        (string) $messageTemplate
+    );
+
+    // Hapus bagian cleaning ini untuk mempertahankan format asli template
+    // $cleanedMessage = preg_replace('/\s+/u', ' ', $finalMessage);
+    // return trim($cleanedMessage);
+    
+    // Langsung return tanpa cleaning, hanya trim di awal dan akhir
+    return trim($finalMessage);
+}
 
     private function sendToFonnte(array $messages, string $fonnteToken, Campaign $campaign, array $scheduleData = [])
     {
