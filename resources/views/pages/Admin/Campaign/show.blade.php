@@ -1,6 +1,10 @@
 <x-Layouts.AdminLayout>
     <div x-data="messageLogModal()">
-        <x-Layouts.PageHeader title="Detail Kampanye {{$campaign->name}}" />
+        <x-Layouts.PageHeader title="Detail Kampanye {{$campaign->name}}" >
+            <x-slot name="actions">
+                <x-Atoms.Button href="{{ route('campaigns.reuse', $campaign->id) }}">Gunakan Ulang</x-Atoms.Button>
+            </x-slot>
+        </x-Layouts.PageHeader>
         <x-Organisms.StatisticMessage 
             :messageLogs="$messageLogs" 
             :totalMessages="$messageLogs->total()" 
@@ -29,30 +33,6 @@
                         <div class="text-red-500 text-sm mt-1">{{ $message }}</div>
                     @enderror
                 </x-Molecules.Form.FormGroup>
-
-            <x-Molecules.Form.FormGroup label="Tanggal Kampanye" for="tanggal_kampanye">
-                <x-Atoms.InputDate
-                    name="tanggal_kampanye"
-                    id="tanggal_kampanye"
-                    value="{{ $campaign->schedule }}"
-                    readonly
-                />
-                @error('tanggal_kampanye')
-                    <span class="text-red-500 text-sm">{{ $message }}</span>
-                @enderror
-            </x-Molecules.Form.FormGroup>
-            
-            <x-Molecules.Form.FormGroup label="Waktu Kirim Kampanye" for="time_send">
-                <x-Atoms.InputTime
-                    name="time_send"
-                    id="time_send"
-                    value="{{ $campaign->time_send }}"
-                    readonly
-                />
-                @error('time_send')
-                    <span class="text-red-500 text-sm">{{ $message }}</span>
-                @enderror
-            </x-Molecules.Form.FormGroup>
         </div>
         <x-Molecules.Form.FormGroup label="Template" for="template">
             <x-Atoms.TextArea 

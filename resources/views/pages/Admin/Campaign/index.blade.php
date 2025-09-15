@@ -23,7 +23,7 @@
     <x-slot name="tableHeader">
         <x-Atoms.Table.th>No</x-Atoms.Table.th>
         <x-Atoms.Table.th sortable :direction="$sortField === 'name' ? $sortDirection : null" onclick="window.location.href='{{ route('campaigns.index', array_merge(request()->query(), ['sort' => 'name', 'direction' => ($sortField === 'name' && $sortDirection === 'asc') ? 'desc' : 'asc'])) }}'">Nama Kampanye</x-Atoms.Table.th>
-        <x-Atoms.Table.th sortable :direction="$sortField === 'schedule' ? $sortDirection : null" onclick="window.location.href='{{ route('campaigns.index', array_merge(request()->query(), ['sort' => 'schedule', 'direction' => ($sortField === 'schedule' && $sortDirection === 'asc') ? 'desc' : 'asc'])) }}'">Jadwal</x-Atoms.Table.th>
+        <x-Atoms.Table.th sortable :direction="$sortField === 'created_at' ? $sortDirection : null" onclick="window.location.href='{{ route('campaigns.index', array_merge(request()->query(), ['sort' => 'created_at', 'direction' => ($sortField === 'created_at' && $sortDirection === 'asc') ? 'desc' : 'asc'])) }}'">Waktu dibuat</x-Atoms.Table.th>
         <x-Atoms.Table.th>Aksi</x-Atoms.Table.th>
     </x-slot>
 
@@ -31,7 +31,7 @@
         <tr>
             <x-Atoms.Table.td>{{ $loop->iteration }}</x-Atoms.Table.td>
             <x-Atoms.Table.td>{{ $campaign->name }}</x-Atoms.Table.td>
-            <x-Atoms.Table.td>{{ \Carbon\Carbon::parse($campaign->schedule)->translatedFormat('d F Y') }}</x-Atoms.Table.td>
+            <x-Atoms.Table.td>{{ \Carbon\Carbon::parse($campaign->created_at)->translatedFormat('d F Y') }}</x-Atoms.Table.td>
             <x-Atoms.Table.td>
                 <x-Atoms.Button variant="info" href="{{ route('campaigns.edit', $campaign->id) }}">
                     Detail

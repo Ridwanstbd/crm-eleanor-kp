@@ -51,7 +51,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/campaigns/{campaign}', [CampaignController::class, 'edit'])->name('campaigns.edit');
     Route::delete('/campaigns/{campaign}', [CampaignController::class, 'destroy'])->name('campaigns.destroy');
     Route::get('/download-csv-template',[CampaignController::class, 'downloadCsvTemplate'])->name('download.csv.template');
-
+    Route::get('/campaigns/{campaign}/reuse', [CampaignController::class, 'reuse'])->name('campaigns.reuse');
     Route::get('/logs',[MessageLogsController::class,'index'])->name('logs.index');
     Route::get('/logs/{id}',[MessageLogsController::class,'show'])->name('logs.show');
 

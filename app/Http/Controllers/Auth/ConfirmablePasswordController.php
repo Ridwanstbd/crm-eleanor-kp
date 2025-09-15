@@ -35,6 +35,6 @@ class ConfirmablePasswordController extends Controller
 
         $request->session()->put('components.Organisms.password_confirmed_at', time());
 
-        return redirect()->intended(route('products.index', absolute: false));
+        return redirect()->intended(route('campaigns.index', absolute: false));
     }
 }

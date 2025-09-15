@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 // app/Models/Campaign.php
 class Campaign extends Model
 {
-    protected $fillable = ['user_id', 'message_template_id', 'product_id', 'name', 'schedule','time_send'];
+    protected $fillable = ['user_id', 'message_template_id', 'product_id', 'name'];
 
     public function messageLogs()
     {

@@ -14,7 +14,7 @@
         <li><strong>nama</strong> (opsional): Nama pelanggan</li>
         <li><strong>jumlah_beli</strong> (opsional): Jumlah pembelian (1-999)</li>
         <li><strong>resi</strong> (opsional): Nomor Resi Pengiriman (1-999)</li>
+        <li><strong>tanggal</strong> (opsional): Tanggal Kampanye Dijalankan (31/08/2025)</li>
+        <li><strong>waktu</strong> (opsional): Waktu Kampanye Dijalankan (23:59)</li>
     </ul>
-    <p class="text-xs text-blue-500 mt-2">Contoh: kolom A nama ; kolom B nomor; kolom C Jumlah Beli; kolom D resi</p>
-    <p class="text-xs text-blue-500">boy; 6281234567890; 5 ; JNT123457756</p>
 </div>

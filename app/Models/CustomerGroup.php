@@ -4,11 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-// app/Models/CustomerGroup.php
 class CustomerGroup extends Model
 {
+    protected $fillable = [
+        'name', 
+        'total_customers', 
+        'processed_customers_data'
+    ];
 
-    protected $fillable = ['name'];
+    protected $casts = [
+        'processed_customers_data' => 'array',
+    ];
 
     public function customers()
     {
@@ -22,4 +28,3 @@ class CustomerGroup extends Model
                 ->using(CampaignCustomerGroup::class);
     }
 }
-

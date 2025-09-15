@@ -7,7 +7,7 @@
         @csrf
         @method('PUT')
         <x-Molecules.Form.FormGroup for="name-{{ $template->id }}" value="{{ $template->name }}" label="Nama Template">
-            <x-Atoms.Form.Input name="name" id="name-{{ $template->id }}" value="{{ $template->name }}" class="mb-2" placeholder="Nama Template Pesan" />
+            <x-Atoms.Form.Input name="name" id="name-{{ $template->id }}" value="{{ $template->name }}" class="mb-2" placeholder="Template Follow Up Produk 1" />
         </x-Molecules.Form.FormGroup>
         <x-Molecules.Form.FormGroup for="messageTemplate-{{ $template->id }}" label="Isi Template">
             <x-Atoms.TextArea 
@@ -137,7 +137,7 @@
     <form method="POST" action="{{ route('templates.store') }}">
         @csrf
         <x-Molecules.Form.FormGroup for="name" label="Nama Template">
-            <x-Atoms.Form.Input name="name" id="name" class="mb-2" placeholder="Nama Template Pesan" />
+            <x-Atoms.Form.Input name="name" id="name" class="mb-2" placeholder="Follow Up Produk 1" />
         </x-Molecules.Form.FormGroup>
         <x-Molecules.Form.FormGroup for="content" label="Konten">
             <x-Atoms.TextArea 
