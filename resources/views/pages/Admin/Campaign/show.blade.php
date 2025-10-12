@@ -6,8 +6,8 @@
             </x-slot>
         </x-Layouts.PageHeader>
         <x-Organisms.StatisticMessage 
-            :messageLogs="$messageLogs" 
-            :totalMessages="$messageLogs->total()" 
+            :messageLogs="$allMessageLogs" 
+            :totalMessages="$allMessageLogs->count()" 
         />
         <div class="grid grid-cols-2 gap-2">
             <x-Molecules.Form.FormGroup label="Nama Kampanye" for="name">

@@ -1110,6 +1110,16 @@ $fonnteToken = $user->fonnte_token ?? null;
 
         $product = $campaign->product_id ? Product::find($campaign->product_id) : null;
         $template = MessageTemplate::find($campaign->message_template_id);
+        $allMessageLogs = $campaign->messageLogs()
+        ->with(['customer' => function($query) use ($campaign) {
+            if ($campaign->product_id) {
+                $query->with(['purchases' => function ($subQuery) use ($campaign) {
+                    $subQuery->wherePivot('campaign_id', $campaign->id)
+                        ->wherePivot('product_id', $campaign->product_id);
+                }]);
+            }
+        }])
+        ->get();
 
         $messageLogs = $campaign->messageLogs()
             ->with(['customer' => function($query) use ($campaign) {
@@ -1135,7 +1145,7 @@ $fonnteToken = $user->fonnte_token ?? null;
             }
         }
 
-        return view('pages.Admin.Campaign.show', compact('campaign','customers', 'customerGroups','product','template','messageLogs'));
+        return view('pages.Admin.Campaign.show', compact('campaign','customers', 'customerGroups','product','template','allMessageLogs','messageLogs'));
     }
 
     public function destroy(Campaign $campaign)

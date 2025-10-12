@@ -33,13 +33,6 @@
                     <x-Atoms.Link href="{{ route('admin.settings') }}" class="block px-4 py-2">
                         Informasi Sistem
                     </x-Atoms.Link>
-                    <hr class="my-2">
-                    <form action="{{ route('logout') }}" method="POST" class="block">
-                        @csrf
-                        <button type="submit" class="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600">
-                            Logout
-                        </button>
-                    </form>
                 </div>
             </div>
         </div>

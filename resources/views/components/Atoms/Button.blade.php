@@ -4,13 +4,14 @@
     'variant' => 'primary',
     'size' => 'md',
     'fullWidth' => false,
-    'target' => '_self'
+    'target' => '_self',
+    'class' => '' 
 ])
 
 @php
     if ($variant === 'submit') {
-            $type = 'submit';
-        }
+        $type = 'submit';
+    }
 
     $variants = [
         'primary' => 'bg-indigo-600 hover:bg-indigo-700 text-white',
@@ -35,7 +36,11 @@
         {{ $attributes->merge([
             'href' => $href,
             'target' => $target,
-            'class' => "transition-colors duration-200 cursor-pointer text-center rounded-lg " . $widthClass . ' ' . $variants[$variant] . ' ' . $sizes[$size]
+            'class' => "transition-colors duration-200 cursor-pointer text-center rounded-lg " . 
+                       $widthClass . ' ' . 
+                       $variants[$variant] . ' ' . 
+                       $sizes[$size] . ' ' .
+                       $class 
         ]) }}>
         {{ $slot }}
     </a>
@@ -43,7 +48,11 @@
     <button
         {{ $attributes->merge([
             'type' => $type,
-            'class' => "transition-colors duration-200 cursor-pointer rounded-lg " . $widthClass . ' ' . $variants[$variant] . ' ' . $sizes[$size]
+            'class' => "transition-colors duration-200 cursor-pointer rounded-lg " . 
+                       $widthClass . ' ' . 
+                       $variants[$variant] . ' ' . 
+                       $sizes[$size] . ' ' .
+                       $class 
         ]) }}>
         {{ $slot }}
     </button>
