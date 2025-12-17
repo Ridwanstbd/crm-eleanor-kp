@@ -26,7 +26,7 @@ class ProfileUpdateRequest extends FormRequest
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
             'fonnte_token' => ['nullable','string','max:255'],
-            'delay_message' => ['required', 'numeric' , 'min:3']
+            'delay_message' => ['required', 'string', 'in:6-12,12-24,24-36,36-42,42-48,48-54,54-60']
         ];
     }
 }

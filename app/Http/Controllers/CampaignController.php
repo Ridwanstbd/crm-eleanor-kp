@@ -58,8 +58,7 @@ class CampaignController extends Controller
                     'template_id' => $campaign->message_template_id,
                     'product_id' => $campaign->product_id,
                     'name' => 'Copy - ' . $campaign->name,
-                    'schedule' => $campaign->schedule,
-                    'time_send' => $campaign->time_send,
+                    'scheduled_at' => $campaign->scheduled_at,
                     'original_campaign_id' => $campaign->id
                 ];
             }
@@ -86,8 +85,7 @@ class CampaignController extends Controller
             'name' => 'required|string|max:255',
             'product' => 'nullable|exists:products,id',
             'template' => 'required|exists:message_templates,id',
-            'schedule' => 'nullable|date',
-            'time_send' => 'nullable|date_format:H:i',
+            'scheduled_at' => 'nullable|date_format:Y-m-d H:i:s',
         ];
 
         $validationMessages = [
@@ -95,8 +93,7 @@ class CampaignController extends Controller
             'template.required' => 'Template pesan wajib dipilih.',
             'template.exists' => 'Template pesan yang dipilih tidak valid.',
             'product.exists' => 'Produk yang dipilih tidak valid.',
-            'schedule.date' => 'Format tanggal tidak valid.',
-            'time_send.date_format' => 'Format waktu kirim tidak valid. Gunakan format HH:MM.',
+            'scheduled_at.date_format' => 'Format tanggal dan waktu tidak valid. Gunakan format Y-m-d H:i:s.',
         ];
 
         if ($request->has('new_audiens') && $request->new_audiens == '1') {
@@ -113,17 +110,10 @@ class CampaignController extends Controller
             $validationRules['selected_customers'] = 'required|array|min:1';
             $validationRules['selected_customers.*'] = 'exists:customers,id';
 
-            $validationRules['customer_schedules'] = 'nullable|array';
-            $validationRules['customer_schedules.*'] = 'nullable|date';
-            $validationRules['customer_time_sends'] = 'nullable|array';
-            $validationRules['customer_time_sends.*'] = 'nullable|date_format:H:i';
-
             $validationMessages['selected_customers.required'] = 'Pilih minimal satu pelanggan.';
             $validationMessages['selected_customers.min'] = 'Pilih minimal satu pelanggan.';
             $validationMessages['selected_customers.*.exists'] = 'Pelanggan yang dipilih tidak valid.';
-            $validationMessages['customer_schedules.*.date'] = 'Format tanggal tidak valid untuk customer tertentu.';
-            $validationMessages['customer_time_sends.*.date_format'] = 'Format waktu tidak valid untuk customer tertentu. Gunakan format HH:MM.';
-
+            
             if ($request->filled('product')) {
                 $validationRules['customer_quantities'] = 'required|array';
                 $validationRules['customer_quantities.*'] = 'required|integer|min:1|max:999';
@@ -152,6 +142,7 @@ class CampaignController extends Controller
                 'user_id' => Auth::id(),
                 'product_id' => $request->filled('product') ? $request->product : null,
                 'message_template_id' => $request->template,
+                'scheduled_at' => $request->scheduled_at
             ]);
 
             $customerGroups = [];
@@ -186,8 +177,7 @@ class CampaignController extends Controller
         $selectedCustomers = $request->selected_customers;
         $customerQuantities = $request->customer_quantities ?? [];
         $customerReceipts = $request->customer_receipts ?? [];
-        $customerSchedules = $request->customer_schedules ?? []; 
-        $customerTimeSends = $request->customer_time_sends ?? []; 
+        $scheduledAt = $request->scheduled_at;
 
         $customerGroup = CustomerGroup::create([
             'name' => 'Pelanggan Terpilih - ' . $campaign->name,
@@ -198,8 +188,14 @@ class CampaignController extends Controller
 
         $processedCustomers = [];
 
-        $defaultSchedule = !empty($request->schedule) ? $request->schedule : null;
-        $defaultTimeSend = !empty($request->time_send) ? $request->time_send : null;
+        $defaultScheduledAt = null;
+        if (!empty($scheduledAt)) {
+            try {
+                $defaultScheduledAt = \Carbon\Carbon::parse($scheduledAt);
+            } catch (\Exception $e) {
+                $defaultScheduledAt = now();
+            }
+        }
 
         if ($campaign->product_id) {
             foreach ($selectedCustomers as $customerId) {
@@ -213,62 +209,17 @@ class CampaignController extends Controller
                 
                 $receipt = $customerReceipts[$customerId] ?? null;
 
-                $customerSchedule = $customerSchedules[$customerId] ?? null;
-                $customerTimeSend = $customerTimeSends[$customerId] ?? null;
+                $finalScheduledAt = $defaultScheduledAt ?: now();
 
-                $finalSchedule = null;
-                $finalTimeSend = null;
+                $isScheduleInPast = $finalScheduledAt->isPast();
 
-                if (!empty($customerSchedule)) {
-                    $finalSchedule = $customerSchedule;
-                } elseif (!empty($defaultSchedule)) {
-                    $finalSchedule = $defaultSchedule;
-                }
-
-                if (!empty($customerTimeSend)) {
-                    $finalTimeSend = $customerTimeSend;
-                } elseif (!empty($defaultTimeSend)) {
-                    $finalTimeSend = $defaultTimeSend;
-                }
-
-                $isScheduleInPast = false;
-                if ($finalSchedule || $finalTimeSend) {
-                    $scheduleToCheck = $finalSchedule ?: now()->format('Y-m-d');
-                    $timeToCheck = $finalTimeSend ?: now()->format('H:i');
-                    
-                    try {
-                        $scheduledDateTime = \Carbon\Carbon::parse($scheduleToCheck . ' ' . $timeToCheck);
-                        $isScheduleInPast = $scheduledDateTime->isPast();
-                    } catch (\Exception $e) {
-                        $isScheduleInPast = false;
-                    }
-                }
-
-                $hasAnyScheduleInput = !empty($customerSchedule) || !empty($customerTimeSend) || 
-                                    !empty($defaultSchedule) || !empty($defaultTimeSend);
-                
                 $targetProduct = Product::find($campaign->product_id);
                 $hasEstimation = $targetProduct && $targetProduct->default_estimation_days_per_unit > 0;
                 
-                $sendNow = (!$hasAnyScheduleInput && !$hasEstimation) || 
+                $sendNow = (!$scheduledAt && !$hasEstimation) || 
                         ($isScheduleInPast && !$hasEstimation);
 
-                $schedule = $finalSchedule ?: now()->format('Y-m-d');
-                $timeSend = $finalTimeSend;
-
-                try {
-                    $parsedSchedule = \Carbon\Carbon::parse($schedule);
-                    $schedule = $parsedSchedule->format('Y-m-d');
-                } catch (\Exception $e) {
-                    $schedule = now()->format('Y-m-d');
-                    if (!$hasEstimation) {
-                        $sendNow = true;
-                    }
-                }
-
-                if ($timeSend && !preg_match('/^([0-1]?[0-9]|2[0-3]):([0-5][0-9])$/', $timeSend)) {
-                    $timeSend = null;
-                }
+                $scheduledAtForCustomer = $finalScheduledAt->format('Y-m-d H:i:s');
 
                 if ($purchaseQuantity < 1 || $purchaseQuantity > 999) {
                     $purchaseQuantity = 1;
@@ -279,8 +230,7 @@ class CampaignController extends Controller
                         'campaign_id' => $campaign->id,
                         'last_purchase_quantity' => $purchaseQuantity,
                         'receipt' => $receipt,
-                        'schedule' => $schedule,
-                        'time_send' => $timeSend,
+                        'scheduled_at' => $scheduledAtForCustomer,
                         'created_at' => now(),
                         'updated_at' => now()
                     ]
@@ -290,8 +240,7 @@ class CampaignController extends Controller
                     'customer_id' => $customer->id,
                     'customer_name' => $customer->name,
                     'customer_phone' => $customer->phone,
-                    'schedule' => $schedule,
-                    'time_send' => $timeSend,
+                    'scheduled_at' => $scheduledAtForCustomer,
                     'purchase_quantity' => $purchaseQuantity,
                     'receipt' => $receipt,
                     'send_now' => $sendNow
@@ -304,61 +253,18 @@ class CampaignController extends Controller
                     continue;
                 }
 
-                $customerSchedule = $customerSchedules[$customerId] ?? null;
-                $customerTimeSend = $customerTimeSends[$customerId] ?? null;
+                $finalScheduledAt = $defaultScheduledAt ?: now();
+                $isScheduleInPast = $finalScheduledAt->isPast();
 
-                $finalSchedule = null;
-                $finalTimeSend = null;
+                $sendNow = (!$scheduledAt) || $isScheduleInPast;
 
-                if (!empty($customerSchedule)) {
-                    $finalSchedule = $customerSchedule;
-                } elseif (!empty($defaultSchedule)) {
-                    $finalSchedule = $defaultSchedule;
-                }
-
-                if (!empty($customerTimeSend)) {
-                    $finalTimeSend = $customerTimeSend;
-                } elseif (!empty($defaultTimeSend)) {
-                    $finalTimeSend = $defaultTimeSend;
-                }
-
-                $isScheduleInPast = false;
-                if ($finalSchedule || $finalTimeSend) {
-                    $scheduleToCheck = $finalSchedule ?: now()->format('Y-m-d');
-                    $timeToCheck = $finalTimeSend ?: now()->format('H:i');
-                    
-                    try {
-                        $scheduledDateTime = \Carbon\Carbon::parse($scheduleToCheck . ' ' . $timeToCheck);
-                        $isScheduleInPast = $scheduledDateTime->isPast();
-                    } catch (\Exception $e) {
-                        $isScheduleInPast = false;
-                    }
-                }
-
-                $sendNow = (empty($customerSchedule) && empty($customerTimeSend) && 
-                        empty($defaultSchedule) && empty($defaultTimeSend)) || $isScheduleInPast;
-
-                $schedule = $finalSchedule ?: now()->format('Y-m-d');
-                $timeSend = $finalTimeSend;
-
-                try {
-                    $parsedSchedule = \Carbon\Carbon::parse($schedule);
-                    $schedule = $parsedSchedule->format('Y-m-d');
-                } catch (\Exception $e) {
-                    $schedule = now()->format('Y-m-d');
-                    $sendNow = true;
-                }
-
-                if ($timeSend && !preg_match('/^([0-1]?[0-9]|2[0-3]):([0-5][0-9])$/', $timeSend)) {
-                    $timeSend = null;
-                }
+                $scheduledAtForCustomer = $finalScheduledAt->format('Y-m-d H:i:s');
 
                 $processedCustomers[] = [
                     'customer_id' => $customer->id,
                     'customer_name' => $customer->name,
                     'customer_phone' => $customer->phone,
-                    'schedule' => $schedule,
-                    'time_send' => $timeSend,
+                    'scheduled_at' => $scheduledAtForCustomer,
                     'purchase_quantity' => 1,
                     'receipt' => null,
                     'send_now' => $sendNow
@@ -413,7 +319,7 @@ class CampaignController extends Controller
                         foreach ($delimiters as $delimiter) {
                             if (($delimiter === ',' && $hasComma) || 
                                 ($delimiter === "\t" && $hasTab)) {
-                                
+                                    
                                 $testRow = str_getcsv($line, $delimiter);
                                 
                                 if (count($testRow) > $maxColumns) {
@@ -453,22 +359,16 @@ class CampaignController extends Controller
                 $secondCol = isset($firstRow[1]) ? strtolower(trim($firstRow[1])) : '';
                 $thirdCol = isset($firstRow[2]) ? strtolower(trim($firstRow[2])) : '';
                 $fourthCol = isset($firstRow[3]) ? strtolower(trim($firstRow[3])) : '';
-                $fifthCol = isset($firstRow[4]) ? strtolower(trim($firstRow[4])) : '';
-                $sixthCol = isset($firstRow[5]) ? strtolower(trim($firstRow[5])) : '';
 
                 $phoneHeaders = ['nomor', 'phone', 'telepon', 'nomor telepon', 'no_hp', 'hp', 'whatsapp', 'wa'];
                 $nameHeaders = ['nama', 'name', 'customer', 'pelanggan', 'nama customer'];
                 $quantityHeaders = ['jumlah', 'quantity', 'qty', 'jumlah_beli', 'jumlah beli', 'amount'];
                 $receiptHeaders = ['resi', 'receipt', 'nomor resi', 'no resi'];
-                $scheduleHeaders = ['schedule', 'tanggal', 'date', 'jadwal', 'tanggal kirim'];
-                $timeHeaders = ['time', 'waktu', 'jam', 'time_send', 'waktu kirim'];
 
                 if (in_array($firstCol, $phoneHeaders) ||
                     in_array($secondCol, $nameHeaders) ||
                     in_array($thirdCol, $quantityHeaders) ||
-                    in_array($fourthCol, $receiptHeaders) ||
-                    in_array($fifthCol, $scheduleHeaders) ||
-                    in_array($sixthCol, $timeHeaders)) {
+                    in_array($fourthCol, $receiptHeaders)) {
                     $hasHeaders = true;
                 }
             }
@@ -487,6 +387,17 @@ class CampaignController extends Controller
             $successCount = 0;
             $processedCustomers = [];
 
+            // Parsing scheduled_at dari request (satu nilai untuk semua pelanggan)
+            $scheduledAt = $request->scheduled_at;
+            $defaultScheduledAt = null;
+            if (!empty($scheduledAt)) {
+                try {
+                    $defaultScheduledAt = \Carbon\Carbon::parse($scheduledAt);
+                } catch (\Exception $e) {
+                    $defaultScheduledAt = now();
+                }
+            }
+
             foreach ($csvData as $rowIndex => $row) {
                 if (empty(array_filter($row, function($value) { return !empty(trim($value)); }))) {
                     continue;
@@ -504,100 +415,21 @@ class CampaignController extends Controller
                     ? intval(trim((string) $row[2]))
                     : 1;
                 $receipt = ($campaign->product_id && isset($row[3])) ? trim((string) $row[3]) : null;
-                
-                $csvSchedule = isset($row[4]) ? trim((string) $row[4]) : '';
-                $csvTimeSend = isset($row[5]) ? trim((string) $row[5]) : '';
 
-                $isScheduleInPast = false;
-                if (!empty($csvSchedule) || !empty($csvTimeSend)) {
-                    $scheduleToCheck = !empty($csvSchedule) ? $csvSchedule : now()->format('Y-m-d');
-                    $timeToCheck = !empty($csvTimeSend) ? $csvTimeSend : now()->format('H:i');
-                    
-                    try {
-                        $parsedSchedule = null;
-                        if (!empty($csvSchedule)) {
-                            $dateFormats = ['d/m/Y', 'Y-m-d', 'd-m-Y', 'm/d/Y', 'Y/m/d'];
-                            foreach ($dateFormats as $format) {
-                                try {
-                                    $parsedDate = \Carbon\Carbon::createFromFormat($format, $csvSchedule);
-                                    if ($parsedDate) {
-                                        $parsedSchedule = $parsedDate->format('Y-m-d');
-                                        break;
-                                    }
-                                } catch (\Exception $e) {
-                                    continue;
-                                }
-                            }
-                            
-                            if (!$parsedSchedule) {
-                                try {
-                                    $parsedDate = \Carbon\Carbon::parse($csvSchedule);
-                                    $parsedSchedule = $parsedDate->format('Y-m-d');
-                                } catch (\Exception $e) {
-                                    $parsedSchedule = now()->format('Y-m-d');
-                                }
-                            }
-                            $scheduleToCheck = $parsedSchedule;
-                        }
-                        
-                        if (!empty($csvTimeSend) && preg_match('/^([0-1]?[0-9]|2[0-3]):([0-5][0-9])$/', $csvTimeSend)) {
-                            $timeToCheck = $csvTimeSend;
-                        } else {
-                            $timeToCheck = now()->format('H:i');
-                        }
-                        
-                        $scheduledDateTime = \Carbon\Carbon::parse($scheduleToCheck . ' ' . $timeToCheck);
-                        $isScheduleInPast = $scheduledDateTime->isPast();
-                    } catch (\Exception $e) {
-                        $isScheduleInPast = false;
-                    }
-                }
+                // Gunakan jadwal yang sama untuk semua pelanggan
+                $finalScheduledAt = $defaultScheduledAt ?: now();
 
-                $hasScheduleData = !empty($csvSchedule) || !empty($csvTimeSend);
+                // Cek apakah jadwal di masa lalu
+                $isScheduleInPast = $finalScheduledAt->isPast();
+
                 $hasEstimation = $targetProduct && $targetProduct->default_estimation_days_per_unit > 0;
                 
-                $sendNow = (!$hasScheduleData && !$hasEstimation) || 
+                // Jika tidak ada jadwal yang diinput atau jadwal di masa lalu dan tidak ada estimasi, kirim sekarang
+                $sendNow = (!$scheduledAt && !$hasEstimation) || 
                         ($isScheduleInPast && !$hasEstimation);
 
-                $schedule = null;
-                if (!empty($csvSchedule)) {
-                    $dateFormats = ['d/m/Y', 'Y-m-d', 'd-m-Y', 'm/d/Y', 'Y/m/d'];
-                    foreach ($dateFormats as $format) {
-                        try {
-                            $parsedDate = \Carbon\Carbon::createFromFormat($format, $csvSchedule);
-                            if ($parsedDate) {
-                                $schedule = $parsedDate->format('Y-m-d');
-                                break;
-                            }
-                        } catch (\Exception $e) {
-                            continue;
-                        }
-                    }
-                    
-                    if (!$schedule) {
-                        try {
-                            $parsedDate = \Carbon\Carbon::parse($csvSchedule);
-                            $schedule = $parsedDate->format('Y-m-d');
-                        } catch (\Exception $e) {
-                            $schedule = now()->format('Y-m-d');
-                            if (!$hasEstimation) {
-                                $sendNow = true;
-                            }
-                            $errors[] = "Baris " . ($rowIndex + 1) . ": Format tanggal tidak valid ($csvSchedule), akan menggunakan jadwal default";
-                        }
-                    }
-                } else {
-                    $schedule = now()->format('Y-m-d');
-                }
-
-                $timeSend = null;
-                if (!empty($csvTimeSend)) {
-                    if (preg_match('/^([0-1]?[0-9]|2[0-3]):([0-5][0-9])$/', $csvTimeSend)) {
-                        $timeSend = $csvTimeSend;
-                    } else {
-                        $errors[] = "Baris " . ($rowIndex + 1) . ": Format waktu tidak valid ($csvTimeSend), akan menggunakan waktu sekarang";
-                    }
-                }
+                // Format scheduled_at
+                $scheduledAtForCustomer = $finalScheduledAt->format('Y-m-d H:i:s');
 
                 if (empty($phone)) {
                     $error = "Baris " . ($rowIndex + 1) . ": Nomor telepon kosong";
@@ -646,12 +478,9 @@ class CampaignController extends Controller
                         'customer_id' => $customer->id,
                         'customer_name' => $customer->name,
                         'customer_phone' => $customer->phone,
-                        'schedule' => $schedule,
-                        'time_send' => $timeSend,
+                        'scheduled_at' => $scheduledAtForCustomer,
                         'purchase_quantity' => $purchaseQuantity,
                         'receipt' => $receipt,
-                        'csv_schedule' => $csvSchedule,
-                        'csv_time_send' => $csvTimeSend,
                         'send_now' => $sendNow
                     ];
                     
@@ -664,8 +493,7 @@ class CampaignController extends Controller
                                 'campaign_id' => $campaign->id,
                                 'last_purchase_quantity' => $purchaseQuantity,
                                 'receipt' => $receipt,
-                                'schedule' => $schedule,
-                                'time_send' => $timeSend,
+                                'scheduled_at' => $scheduledAtForCustomer,
                                 'created_at' => now(),
                                 'updated_at' => now()
                             ]
@@ -713,7 +541,7 @@ class CampaignController extends Controller
     {
         try {
             $user = User::find(auth()->id());
-$fonnteToken = $user->fonnte_token ?? null;
+            $fonnteToken = $user->fonnte_token ?? null;
 
             if (!$fonnteToken) {
                 throw new \Exception('Fonnte token tidak ditemukan. Silakan konfigurasi token Fonnte terlebih dahulu.');
@@ -743,8 +571,7 @@ $fonnteToken = $user->fonnte_token ?? null;
                 if (!empty($processedCustomersData)) {
                     foreach ($processedCustomersData as $customerData) {
                         $customerId = $customerData['customer_id'];
-                        $schedule = $customerData['schedule'] ?? now()->format('Y-m-d');
-                        $timeSend = $customerData['time_send'] ?? '15:00';
+                        $scheduledAt = $customerData['scheduled_at'] ?? now()->format('Y-m-d H:i:s');
                         $purchaseQuantity = $customerData['purchase_quantity'] ?? 1;
                         $receipt = $customerData['receipt'] ?? null;
                         $sendNow = $customerData['send_now'] ?? false;
@@ -755,12 +582,8 @@ $fonnteToken = $user->fonnte_token ?? null;
                             $customerObj = Customer::find($customerId);
                             if (!$customerObj) continue;
 
-                            $scheduledDate = $this->calculateScheduleDate($schedule, $timeSend, $targetProduct, $purchaseQuantity);
+                            $scheduledDate = $this->calculateScheduleDate($scheduledAt, $targetProduct, $purchaseQuantity, $sendNow);
                             
-                            if ($sendNow && (!$targetProduct || $targetProduct->default_estimation_days_per_unit == 0)) {
-                                $scheduledDate = now();
-                            }
-
                             $formattedEstimationDate = $scheduledDate->format('d M Y');
 
                             $personalizedMessage = $this->personalizeMessage(
@@ -777,8 +600,17 @@ $fonnteToken = $user->fonnte_token ?? null;
                                 continue;
                             }
                             
-                            $delay = (string) ($user->delay_message ?? '3');
-                            
+                            $delayRange = $user->delay_message ?? '10';
+                            Log::info('[CampaignDebug] Delay Range diambil dari User: ' . $delayRange);
+                                
+                                if (preg_match('/^(\d+)-(\d+)$/', $delayRange, $matches)) {
+                                    $min = (int) $matches[1];
+                                    $max = (int) $matches[2];
+                                    $delay = (string) rand($min, $max);
+                                } else {
+                                    $delay = (string) $delayRange;
+                                }
+                            Log::info('[CampaignDebug] Calculated Delay for ' . $formattedPhone . ': ' . $delay);
                             $messageData = [
                                 "target" => $formattedPhone,
                                 "message" => $personalizedMessage,
@@ -818,29 +650,18 @@ $fonnteToken = $user->fonnte_token ?? null;
         }
     }
 
-    private function calculateScheduleDate($scheduleDate, $timeSend, $targetProduct, $purchaseQuantity, $sendNow = false)
+    private function calculateScheduleDate($scheduledAt, $targetProduct, $purchaseQuantity, $sendNow = false)
     {
         if ($sendNow && (!$targetProduct || $targetProduct->default_estimation_days_per_unit == 0)) {
             return now();
         }
 
         try {
-            $baseDate = \Carbon\Carbon::parse($scheduleDate)->startOfDay();
+            $baseDate = \Carbon\Carbon::parse($scheduledAt);
         } catch (\Exception $e) {
-            $baseDate = now()->startOfDay();
+            $baseDate = now();
         }
 
-        $currentTime = now();
-        $hour = $currentTime->hour;
-        $minute = $currentTime->minute;
-        
-        if ($timeSend && preg_match('/^([0-1]?[0-9]|2[0-3]):([0-5][0-9])$/', $timeSend)) {
-            $timeParts = explode(':', $timeSend);
-            $hour = intval($timeParts[0]);
-            $minute = intval($timeParts[1]);
-        }
-        
-        $baseDate->setTime($hour, $minute, 0);
         $finalDate = $baseDate->copy();
 
         if ($targetProduct && $targetProduct->default_estimation_days_per_unit > 0) {
@@ -852,14 +673,15 @@ $fonnteToken = $user->fonnte_token ?? null;
             if ($finalDate->isToday()) {
                 $finalDate->addDay();
             } else {
-                $finalDate = now()->addDay()->setTime($hour, $minute, 0);
+                $finalDate = now()->addDay()->setTime($finalDate->hour, $finalDate->minute, 0);
                 
                 if ($targetProduct && $targetProduct->default_estimation_days_per_unit > 0) {
                     $estimationDays = $targetProduct->default_estimation_days_per_unit * $purchaseQuantity;
                     $finalDate->addDays($estimationDays);
                 }
             }
-        } elseif ($sendNow && $finalDate->isPast()) {
+        } 
+        elseif ($sendNow && $finalDate->isPast()) {
             return now();
         }
 
@@ -904,6 +726,7 @@ $fonnteToken = $user->fonnte_token ?? null;
         $payload = [
             'data' => json_encode($messages)
         ];
+        Log::info('[CampaignDebug] Final Fonnte Payload (JSON Encoded Data):', $payload);
 
         try {
             $response = Http::withHeaders([

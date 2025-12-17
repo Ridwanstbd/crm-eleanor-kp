@@ -67,6 +67,18 @@
             </x-Atoms.Select>
         </x-Molecules.Form.FormGroup>
         
+        <x-Molecules.Form.FormGroup label="Tanggal & Waktu Kirim" for="scheduled_at">
+            <input 
+                type="datetime-local"
+                name="scheduled_at"
+                id="scheduled_at"
+                value="{{ old('scheduled_at', isset($reuseData) ? $reuseData['scheduled_at'] : '') }}"
+                class="w-full border border-gray-300 rounded px-2 py-1"
+                required
+            />
+            <p class="text-sm text-gray-500 mt-1">Pilih tanggal dan waktu untuk mengirim pesan ke semua pelanggan</p>
+        </x-Molecules.Form.FormGroup>
+        
         <x-Molecules.Form.FormGroup label="Target Audiens" for="target">
             <div class="flex gap-2 mt-2">
                 <x-Atoms.Checkbox 
@@ -206,8 +218,6 @@
                 </x-Atoms.Table.th>
                 <x-Atoms.Table.th>Nama</x-Atoms.Table.th>
                 <x-Atoms.Table.th>Nomor Telepon</x-Atoms.Table.th>
-                <x-Atoms.Table.th>Tanggal</x-Atoms.Table.th>
-                <x-Atoms.Table.th>Waktu</x-Atoms.Table.th>
                 <x-Atoms.Table.th x-show="selectedProduct">Jumlah Pembelian</x-Atoms.Table.th>
                 <x-Atoms.Table.th x-show="selectedProduct">Nomor Resi</x-Atoms.Table.th>
                 <x-Atoms.Table.th>Grup</x-Atoms.Table.th>
@@ -230,24 +240,6 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap" x-text="customerItem.name"></td>
                         <td class="px-6 py-4 whitespace-nowrap" x-text="customerItem.phone"></td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <input 
-                                type="date"
-                                x-bind:name="'customer_schedules[' + customerItem.id + ']'"
-                                x-bind:value="getCustomerSchedule(customerItem.id)"
-                                class="w-40 border border-gray-300 rounded px-2 py-1" 
-                                @input="updateCustomerSchedule(customerItem.id, $event.target.value)"
-                            />
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <input 
-                                type="time"
-                                x-bind:name="'customer_time_sends[' + customerItem.id + ']'"
-                                x-bind:value="getCustomerTimeSend(customerItem.id)"
-                                class="w-32 border border-gray-300 rounded px-2 py-1" 
-                                @input="updateCustomerTimeSend(customerItem.id, $event.target.value)"
-                            />
-                        </td>
                         <td class="px-6 py-4 whitespace-nowrap" x-show="selectedProduct">
                             <input 
                                 type="number"
@@ -283,13 +275,13 @@
                     </tr>
                 </template>
                 <tr x-show="getFilteredCustomersByGroups().length === 0">
-                    <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500">
+                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
                         Tidak ada pelanggan dalam grup yang dipilih
                     </td>
                 </tr>
                 
                 <tr x-show="searchQuery.length > 0 && getDisplayedCustomers().length === 0 && getFilteredCustomersByGroups().length > 0">
-                    <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500">
+                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
                         Tidak ada pelanggan yang ditemukan dengan kata kunci "<span x-text="searchQuery"></span>"
                     </td>
                 </tr>
@@ -304,13 +296,13 @@
         
         <div x-show="selectedProduct" class="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p class="text-sm text-blue-700">
-                <strong>Catatan:</strong> Setiap pelanggan dapat memiliki jumlah pembelian, nomor resi, tanggal, dan waktu kirim yang berbeda.
+                <strong>Catatan:</strong> Setiap pelanggan dapat memiliki jumlah pembelian dan nomor resi yang berbeda.
             </p>
         </div>
         
         <div x-show="!selectedProduct" class="mt-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
             <p class="text-sm text-amber-700">
-                <strong>Catatan:</strong> Tidak ada produk yang dipilih, namun Anda tetap dapat mengatur tanggal dan waktu kirim untuk setiap pelanggan.
+                <strong>Catatan:</strong> Tidak ada produk yang dipilih, namun Anda tetap dapat mengatur tanggal dan waktu kirim di atas.
             </p>
         </div>
     </div>
@@ -326,8 +318,12 @@
 <script>
     function campaignForm() {
         const now = new Date();
-        const defaultDate = now.toISOString().split('T')[0];
-        const defaultTime = now.toTimeString().split(' ')[0].substring(0, 5);
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const defaultDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
         
         return {
             newAudiens: false, 
@@ -336,8 +332,6 @@
             selectedProduct: '{{ old('product', isset($reuseData) ? $reuseData['product_id'] : '') }}',
             customerQuantities: {},
             customerReceipts: {}, 
-            customerSchedules: {},
-            customerTimeSends: {},
             allFilteredCustomersSelected: false,
             searchQuery: '',
             selectedGroups: @json(old('selected_customer_groups', [])),
@@ -347,8 +341,7 @@
             templatePreview: false,
             templateContent: '',
             templates: @json($templates->keyBy('id')),
-            defaultDate: defaultDate,
-            defaultTime: defaultTime,
+            defaultDateTime: defaultDateTime,
             
             init() {
                 if (this.selectedGroups.length > 0) {
@@ -420,8 +413,6 @@
                 this.selectedCustomers = [];
                 this.customerQuantities = {};
                 this.customerReceipts = {};
-                this.customerSchedules = {};
-                this.customerTimeSends = {};
                 this.allFilteredCustomersSelected = false;
                 this.searchQuery = '';
                 this.showCustomerSelection = false;
@@ -490,14 +481,10 @@
                         this.initCustomerQuantity(customerId);
                         this.initCustomerReceipt(customerId);
                     }
-                    this.initCustomerSchedule(customerId);
-                    this.initCustomerTimeSend(customerId);
                 } else {
                     this.selectedCustomers = this.selectedCustomers.filter(id => id !== customerId);
                     delete this.customerQuantities[customerId];
                     delete this.customerReceipts[customerId];
-                    delete this.customerSchedules[customerId];
-                    delete this.customerTimeSends[customerId];
                 }
                 this.updateSelectAllFilteredState();
             },
@@ -513,8 +500,6 @@
                                 this.initCustomerQuantity(customer.id);
                                 this.initCustomerReceipt(customer.id);
                             }
-                            this.initCustomerSchedule(customer.id);
-                            this.initCustomerTimeSend(customer.id);
                         }
                     });
                 } else {
@@ -522,8 +507,6 @@
                         this.selectedCustomers = this.selectedCustomers.filter(id => id !== customer.id);
                         delete this.customerQuantities[customer.id];
                         delete this.customerReceipts[customer.id];
-                        delete this.customerSchedules[customer.id];
-                        delete this.customerTimeSends[customer.id];
                     });
                 }
                 
@@ -555,18 +538,6 @@
                     this.customerReceipts[customerId] = '';
                 }
             },
-
-            initCustomerSchedule(customerId) {
-                if (!this.customerSchedules[customerId]) {
-                    this.customerSchedules[customerId] = this.defaultDate;
-                }
-            },
-
-            initCustomerTimeSend(customerId) {
-                if (!this.customerTimeSends[customerId]) {
-                    this.customerTimeSends[customerId] = this.defaultTime;
-                }
-            },
             
             getCustomerQuantity(customerId) {
                 return this.customerQuantities[customerId] || 1;
@@ -574,14 +545,6 @@
 
             getCustomerReceipt(customerId) {
                 return this.customerReceipts[customerId] || '';
-            },
-
-            getCustomerSchedule(customerId) {
-                return this.customerSchedules[customerId] || this.defaultDate;
-            },
-
-            getCustomerTimeSend(customerId) {
-                return this.customerTimeSends[customerId] || this.defaultTime;
             },
             
             updateCustomerQuantity(customerId, value) {
@@ -591,22 +554,12 @@
             updateCustomerReceipt(customerId, value) {
                 this.customerReceipts[customerId] = value;
             },
-
-            updateCustomerSchedule(customerId, value) {
-                this.customerSchedules[customerId] = value;
-            },
-
-            updateCustomerTimeSend(customerId, value) {
-                this.customerTimeSends[customerId] = value;
-            },
             
             resetCustomerFlow() {
                 this.selectedGroups = [];
                 this.selectedCustomers = [];
                 this.customerQuantities = {};
                 this.customerReceipts = {};
-                this.customerSchedules = {};
-                this.customerTimeSends = {};
                 this.allFilteredCustomersSelected = false;
                 this.searchQuery = '';
                 this.showCustomerSelection = false;

@@ -36,11 +36,27 @@
         <x-Molecules.Form.FormGroup :message="$errors->get('fonnte_token')" :label="__('Fonnte Token')" for="fonnte_token">
             <x-Atoms.Form.Input name="fonnte_token" id="fonnte_token" :value="old('fonnte_token', $user->fonnte_token)" required autofocus autocomplete="fonnte_token"/>
         </x-Molecules.Form.FormGroup>
-        <x-Molecules.Form.FormGroup :message="$errors->get('delay_message')" :label="__('Tunda Pesan /detik')" for="delay_message">
-            <x-Atoms.Form.Input name="delay_message" type="number" id="delay_message" :value="old('delay_message', $user->delay_message)" required autofocus autocomplete="delay_message"/>
+
+        <x-Molecules.Form.FormGroup :message="$errors->get('delay_message')" :label="__('Rentang Tunda Pesan /detik')" for="delay_message">
+        @php
+            $delayOptions = ['6-12', '12-24', '24-36', '36-42', '42-48', '48-54', '54-60'];
+            $currentValue = old('delay_message', $user->delay_message ?? '6-12');
+        @endphp
+
+        <select name="delay_message" 
+                id="delay_message" 
+                class="block w-full px-3 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            
+            @foreach($delayOptions as $optionValue)
+                <option value="{{ $optionValue }}" @if($currentValue == $optionValue) selected @endif>
+                    {{ $optionValue }}
+                </option>
+            @endforeach
+
+        </select>
         </x-Molecules.Form.FormGroup>
-        <x-Molecules.Form.FormGroup :message="$errors->get('delay_message')" :label="__('URL Webhook untuk pembaruan status pesan')" for="delay_message">
-             <p class="text-gray-900" >https://crm.eleanordigital.com/webhook/update-status</p>
+        <x-Molecules.Form.FormGroup :label="__('Webhook Update Status Pesan')" for="webhook">
+        <p id="webhook" class="text-gray-900 " >https://crm.eleanordigital.com/webhook/update-status</p>
         </x-Molecules.Form.FormGroup>
 
         <div class="flex items-center gap-4">
